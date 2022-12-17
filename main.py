@@ -5,8 +5,10 @@ from strawberry.fastapi import GraphQLRouter
 
 from fastapi import FastAPI
 
+# import all queries and mutations
 from queries import sampleQuery
 from mutations import sampleMutation
+
 
 # create query types
 Query = create_type("Query", [sampleQuery])
