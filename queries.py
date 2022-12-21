@@ -24,3 +24,5 @@ def sampleQuery(sampleInput: SampleQueryInput) -> SampleType:
 
     else:
         raise Exception("Sample not found!")
+
+list_all_queries = [sampleQuery,]

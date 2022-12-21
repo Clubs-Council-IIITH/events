@@ -10,15 +10,15 @@ from models import PyObjectId
 from otypes import PyObjectIdType
 
 # import all queries and mutations
-from queries import sampleQuery
-from mutations import sampleMutation
+from queries import list_all_queries
+from mutations import list_all_mutations
 
 
 # create query types
-Query = create_type("Query", [sampleQuery])
+Query = create_type("Query", list_all_queries)
 
 # create mutation types
-Mutation = create_type("Mutation", [sampleMutation])
+Mutation = create_type("Mutation", list_all_mutations)
 
 # initialize federated schema
 schema = strawberry.federation.Schema(
