@@ -22,4 +22,8 @@ def sampleMutation(sampleInput: SampleMutationInput) -> SampleType:
 
     return SampleType.from_pydantic(created_sample)
 
-list_all_mutations = [sampleMutation,]
+
+# register all mutations
+mutations = [
+    sampleMutation,
+]

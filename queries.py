@@ -28,4 +28,8 @@ def sampleQuery(sampleInput: SampleQueryInput, info: Info) -> SampleType:
     else:
         raise Exception("Sample not found!")
 
-list_all_queries = [sampleQuery,]
+
+# register all queries
+queries = [
+    sampleQuery,
+]
