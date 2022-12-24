@@ -14,12 +14,12 @@ from models import PyObjectId, Sample
 # custom context class
 class Context(BaseContext):
     @cached_property
-    def session(self) -> Union[Dict, None]:
+    def user(self) -> Union[Dict, None]:
         if not self.request:
             return None
 
-        session = json.loads(self.request.headers.get("session", "{}"))
-        return session
+        user = json.loads(self.request.headers.get("user", "{}"))
+        return user
 
 
 # custom info type

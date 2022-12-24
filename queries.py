@@ -12,8 +12,8 @@ from otypes import Info, SampleQueryInput, SampleType
 # sample query
 @strawberry.field
 def sampleQuery(sampleInput: SampleQueryInput, info: Info) -> SampleType:
-    session = info.context.session
-    print("session:", session)
+    user = info.context.user
+    print("user:", user)
 
     sample = jsonable_encoder(sampleInput.to_pydantic())
 
