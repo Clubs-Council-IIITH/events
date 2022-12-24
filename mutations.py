@@ -21,3 +21,5 @@ def sampleMutation(sampleInput: SampleMutationInput) -> SampleType:
     created_sample = Sample.parse_obj(db.samples.find_one({"_id": created_id}))
 
     return SampleType.from_pydantic(created_sample)
+
+list_all_mutations = [sampleMutation,]
