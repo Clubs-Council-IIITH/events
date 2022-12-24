@@ -6,12 +6,15 @@ from db import db
 
 # import all models and types
 from models import Sample
-from otypes import SampleQueryInput, SampleType
+from otypes import Info, SampleQueryInput, SampleType
 
 
 # sample query
 @strawberry.field
-def sampleQuery(sampleInput: SampleQueryInput) -> SampleType:
+def sampleQuery(sampleInput: SampleQueryInput, info: Info) -> SampleType:
+    session = info.context.session
+    print("session:", session)
+
     sample = jsonable_encoder(sampleInput.to_pydantic())
 
     # query from database
