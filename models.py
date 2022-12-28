@@ -47,7 +47,7 @@ class Sample(BaseModel):
     location: Event_Location = Event_Location._none
     status: Event_Status = Event_Status()
     description: event_desc_type | None = None # todo(FE): if None, use "No description available."
-    club: PyObjectId | None = None
+    club: PyObjectId
     mode: Event_Mode
     poster: FilePath | None = None # todo: upload_to="imgs/events/"; todo(FE): if None, use default
     datetimeperiod: Tuple[datetime, datetime]

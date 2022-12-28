@@ -107,10 +107,10 @@ class Event_Location (Flag) :
     H205 = auto()
     # KRB
     KRBa = auto()
-    SM22 = auto()
+    LM22 = auto()
     SM24 = auto()
     SM32 = auto()
-    SM34 = auto()
+    LM34 = auto()
     # nota
     other = auto()
 
@@ -136,10 +136,10 @@ location_mapping = {
     Event_Location.H105    : 'Himalaya 105',
     Event_Location.H205    : 'Himalaya 205',
     Event_Location.KRBa    : 'KRB Auditorium',
-    Event_Location.SM22    : 'SM22',
-    Event_Location.SM24    : 'SM24',
-    Event_Location.SM32    : 'SM32',
-    Event_Location.SM34    : 'SM34',
+    Event_Location.LM22    : 'LM-22, KRB',
+    Event_Location.SM24    : 'SM-24, KRB',
+    Event_Location.SM32    : 'SM-32, KRB',
+    Event_Location.LM34    : 'LM-34, KRB',
     Event_Location.other   : 'Other',
 }
 
