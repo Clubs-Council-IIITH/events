@@ -40,7 +40,7 @@ class PyObjectId(ObjectId):
 
 
 # sample pydantic model
-class Sample(BaseModel):
+class Event(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
 
     name: event_name_type
