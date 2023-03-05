@@ -8,6 +8,7 @@ from mtypes import (
     event_othr_type,
     Event_Mode,
     Event_Location,
+    PyObjectId,
 )
 from pydantic import (
     BaseModel,
@@ -22,40 +23,27 @@ from typing import (
     Tuple,
 )
 
-# for handling mongo ObjectIds
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid ObjectId")
-        return ObjectId(v)
-
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
-
-
-# sample pydantic model
 class Event(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
 
     name: event_name_type
-    location: Event_Location = Event_Location._none
-    status: Event_Status = Event_Status()
-    description: event_desc_type | None = None # todo(FE): if None, use "No description available."
     clubid: PyObjectId
-    mode: Event_Mode
-    poster: FilePath | None = None # todo: upload_to="imgs/events/"; todo(FE): if None, use default
     datetimeperiod: Tuple[datetime, datetime]
+    status: Event_Status = Event_Status()
+    # location: Event_Location = Event_Location._none
+    # TODO : currently, cant get `Event_Location._none` to work.
+    # This causes the following error:
+    ## TypeError: Expected `Event_Location.serialize(<Event_Location instance>)` to return non-nullable value, returned: None
+    # So, as a workaround, we use `None` as the default value.
+    location: Event_Location | None = None
+    description: event_desc_type | None = None # todo(FE): if None, use "No description available."
+    mode: Event_Mode = Event_Mode.hybrid
+    poster: str | None = None # todo: upload_to="imgs/events/"; todo(FE): if None, use default
     audience: Audience = Audience._all
     link: HttpUrl | None = None
     equipment: event_othr_type | None = None
     additional: event_othr_type | None = None
-    population: event_popu_type | None
+    population: event_popu_type | None = None
 
     class Config:
         allow_population_by_field_name = True

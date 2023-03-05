@@ -2,28 +2,59 @@ import strawberry
 
 from fastapi.encoders import jsonable_encoder
 
-from db import db
+from db import eventsdb
 
 # import all models and types
-from models import Sample
-from otypes import SampleMutationInput, SampleType
+from models import Event
+from otypes import Info, InputEventDetails, EventType
+from mtypes import Event_Mode
 
-
-# sample mutation
 @strawberry.mutation
-def sampleMutation(sampleInput: SampleMutationInput) -> SampleType:
-    sample = jsonable_encoder(sampleInput.to_pydantic())
+def createEvent (eventDetails: InputEventDetails, info: Info) -> EventType :
+    modeNum = eventDetails.modeNum
+    if not (0 <= modeNum < len(Event_Mode)) :
+        raise Exception(
+            "Invalid event mode."
+        )
+    details = eventDetails.to_pydantic()
+    details.__class__.mode = Event_Mode(modeNum)
 
-    # add to database
-    created_id = db.samples.insert_one(sample).inserted_id
+    user = info.context.user
+    if not user or not details.clubid or details.clubid not in user["clubs"] :
+       raise Exception(
+           "You do not have permission to access this resource."
+       )
 
-    # query from database
-    created_sample = Sample.parse_obj(db.samples.find_one({"_id": created_id}))
+    event_instance = Event(
+        name =  details.name,
+        clubid = details.clubid,
+        mode = details.mode,
+        datetimeperiod = details.datetimeperiod,
+    )
+    if details.location is not None :
+        event_instance.location = details.location
+    if details.description is not None :
+        event_instance.description = details.description
+    if details.poster is not None :
+        event_instance.poster = details.poster # TODO: upload_to="imgs/events/"; TODO (FE): if None, use defaul
+    if details.audience is not None :
+        event_instance.audience = details.audience
+    if details.link is not None :
+        event_instance.link = details.link
+    if details.equipment is not None :
+        event_instance.equipment = details.equipment
+    if details.additional is not None :
+        event_instance.additional = details.additional
+    if details.population is not None :
+        event_instance.population = details.population
 
-    return SampleType.from_pydantic(created_sample)
+    created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
+    created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
+
+    return EventType.from_pydantic(created_event)
 
 
 # register all mutations
 mutations = [
-    sampleMutation,
+    createEvent,
 ]

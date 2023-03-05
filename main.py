@@ -6,7 +6,7 @@ from strawberry.fastapi import GraphQLRouter
 from fastapi import FastAPI
 
 # override PyObjectId and Context scalars
-from models import PyObjectId
+from mtypes import PyObjectId
 from otypes import Context, PyObjectIdType
 
 # import all queries and mutations

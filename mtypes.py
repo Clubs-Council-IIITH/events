@@ -1,3 +1,6 @@
+import strawberry
+from bson import ObjectId
+
 from enum import (
     Enum,
     Flag,
@@ -11,12 +14,13 @@ from pydantic import (
 def bitmask ( flag ):
     flag._none = flag(0)
     all_value = flag._none
-    for member in flag.show_flag_values():
+    for member in flag.__members__.values() :
         all_value |= member
     flag._all = all_value
     return flag
 
 # Audience of Events
+@strawberry.enum
 @bitmask
 class Audience (Flag) :
     ug1 = auto()
@@ -38,6 +42,7 @@ audience_mapping = {
 }
 
 # Event States
+@strawberry.enum
 class Event_State_Status (Enum) :
     # initially, the event is `incomplete`
     incomplete = auto()
@@ -55,30 +60,35 @@ class Event_State_Status (Enum) :
     completed  = auto()
     # if the event is deleted, its state is `deleted`
     deleted    = auto()
+@strawberry.enum
 class Event_Room_Status (Enum) :
     unapproved = auto()
     approved = auto()
+@strawberry.enum
 class Event_Budget_Status (Enum) :
     unapproved = auto()
     approved = auto()
 
+@strawberry.type
 class Event_Status :
     state: Event_State_Status = Event_State_Status.incomplete
     room: Event_Room_Status = Event_Room_Status.unapproved
     budget: Event_Budget_Status = Event_Budget_Status.unapproved
 
-    def __init__ (self) :
-        self.state: Event_State_Status = Event_State_Status.incomplete
-        self.room: Event_Room_Status = Event_Room_Status.unapproved
-        self.budget: Event_Budget_Status = Event_Budget_Status.unapproved
+    def __init__ (self, state: Event_State_Status = None, room: Event_Room_Status = None, budget: Event_Budget_Status = None) :
+        self.state: Event_State_Status = Event_State_Status.incomplete if state is None else state
+        self.room: Event_Room_Status = Event_Room_Status.unapproved if room is None else room
+        self.budget: Event_Budget_Status = Event_Budget_Status.unapproved if budget is None else budget
 
 # Event Modes
+@strawberry.enum
 class Event_Mode (Enum) :
+    hybrid  = auto()
     online  = auto()
     offline = auto()
-    hybrid  = auto()
 
 # Event Locations
+@strawberry.enum
 @bitmask
 class Event_Location (Flag) :
     # Himalaya
@@ -147,3 +157,19 @@ event_name_type = constr(min_length=1, max_length=20)
 event_desc_type = constr(max_length=5000)
 event_popu_type = conint(ge=0)
 event_othr_type = constr(max_length=1000)
+
+# for handling mongo ObjectIds
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid ObjectId")
+        return ObjectId(v)
+
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(type="string")

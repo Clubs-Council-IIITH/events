@@ -5,11 +5,11 @@ from strawberry.fastapi import BaseContext
 from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
 
-from typing import Dict
+from typing import Dict, Tuple
 from functools import cached_property
 
-from models import PyObjectId, Event
-
+from models import Event
+from mtypes import PyObjectId
 
 # custom context class
 class Context(BaseContext):
@@ -33,17 +33,18 @@ PyObjectIdType = strawberry.scalar(
 class EventType :
     pass
 
-# query's input type from pydantic model
+# mutation's input type from pydantic model
 @strawberry.experimental.pydantic.input(model=Event)
-class InputEventId :
-    id: strawberry.auto
-
-# query's input type from pydantic model
-@strawberry.experimental.pydantic.input(model=Event)
-class InputClubId :
+class InputEventDetails :
+    name: strawberry.auto
+    location: strawberry.auto
+    description: strawberry.auto
     clubid: strawberry.auto
-
-# sample mutation's input type from pydantic model
-@strawberry.experimental.pydantic.input(model=Event)
-class SampleMutationInput:
-    attribute: strawberry.auto
+    modeNum: int
+    poster: strawberry.auto
+    datetimeperiod: strawberry.auto
+    audience: strawberry.auto
+    link: strawberry.auto
+    equipment: strawberry.auto
+    additional: strawberry.auto
+    population: strawberry.auto
