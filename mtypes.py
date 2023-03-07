@@ -3,7 +3,6 @@ from bson import ObjectId
 
 from enum import (
     Enum,
-    Flag,
     auto,
 )
 from pydantic import (
@@ -11,18 +10,9 @@ from pydantic import (
     conint,
 )
 
-def bitmask ( flag ):
-    flag._none = flag(0)
-    all_value = flag._none
-    for member in flag.__members__.values() :
-        all_value |= member
-    flag._all = all_value
-    return flag
-
 # Audience of Events
 @strawberry.enum
-@bitmask
-class Audience (Flag) :
+class Audience (Enum) :
     ug1 = auto()
     ug2 = auto()
     ug3 = auto()
@@ -89,8 +79,7 @@ class Event_Mode (Enum) :
 
 # Event Locations
 @strawberry.enum
-@bitmask
-class Event_Location (Flag) :
+class Event_Location (Enum) :
     # Himalaya
     H101 = auto()
     H102 = auto()

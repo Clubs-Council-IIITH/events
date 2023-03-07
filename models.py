@@ -21,25 +21,21 @@ from datetime import (
 )
 from typing import (
     Tuple,
+    List,
 )
 
 class Event(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
 
     name: event_name_type
-    clubid: PyObjectId
+    clubid: str
     datetimeperiod: Tuple[datetime, datetime]
     status: Event_Status = Event_Status()
-    # location: Event_Location = Event_Location._none
-    # TODO : currently, cant get `Event_Location._none` to work.
-    # This causes the following error:
-    ## TypeError: Expected `Event_Location.serialize(<Event_Location instance>)` to return non-nullable value, returned: None
-    # So, as a workaround, we use `None` as the default value.
-    location: Event_Location | None = None
+    location: List[Event_Location] = []
     description: event_desc_type | None = None # todo(FE): if None, use "No description available."
     mode: Event_Mode = Event_Mode.hybrid
-    poster: str | None = None # todo: upload_to="imgs/events/"; todo(FE): if None, use default
-    audience: Audience = Audience._all
+    poster: str | None = None
+    audience: List[Audience] = []
     link: HttpUrl | None = None
     equipment: event_othr_type | None = None
     additional: event_othr_type | None = None
