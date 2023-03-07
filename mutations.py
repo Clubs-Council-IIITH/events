@@ -20,6 +20,10 @@ def createEvent (eventDetails: InputEventDetails, info: Info) -> EventType :
     details.__class__.mode = Event_Mode(modeNum)
 
     user = info.context.user
+
+    user = dict() # TODO : remove after testing
+    user.update({ "clubs": ["2"], "role": None }) # TODO : remove after testing
+
     if not user or not details.clubid or details.clubid not in user["clubs"] :
        raise Exception(
            "You do not have permission to access this resource."
