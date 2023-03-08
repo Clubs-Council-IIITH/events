@@ -26,7 +26,6 @@ from typing import (
 
 class Event(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-
     name: event_name_type
     clubid: str
     datetimeperiod: Tuple[datetime, datetime]

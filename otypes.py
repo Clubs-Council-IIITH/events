@@ -5,8 +5,9 @@ from strawberry.fastapi import BaseContext
 from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
 
-from typing import Dict, Tuple
+from typing import Dict, List
 from functools import cached_property
+from datetime import datetime
 
 from models import Event
 from mtypes import PyObjectId
@@ -28,23 +29,21 @@ PyObjectIdType = strawberry.scalar(
     PyObjectId, serialize=str, parse_value=lambda v: PyObjectId(v)
 )
 
-# object type from pydantic model with all fields exposed
 @strawberry.experimental.pydantic.type(model=Event, all_fields=True)
 class EventType :
     pass
 
-# mutation's input type from pydantic model
-@strawberry.experimental.pydantic.input(model=Event)
+@strawberry.input()
 class InputEventDetails :
-    name: strawberry.auto
-    location: strawberry.auto
-    description: strawberry.auto
-    clubid: strawberry.auto
-    modeNum: int
-    poster: strawberry.auto
-    datetimeperiod: strawberry.auto
-    audience: strawberry.auto
-    link: strawberry.auto
-    equipment: strawberry.auto
-    additional: strawberry.auto
-    population: strawberry.auto
+    name: str
+    location: List[int] | None = None
+    description: str | None = None
+    clubid: str
+    mode: int | None = 1
+    poster: str | None = None
+    datetimeperiod: List[datetime]
+    audience: List[int] | None = None
+    link: str | None = None
+    equipment: str | None = None
+    additional: str | None = None
+    population: str | None = None

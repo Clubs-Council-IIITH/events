@@ -7,18 +7,10 @@ from db import eventsdb
 # import all models and types
 from models import Event
 from otypes import Info, InputEventDetails, EventType
-from mtypes import Event_Mode
+from mtypes import Event_Mode, Event_Location, Audience
 
 @strawberry.mutation
-def createEvent (eventDetails: InputEventDetails, info: Info) -> EventType :
-    modeNum = eventDetails.modeNum
-    if not (0 <= modeNum < len(Event_Mode)) :
-        raise Exception(
-            "Invalid event mode."
-        )
-    details = eventDetails.to_pydantic()
-    details.__class__.mode = Event_Mode(modeNum)
-
+def createEvent (details: InputEventDetails, info: Info) -> EventType :
     user = info.context.user
 
     user = dict() # TODO : remove after testing
@@ -30,19 +22,20 @@ def createEvent (eventDetails: InputEventDetails, info: Info) -> EventType :
        )
 
     event_instance = Event(
-        name =  details.name,
+        name = details.name,
         clubid = details.clubid,
-        mode = details.mode,
         datetimeperiod = details.datetimeperiod,
     )
+    if details.mode is not None :
+        event_instance.mode = Event_Mode(details.mode)
     if details.location is not None :
-        event_instance.location = details.location
+        event_instance.location = [ Event_Location(loc) for loc in details.location ]
     if details.description is not None :
         event_instance.description = details.description
     if details.poster is not None :
-        event_instance.poster = details.poster # TODO: upload_to="imgs/events/"; TODO (FE): if None, use defaul
+        event_instance.poster = details.poster
     if details.audience is not None :
-        event_instance.audience = details.audience
+        event_instance.audience = [ Audience(aud) for aud in details.audience ]
     if details.link is not None :
         event_instance.link = details.link
     if details.equipment is not None :
