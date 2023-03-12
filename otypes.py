@@ -21,6 +21,14 @@ class Context(BaseContext):
         user = json.loads(self.request.headers.get("user", "{}"))
         return user
 
+    @cached_property
+    def cookies(self) -> Union[Dict, None]:
+        if not self.request:
+            return None
+
+        cookies = json.loads(self.request.headers.get("cookies", "{}"))
+        return cookies
+
 
 # custom info type
 Info = _Info[Context, RootValueType]
