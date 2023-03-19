@@ -1,6 +1,7 @@
 from bson import ObjectId
 from mtypes import (
     Audience,
+    BudgetType,
     Event_Status,
     event_name_type,
     event_desc_type,
@@ -39,6 +40,7 @@ class Event(BaseModel):
     equipment: event_othr_type | None = None
     additional: event_othr_type | None = None
     population: event_popu_type | None = None
+    budget: List[BudgetType] = []
 
     class Config:
         allow_population_by_field_name = True

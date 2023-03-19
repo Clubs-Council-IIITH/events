@@ -59,12 +59,95 @@ def getAllEvents (clubid: str | None, info: Info) -> List[EventType]:
     events = eventsdb.find(searchspace)
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
 
+@strawberry.field
+def getIncompleteEvents (clubid: str, info: Info) -> List[EventType]:
+    '''
+        return all incomplete events of a club
+        raise Exception if user is not a member of the club
+    '''
+    user = info.context.user
+
+    user = dict() # TODO : remove after testing
+    user.update({ "clubs": [1], "role": None }) # TODO : remove after testing
+
+    if not user or clubid not in user["clubs"] :
+        raise Exception(
+            "You do not have permission to access this resource."
+        )
+
+    events = eventsdb.find({
+        "clubid": clubid,
+        "status.state": Event_State_Status.incomplete,
+    })
+    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
+
+@strawberry.field
+def getApprovedEvents (clubid: str | None, info: Info) -> List[EventType]:
+    '''
+        if clubid is set, return approved events of that club.
+        else return approved events of every club.
+        NOTE: this is a public query, accessible to all.
+    '''
+    user = info.context.user
+
+    user = dict() # TODO : remove after testing
+    user.update({ "clubs": [1], "role": None }) # TODO : remove after testing
+
+    requested_state = Event_State_Status.approved
+
+    searchspace = {
+        "status.state": requested_state,
+    }
+    if clubid is not None :
+        searchspace["clubid"] = clubid
+
+    events = eventsdb.find(searchspace)
+    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
+
+@strawberry.field
+def getPendingEvents (clubid: str | None, info: Info) -> List[EventType]:
+    '''
+        if user is admin, return events pending for them
+        if InpClub is set, and current user belongs to that club,
+        return pending events of that club.
+        raise Exception if user is not adimn and user is not in that club.
+    '''
+    user = info.context.user
+
+    user = dict() # TODO : remove after testing
+    user.update({ "clubs": [1], "role": None }) # TODO : remove after testing
+
+    requested_states = set()
+    if user is not None :
+        if "cc" == user["role"] :
+            requested_states |= {Event_State_Status.pending_cc}
+        if "slc" == user["role"] :
+            requested_states |= {Event_State_Status.pending_budget}
+        if "slo" == user["role"] :
+            requested_states |= {Event_State_Status.pending_room}
+        if clubid in user["clubs"] :
+            requested_states |= {Event_State_Status.pending_cc, Event_State_Status.pending_budget, Event_State_Status.pending_room}
+
+    if user is None or len(requested_states) == 0 :
+        raise Exception(
+            "You do not have permission to access this resource."
+        )
+
+    searchspace = {
+        "status.state": { "$in": requested_states },
+    }
+    if clubid is not None :
+        searchspace["clubid"] = clubid
+
+    events = eventsdb.find(searchspace)
+    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
+
 
 # register all queries
 queries = [
     getEvent,
-    # getIncompleteEvents,
-    # getApprovedEvents,
-    # getPendingEvents,
+    getIncompleteEvents,
+    getApprovedEvents,
+    getPendingEvents,
     getAllEvents,
 ]

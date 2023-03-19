@@ -49,7 +49,7 @@ class Event_State_Status (Enum) :
     # once the finishing time of the event passes, the state moves to `completed`
     completed  = auto()
     # if the event is deleted, its state is `deleted`
-    deleted    = auto()
+    deleted = auto()
 @strawberry.enum
 class Event_Room_Status (Enum) :
     unapproved = auto()
@@ -146,6 +146,11 @@ event_name_type = constr(min_length=1, max_length=20)
 event_desc_type = constr(max_length=5000)
 event_popu_type = conint(ge=0)
 event_othr_type = constr(max_length=1000)
+
+class BudgetType :
+    amount: float
+    description: event_desc_type | None = None
+    reimbursable: bool = False
 
 # for handling mongo ObjectIds
 class PyObjectId(ObjectId):
