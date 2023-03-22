@@ -5,12 +5,12 @@ from strawberry.fastapi import BaseContext
 from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
 
-from typing import Dict, List
+from typing import Dict, List, NewType
 from functools import cached_property
 from datetime import datetime
 
 from models import Event
-from mtypes import PyObjectId
+from mtypes import PyObjectId, BudgetType, Event_Status
 
 # custom context class
 class Context(BaseContext):
@@ -43,6 +43,10 @@ class EventType :
     pass
 
 @strawberry.input()
+class BudgetInput (BudgetType) :
+    pass
+
+@strawberry.input()
 class InputEventDetails :
     name: str
     location: List[int] | None = None
@@ -56,3 +60,4 @@ class InputEventDetails :
     equipment: str | None = None
     additional: str | None = None
     population: str | None = None
+    budget: List[BudgetInput] | None = None

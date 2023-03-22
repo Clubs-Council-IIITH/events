@@ -22,7 +22,7 @@ def getEvent (eventid: str, info: Info) -> EventType:
     user.update({ "clubs": ["2"], "role": None }) # TODO : remove after testing
     if (
         event is None or (
-            event["status"]["state"] not in { Event_State_Status.approved, Event_State_Status.completed, } and (
+            event["status"]["state"] not in { Event_State_Status.approved.value, Event_State_Status.completed.value, } and (
                 user is None or (
                     user["role"] not in { "cc", "slc", "slo" } and
                     event["clubid"] not in user["clubs"]
@@ -43,7 +43,7 @@ def getAllEvents (clubid: str | None, info: Info) -> List[EventType]:
     user = info.context.user
 
     user = dict() # TODO : remove after testing
-    user.update({ "clubs": [], "role": "cc" }) # TODO : remove after testing
+    user.update({ "clubs": ["1"], "role": "cc" }) # TODO : remove after testing
 
     restrictAccess = True
     if user is not None :
@@ -68,7 +68,7 @@ def getIncompleteEvents (clubid: str, info: Info) -> List[EventType]:
     user = info.context.user
 
     user = dict() # TODO : remove after testing
-    user.update({ "clubs": [1], "role": None }) # TODO : remove after testing
+    user.update({ "clubs": ["1"], "role": None }) # TODO : remove after testing
 
     if not user or clubid not in user["clubs"] :
         raise Exception(
@@ -77,7 +77,7 @@ def getIncompleteEvents (clubid: str, info: Info) -> List[EventType]:
 
     events = eventsdb.find({
         "clubid": clubid,
-        "status.state": Event_State_Status.incomplete,
+        "status.state": Event_State_Status.incomplete.value,
     })
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
 
@@ -93,7 +93,7 @@ def getApprovedEvents (clubid: str | None, info: Info) -> List[EventType]:
     user = dict() # TODO : remove after testing
     user.update({ "clubs": [1], "role": None }) # TODO : remove after testing
 
-    requested_state = Event_State_Status.approved
+    requested_state = Event_State_Status.approved.value
 
     searchspace = {
         "status.state": requested_state,
@@ -115,18 +115,18 @@ def getPendingEvents (clubid: str | None, info: Info) -> List[EventType]:
     user = info.context.user
 
     user = dict() # TODO : remove after testing
-    user.update({ "clubs": [1], "role": None }) # TODO : remove after testing
+    user.update({ "clubs": ["1"], "role": None }) # TODO : remove after testing
 
     requested_states = set()
     if user is not None :
         if "cc" == user["role"] :
-            requested_states |= {Event_State_Status.pending_cc}
+            requested_states |= {Event_State_Status.pending_cc.value}
         if "slc" == user["role"] :
-            requested_states |= {Event_State_Status.pending_budget}
+            requested_states |= {Event_State_Status.pending_budget.value}
         if "slo" == user["role"] :
-            requested_states |= {Event_State_Status.pending_room}
+            requested_states |= {Event_State_Status.pending_room.value}
         if clubid in user["clubs"] :
-            requested_states |= {Event_State_Status.pending_cc, Event_State_Status.pending_budget, Event_State_Status.pending_room}
+            requested_states |= {Event_State_Status.pending_cc.value, Event_State_Status.pending_budget.value, Event_State_Status.pending_room.value}
 
     if user is None or len(requested_states) == 0 :
         raise Exception(

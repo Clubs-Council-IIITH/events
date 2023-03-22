@@ -50,25 +50,31 @@ class Event_State_Status (Enum) :
     completed  = auto()
     # if the event is deleted, its state is `deleted`
     deleted = auto()
-@strawberry.enum
-class Event_Room_Status (Enum) :
-    unapproved = auto()
-    approved = auto()
-@strawberry.enum
-class Event_Budget_Status (Enum) :
-    unapproved = auto()
-    approved = auto()
+# @strawberry.enum
+# class Event_Room_Status (Enum) :
+#     unapproved = auto()
+#     approved = auto()
+# @strawberry.enum
+# class Event_Budget_Status (Enum) :
+#     unapproved = auto()
+#     approved = auto()
 
 @strawberry.type
 class Event_Status :
     state: Event_State_Status = Event_State_Status.incomplete
-    room: Event_Room_Status = Event_Room_Status.unapproved
-    budget: Event_Budget_Status = Event_Budget_Status.unapproved
+    # room: Event_Room_Status = Event_Room_Status.unapproved
+    # budget: Event_Budget_Status = Event_Budget_Status.unapproved
+    room: bool = False
+    budget: bool = False
 
-    def __init__ (self, state: Event_State_Status = None, room: Event_Room_Status = None, budget: Event_Budget_Status = None) :
-        self.state: Event_State_Status = Event_State_Status.incomplete if state is None else state
-        self.room: Event_Room_Status = Event_Room_Status.unapproved if room is None else room
-        self.budget: Event_Budget_Status = Event_Budget_Status.unapproved if budget is None else budget
+    # def __init__ (self, state: Event_State_Status = None, room: Event_Room_Status = None, budget: Event_Budget_Status = None) :
+    #     self.state: Event_State_Status = Event_State_Status.incomplete if state is None else state
+    #     self.room: Event_Room_Status = Event_Room_Status.unapproved if room is None else room
+    #     self.budget: Event_Budget_Status = Event_Budget_Status.unapproved if budget is None else budget
+    def __init__ (self, state: Event_State_Status = Event_State_Status.incomplete, room: bool = False, budget: bool = False) :
+        self.state = state
+        self.room = room
+        self.budget = budget
 
 # Event Modes
 @strawberry.enum
@@ -147,9 +153,10 @@ event_desc_type = constr(max_length=5000)
 event_popu_type = conint(ge=0)
 event_othr_type = constr(max_length=1000)
 
+@strawberry.type
 class BudgetType :
     amount: float
-    description: event_desc_type | None = None
+    description: str | None = None
     reimbursable: bool = False
 
 # for handling mongo ObjectIds
