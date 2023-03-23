@@ -1,13 +1,17 @@
 import strawberry
 
 from fastapi.encoders import jsonable_encoder
-from typing import List
+from typing import (
+    List,
+    Tuple,
+)
+from datetime import datetime
 from db import eventsdb
 
 # import all models and types
 from models import Event
-from otypes import Info, EventType
-from mtypes import Event_State_Status, PyObjectId
+from otypes import Info, EventType, RoomList, RoomListType
+from mtypes import Event_State_Status, Event_Location, PyObjectId
 
 
 @strawberry.field
@@ -142,6 +146,35 @@ def getPendingEvents (clubid: str | None, info: Info) -> List[EventType]:
     events = eventsdb.find(searchspace)
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
 
+@strawberry.field
+def getAvailableRooms (timeslot: Tuple[datetime, datetime], info: Info) -> RoomListType :
+    '''
+        return a list of all rooms that are available in the given timeslot
+        NOTE: this is a public query, accessible to all.
+    '''
+    user = info.context.user
+    assert timeslot[0] < timeslot[1], "Invalid timeslot"
+
+    approved_events = eventsdb.find(
+        {
+        "status.state": Event_State_Status.approved.value,
+        },
+        {
+            "location": 1,
+            "datetimeperiod": 1,
+        },
+    )
+
+    free_rooms = set(Event_Location)
+    for approved_event in approved_events :
+        if (
+            timeslot[1] > approved_event.datetimeperiod[0]
+            and timeslot[0] < approved_event.datetimeperiod[1]
+        ):
+            free_rooms.difference_update(approved_event.location)
+            
+    return RoomListType.from_pydantic(RoomList.parse_obj({"locations": free_rooms}))
+
 
 # register all queries
 queries = [
@@ -150,4 +183,5 @@ queries = [
     getApprovedEvents,
     getPendingEvents,
     getAllEvents,
+    getAvailableRooms,
 ]

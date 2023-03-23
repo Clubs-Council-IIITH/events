@@ -5,12 +5,13 @@ from strawberry.fastapi import BaseContext
 from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
 
+from pydantic import BaseModel
 from typing import Dict, List, NewType
 from functools import cached_property
 from datetime import datetime
 
 from models import Event
-from mtypes import PyObjectId, BudgetType, Event_Status
+from mtypes import PyObjectId, BudgetType, Event_Location
 
 # custom context class
 class Context(BaseContext):
@@ -40,6 +41,12 @@ PyObjectIdType = strawberry.scalar(
 
 @strawberry.experimental.pydantic.type(model=Event, all_fields=True)
 class EventType :
+    pass
+
+class RoomList (BaseModel) :
+    locations: List[Event_Location]
+@strawberry.experimental.pydantic.type(model=RoomList, all_fields=True)
+class RoomListType :
     pass
 
 @strawberry.input()
