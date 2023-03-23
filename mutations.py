@@ -77,7 +77,6 @@ def progressEvent (eventid: str, info: Info, cc_progress_budget: bool = False, c
         after room is approved (through any track), the event is `approved`
         once the event is over, the club or cc can change the state to `completed`
     '''
-    # TODO : consider using replace_one instead of find_one and save
     noaccess_error = Exception("Can not access event. Either it does not exist or user does not have perms.")
 
     user = info.context.user
@@ -90,54 +89,68 @@ def progressEvent (eventid: str, info: Info, cc_progress_budget: bool = False, c
         raise noaccess_error
     event_instance = Event.parse_obj(event_ref)
 
+    status_updation = dict()
+
     if event_instance.status.state == Event_State_Status.incomplete :
         if user["role"] != "club" or user["uid"] != event_instance.clubid :
             raise noaccess_error
-        event_instance.status.budget_approved = False
-        event_instance.status.room_approved = False
-        event_instance.status.state = Event_State_Status.pending_cc
+        updation = {
+            "budget": False,
+            "room": False,
+            "state": Event_State_Status.pending_cc.value,
+        }
 
     elif event_instance.status.state == Event_State_Status.pending_cc :
         if user["role"] != "cc" :
             raise noaccess_error
-        event_instance.status.budget_approved = cc_progress_budget or sum([b.amount for b in event_instance.budget]) == 0
-        event_instance.status.room_approved = cc_progress_room or len(event_instance.location) == 0
+        updation = {
+            "budget": cc_progress_budget or sum([b.amount for b in event_instance.budget]) == 0,
+            "room": cc_progress_room or len(event_instance.location) == 0,
+        }
 
-        if not event_instance.status.budget_approved :
-            event_instance.status.state = Event_State_Status.pending_budget
-        elif not event_instance.status.room_approved :
-            event_instance.status.state = Event_State_Status.pending_room
+        if not updation["budget"] :
+            updation["state"] = Event_State_Status.pending_budget.value
+        elif not updation["room"] :
+            updation["state"] = Event_State_Status.pending_room.value
         else :
-            event_instance.status.state = Event_State_Status.approved
+            updation["state"] = Event_State_Status.approved.value
 
     elif event_instance.status.state == Event_State_Status.pending_budget :
         if user["role"] != "slc" :
             raise noaccess_error
-        assert(event_instance.status.budget_approved == False)
-        event_instance.status.budget_approved = True
-        event_instance.status.room_approved |= len(event_instance.location) == 0
+        assert(event_instance.status.budget == False)
+        updation = {
+            "budget": True,
+            "room": event_instance.status.room | len(event_instance.location) == 0,
+        }
 
-        if not event_instance.status.room_approved :
-            event_instance.status.state = Event_State_Status.pending_room
+        if not updation["room"] :
+            updation["state"] = Event_State_Status.pending_room.value
         else :
-            event_instance.status.state = Event_State_Status.approved
+            updation["state"] = Event_State_Status.approved.value
             
     elif event_instance.status.state == Event_State_Status.pending_room :
         if user["role"] != "slo" :
             raise noaccess_error
-        assert(event_instance.status.budget_approved == True)
-        assert(event_instance.status.room_approved == False)
-        event_instance.status.room_approved = True
-
-        event_instance.status.state = Event_State_Status.approved
+        assert(event_instance.status.budget == True)
+        assert(event_instance.status.room == False)
+        updation = {
+            "budget": event_instance.status.budget,
+            "room": True,
+            "state": Event_State_Status.approved.value,
+        }
     
     elif event_instance.status.state == Event_State_Status.approved :
         if user["role"] != "cc" and ( user["role"] != "club" or user["uid"] != event_instance.clubid ) :
             raise noaccess_error
 
-        event_instance.status.state = Event_State_Status.completed
+        updation = {
+            "budget": event_instance.status.budget,
+            "room": event_instance.status.room,
+            "state": Event_State_Status.approved.value,
+        }
         
-    eventsdb.replace_one({"_id": eventid}, jsonable_encoder(event_instance))
+    eventsdb.update_one({"_id": eventid}, {"$set": {"status": updation}})
     return EventType.from_pydantic(event_instance)
 
 @strawberry.mutation
