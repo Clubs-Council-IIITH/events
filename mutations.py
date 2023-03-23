@@ -24,9 +24,9 @@ def createEvent (details: InputEventDetails, info: Info) -> EventType :
     user = info.context.user
 
     user = dict() # TODO : remove after testing
-    user.update({ "clubs": ["1"], "role": None }) # TODO : remove after testing
+    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
 
-    if not user or not details.clubid or details.clubid not in user["clubs"] :
+    if not user or not details.clubid or ( user["role"] != "club" or user["uid"] != details.clubid ) :
        raise Exception(
            "You do not have permission to access this resource."
        )
@@ -83,7 +83,7 @@ def progressEvent (eventid: str, info: Info, cc_progress_budget: bool = False, c
     user = info.context.user
 
     user = dict() # TODO : remove after testing
-    user.update({ "clubs": [], "role": "cc" }) # TODO : remove after testing
+    user.update({ "uid": "b@iiit.ac.in", "role": "cc" }) # TODO : remove after testing
 
     event_ref = eventsdb.find_one({"_id": eventid})
     if event_ref is None or user is None :
@@ -91,7 +91,7 @@ def progressEvent (eventid: str, info: Info, cc_progress_budget: bool = False, c
     event_instance = Event.parse_obj(event_ref)
 
     if event_instance.status.state == Event_State_Status.incomplete :
-        if event_instance.clubid not in user["clubs"] :
+        if user["role"] != "club" or user["uid"] != event_instance.clubid :
             raise noaccess_error
         event_instance.status.budget_approved = False
         event_instance.status.room_approved = False
@@ -132,7 +132,7 @@ def progressEvent (eventid: str, info: Info, cc_progress_budget: bool = False, c
         event_instance.status.state = Event_State_Status.approved
     
     elif event_instance.status.state == Event_State_Status.approved :
-        if user["role"] != "cc" and event_instance.clubid not in user["clubs"] :
+        if user["role"] != "cc" and ( user["role"] != "club" or user["uid"] != event_instance.clubid ) :
             raise noaccess_error
 
         event_instance.status.state = Event_State_Status.completed
@@ -148,7 +148,7 @@ def deleteEvent (eventid: str, info: Info) -> EventType :
     user = info.context.user
 
     user = dict() # TODO : remove after testing
-    user.update({ "clubs": ["1"], "role": None }) # TODO : remove after testing
+    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
     
     if user["role"] in ["cc",] :
         query = {
@@ -157,7 +157,7 @@ def deleteEvent (eventid: str, info: Info) -> EventType :
     else :
         query = {
             "_id": eventid,
-            "clubid": {"$in": user["clubs"]},
+            "clubid": user["uid"],
         }
 
     updation = {"$set":

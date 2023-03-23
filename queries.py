@@ -19,13 +19,16 @@ def getEvent (eventid: str, info: Info) -> EventType:
     event = eventsdb.find_one({"_id": eventid})
     
     user = dict() # TODO : remove after testing
-    user.update({ "clubs": ["2"], "role": None }) # TODO : remove after testing
+    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
     if (
         event is None or (
             event["status"]["state"] not in { Event_State_Status.approved.value, Event_State_Status.completed.value, } and (
                 user is None or (
                     user["role"] not in { "cc", "slc", "slo" } and
-                    event["clubid"] not in user["clubs"]
+                    (
+                        user["role"] != "club" or
+                        user["uid"] != event["clubid"]
+                    )
                 )
             )
         )
@@ -43,11 +46,11 @@ def getAllEvents (clubid: str | None, info: Info) -> List[EventType]:
     user = info.context.user
 
     user = dict() # TODO : remove after testing
-    user.update({ "clubs": ["1"], "role": "cc" }) # TODO : remove after testing
+    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
 
     restrictAccess = True
     if user is not None :
-        if user["role"] in { "cc", "slc", "slo" } or clubid in user["clubs"] :
+        if user["role"] in { "cc", "slc", "slo" } or ( user["role"] == "club" and user["uid"] == clubid ) :
             restrictAccess = False
 
     searchspace = dict()
@@ -68,9 +71,9 @@ def getIncompleteEvents (clubid: str, info: Info) -> List[EventType]:
     user = info.context.user
 
     user = dict() # TODO : remove after testing
-    user.update({ "clubs": ["1"], "role": None }) # TODO : remove after testing
+    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
 
-    if not user or clubid not in user["clubs"] :
+    if not user or user["role"] != "club" or user["uid"] != clubid :
         raise Exception(
             "You do not have permission to access this resource."
         )
@@ -89,9 +92,6 @@ def getApprovedEvents (clubid: str | None, info: Info) -> List[EventType]:
         NOTE: this is a public query, accessible to all.
     '''
     user = info.context.user
-
-    user = dict() # TODO : remove after testing
-    user.update({ "clubs": [1], "role": None }) # TODO : remove after testing
 
     requested_state = Event_State_Status.approved.value
 
@@ -115,7 +115,7 @@ def getPendingEvents (clubid: str | None, info: Info) -> List[EventType]:
     user = info.context.user
 
     user = dict() # TODO : remove after testing
-    user.update({ "clubs": ["1"], "role": None }) # TODO : remove after testing
+    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
 
     requested_states = set()
     if user is not None :
@@ -125,7 +125,7 @@ def getPendingEvents (clubid: str | None, info: Info) -> List[EventType]:
             requested_states |= {Event_State_Status.pending_budget.value}
         if "slo" == user["role"] :
             requested_states |= {Event_State_Status.pending_room.value}
-        if clubid in user["clubs"] :
+        if "club" == user["role"] and user["uid"] == clubid :
             requested_states |= {Event_State_Status.pending_cc.value, Event_State_Status.pending_budget.value, Event_State_Status.pending_room.value}
 
     if user is None or len(requested_states) == 0 :
