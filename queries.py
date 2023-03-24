@@ -22,8 +22,6 @@ def getEvent (eventid: str, info: Info) -> EventType:
     user = info.context.user
     event = eventsdb.find_one({"_id": eventid})
     
-    user = dict() # TODO : remove after testing
-    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
     if (
         event is None or (
             event["status"]["state"] not in { Event_State_Status.approved.value, Event_State_Status.completed.value, } and (
@@ -49,8 +47,6 @@ def getAllEvents (clubid: str | None, info: Info) -> List[EventType]:
     '''
     user = info.context.user
 
-    user = dict() # TODO : remove after testing
-    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
 
     restrictAccess = True
     if user is not None :
@@ -73,9 +69,6 @@ def getIncompleteEvents (clubid: str, info: Info) -> List[EventType]:
         raise Exception if user is not a member of the club
     '''
     user = info.context.user
-
-    user = dict() # TODO : remove after testing
-    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
 
     if not user or user["role"] != "club" or user["uid"] != clubid :
         raise Exception(
@@ -117,9 +110,6 @@ def getPendingEvents (clubid: str | None, info: Info) -> List[EventType]:
         raise Exception if user is not adimn and user is not in that club.
     '''
     user = info.context.user
-
-    user = dict() # TODO : remove after testing
-    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
 
     requested_states = set()
     if user is not None :

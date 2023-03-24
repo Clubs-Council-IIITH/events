@@ -23,9 +23,6 @@ def createEvent (details: InputEventDetails, info: Info) -> EventType :
     '''
     user = info.context.user
 
-    user = dict() # TODO : remove after testing
-    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
-
     if not user or not details.clubid or ( user["role"] != "club" or user["uid"] != details.clubid ) :
        raise Exception(
            "You do not have permission to access this resource."
@@ -80,9 +77,6 @@ def progressEvent (eventid: str, info: Info, cc_progress_budget: bool = False, c
     noaccess_error = Exception("Can not access event. Either it does not exist or user does not have perms.")
 
     user = info.context.user
-
-    user = dict() # TODO : remove after testing
-    user.update({ "uid": "b@iiit.ac.in", "role": "cc" }) # TODO : remove after testing
 
     event_ref = eventsdb.find_one({"_id": eventid})
     if event_ref is None or user is None :
@@ -160,9 +154,6 @@ def deleteEvent (eventid: str, info: Info) -> EventType :
     '''
     user = info.context.user
 
-    user = dict() # TODO : remove after testing
-    user.update({ "uid": "a@iiit.ac.in", "role": "club" }) # TODO : remove after testing
-    
     if user["role"] in ["cc",] :
         query = {
             "_id": eventid,
