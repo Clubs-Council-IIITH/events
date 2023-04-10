@@ -67,7 +67,4 @@ class InputEventDetails :
     equipment: str | None = None
     additional: str | None = None
     population: str | None = None
-<<<<<<< HEAD
-=======
     budget: List[BudgetInput] | None = None
->>>>>>> 88d8bc6047bb56487617b9ff3da54df5d26fc66f
