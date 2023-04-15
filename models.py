@@ -1,4 +1,8 @@
 from bson import ObjectId
+from datetime import datetime
+from typing import Tuple, List
+from pydantic import BaseModel, Field, HttpUrl
+
 from mtypes import (
     Audience,
     BudgetType,
@@ -11,19 +15,7 @@ from mtypes import (
     Event_Location,
     PyObjectId,
 )
-from pydantic import (
-    BaseModel,
-    Field,
-    FilePath,
-    HttpUrl,
-)
-from datetime import (
-    datetime,
-)
-from typing import (
-    Tuple,
-    List,
-)
+
 
 class Event(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
@@ -32,7 +24,9 @@ class Event(BaseModel):
     datetimeperiod: Tuple[datetime, datetime]
     status: Event_Status = Event_Status()
     location: List[Event_Location] = []
-    description: event_desc_type | None = None # todo(FE): if None, use "No description available."
+    description: event_desc_type | None = (
+        None  # todo(FE): if None, use "No description available."
+    )
     mode: Event_Mode = Event_Mode.hybrid
     poster: str | None = None
     audience: List[Audience] = []
