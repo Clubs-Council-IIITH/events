@@ -1,6 +1,5 @@
 import strawberry
 
-from bson import ObjectId
 from fastapi.encoders import jsonable_encoder
 from typing import List, Tuple
 from datetime import datetime
@@ -18,7 +17,7 @@ def event(eventid: str, info: Info) -> EventType:
     return event with given id if it is visible to the user
     """
     user = info.context.user
-    event = eventsdb.find_one({"_id": ObjectId(eventid)})
+    event = eventsdb.find_one({"_id": eventid})
 
     if event is None or (
         event["status"]["state"]
