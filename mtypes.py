@@ -6,7 +6,7 @@ from pydantic import constr, conint
 
 # Audience of Events
 @strawberry.enum
-class Audience(Enum):
+class Audience(str, Enum):
     ug1 = "UG 1"
     ug2 = "UG 2"
     ug3 = "UG 3"
@@ -29,7 +29,7 @@ class Audience(Enum):
 
 # Event States
 @strawberry.enum
-class Event_State_Status(Enum):
+class Event_State_Status(str, Enum):
     # initially, the event is `incomplete`
     incomplete = "Incomplete"
     # after the club fills all the details, they progress it
@@ -91,7 +91,7 @@ class Event_Mode(Enum):
 
 # Event Locations
 @strawberry.enum
-class Event_Location(Enum):
+class Event_Location(str, Enum):
     # Himalaya
     H101 = "Himalaya 101"
     H102 = "Himalaya 102"
