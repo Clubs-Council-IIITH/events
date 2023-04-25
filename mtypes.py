@@ -122,6 +122,8 @@ class Event_Location(Enum):
     SM24 = auto()
     SM32 = auto()
     LM34 = auto()
+    # T-Hub
+    D101 = auto()
     # nota
     other = auto()
 
@@ -152,6 +154,7 @@ location_mapping = {
     Event_Location.SM24: "SM-24, KRB",
     Event_Location.SM32: "SM-32, KRB",
     Event_Location.LM34: "LM-34, KRB",
+    Event_Location.D101: "D101, T-Hub",
     Event_Location.other: "Other",
 }
 
