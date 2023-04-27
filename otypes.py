@@ -11,19 +11,20 @@ from functools import cached_property
 from datetime import datetime
 
 from models import Event
-from mtypes import PyObjectId, BudgetType, Event_Location
+from mtypes import PyObjectId, BudgetType, Event_Location, Event_Mode, Audience
+
 
 # custom context class
 class Context(BaseContext):
     @cached_property
-    def user(self) -> Dict | None :
+    def user(self) -> Dict | None:
         if not self.request:
             return None
         user = json.loads(self.request.headers.get("user", "{}"))
         return user
 
     @cached_property
-    def cookies(self) -> Dict | None :
+    def cookies(self) -> Dict | None:
         if not self.request:
             return None
 
@@ -39,30 +40,36 @@ PyObjectIdType = strawberry.scalar(
     PyObjectId, serialize=str, parse_value=lambda v: PyObjectId(v)
 )
 
+
 @strawberry.experimental.pydantic.type(model=Event, all_fields=True)
-class EventType :
+class EventType:
     pass
 
-class RoomList (BaseModel) :
+
+class RoomList(BaseModel):
     locations: List[Event_Location]
+
+
 @strawberry.experimental.pydantic.type(model=RoomList, all_fields=True)
-class RoomListType :
+class RoomListType:
     pass
 
-@strawberry.input()
-class BudgetInput (BudgetType) :
-    pass
 
 @strawberry.input()
-class InputEventDetails :
+class BudgetInput(BudgetType):
+    pass
+
+
+@strawberry.input()
+class InputEventDetails:
     name: str
-    location: List[int] | None = None
+    location: List[Event_Location] | None = None
     description: str | None = None
     clubid: str
-    mode: int | None = 1
+    mode: Event_Mode | None = Event_Mode.hybrid
     poster: str | None = None
     datetimeperiod: List[datetime]
-    audience: List[int] | None = None
+    audience: List[Audience] | None = None
     link: str | None = None
     equipment: str | None = None
     additional: str | None = None
