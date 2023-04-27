@@ -73,6 +73,35 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
 
 
+# TODO: this is a temporary query; remove it later once pagination has been implemented for the `events` query
+@strawberry.field
+def recentEvents(info: Info) -> List[EventType]:
+    """
+    return the recent 10 events across all clubs
+    only publicly visible events are returned
+    """
+    user = info.context.user
+
+    searchspace = dict()
+    searchspace["status.state"] = {
+        "$in": [
+            Event_State_Status.approved.value,
+            Event_State_Status.completed.value,
+        ]
+    }
+
+    events = eventsdb.find(searchspace)
+
+    # sort events in descending order of time
+    events = sorted(
+        events,
+        key=lambda event: event["datetimeperiod"][0],
+        reverse=True,
+    )
+
+    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events[:10]]
+
+
 @strawberry.field
 def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     """
@@ -186,6 +215,7 @@ def availableRooms(timeslot: Tuple[datetime, datetime], info: Info) -> RoomListT
 queries = [
     event,
     events,
+    recentEvents,
     incompleteEvents,
     approvedEvents,
     pendingEvents,
