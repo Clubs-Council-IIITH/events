@@ -16,17 +16,6 @@ class Audience(Enum):
     fac = auto()
 
 
-audience_mapping = {
-    Audience.ug1: "UG 1",
-    Audience.ug2: "UG 2",
-    Audience.ug3: "UG 3",
-    Audience.ug4: "UG 4+",
-    Audience.pg: "PG",
-    Audience.stf: "Staff",
-    Audience.fac: "Faculty",
-}
-
-
 # Event States
 @strawberry.enum
 class Event_State_Status(Enum):
