@@ -4,7 +4,6 @@ from fastapi.encoders import jsonable_encoder
 from typing import List, Tuple
 from datetime import datetime
 from db import eventsdb
-from bson import ObjectId
 
 # import all models and types
 from models import Event
@@ -18,7 +17,7 @@ def event(eventid: str, info: Info) -> EventType:
     return event with given id if it is visible to the user
     """
     user = info.context.user
-    event = eventsdb.find_one({"_id": ObjectId(eventid)})
+    event = eventsdb.find_one({"_id": eventid})
 
     allevents = eventsdb.find({})
 
@@ -167,6 +166,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
                 Event_State_Status.pending_budget.value,
                 Event_State_Status.pending_room.value,
             }
+    requested_states = list(requested_states)
 
     if user is None or len(requested_states) == 0:
         raise Exception("You do not have permission to access this resource.")

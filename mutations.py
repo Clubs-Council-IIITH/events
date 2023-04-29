@@ -3,7 +3,6 @@ import strawberry
 from fastapi.encoders import jsonable_encoder
 
 from db import eventsdb
-from bson import ObjectId
 
 # import all models and types
 from models import Event
@@ -58,7 +57,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.budget = details.budget
 
     created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
-    created_event = Event.parse_obj(eventsdb.find_one({"_id": ObjectId(created_id)}))
+    created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
 
     return EventType.from_pydantic(created_event)
 
@@ -89,7 +88,7 @@ def progressEvent(
 
     user = info.context.user
 
-    event_ref = eventsdb.find_one({"_id": ObjectId(eventid)})
+    event_ref = eventsdb.find_one({"_id": eventid})
     if event_ref is None or user is None:
         raise noaccess_error
     event_instance = Event.parse_obj(event_ref)
@@ -158,7 +157,7 @@ def progressEvent(
             "state": Event_State_Status.approved.value,
         }
 
-    eventsdb.update_one({"_id": ObjectId(eventid)}, {"$set": {"status": updation}})
+    eventsdb.update_one({"_id": eventid}, {"$set": {"status": updation}})
     return EventType.from_pydantic(event_instance)
 
 
@@ -169,17 +168,12 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
     """
     user = info.context.user
 
-    if user["role"] in [
-        "cc",
-    ]:
-        query = {
-            "_id": ObjectId(eventid),
-        }
-    else:
-        query = {
-            "_id": ObjectId(eventid),
-            "clubid": user["uid"],
-        }
+    query = {
+        "_id": eventid,
+    }
+    if user["role"] not in ["cc"]:
+        # if user is not an admin, they can only delete their own events
+        query["clubid"] = user["uid"]
 
     updation = {
         "$set": {
@@ -197,7 +191,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
             "Can not access event. Either it does not exist or user does not have perms."
         )
 
-    event_ref = eventsdb.find_one({"_id": ObjectId(eventid)})
+    event_ref = eventsdb.find_one({"_id": eventid})
     return EventType.from_pydantic(Event.parse_obj(event_ref))
 
 
