@@ -127,7 +127,7 @@ event_othr_type = constr(max_length=1000)
 class BudgetType:
     amount: float
     description: str | None = None
-    reimbursable: bool = False
+    advance: bool = False
 
 
 # for handling mongo ObjectIds
