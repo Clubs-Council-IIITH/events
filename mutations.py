@@ -6,7 +6,7 @@ from db import eventsdb
 
 # import all models and types
 from models import Event
-from otypes import Info, InputEventDetails, EventType
+from otypes import Info, InputEventDetails, EventType, InputEditEventDetails
 from mtypes import (
     Event_Mode,
     Event_Location,
@@ -63,11 +63,65 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
 
 
 @strawberry.mutation
+def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
+    """
+    edit event with given details if user has permission
+    return the event
+    """
+    user = info.context.user
+
+    updates = {
+        "status.state": Event_State_Status.incomplete,
+    }
+
+    if details.name is not None:
+        updates["name"] = details.name
+    if details.datetimeperiod is not None:
+        updates["datetimeperiod"] = details.datetimeperiod
+    if details.mode is not None:
+        updates["mode"] = Event_Mode(details.mode)
+    if details.location is not None:
+        updates["status.room"] = False
+        updates["location"] = [Event_Location(loc) for loc in details.location]
+    if details.description is not None:
+        updates["description"] = details.description
+    if details.poster is not None:
+        updates["poster"] = details.poster
+    if details.audience is not None:
+        updates["audience"] = [Audience(aud) for aud in details.audience]
+    if details.link is not None:
+        updates["link"] = details.link
+    if details.equipment is not None:
+        updates["equipment"] = details.equipment
+    if details.additional is not None:
+        updates["additional"] = details.additional
+    if details.population is not None:
+        updates["population"] = details.population
+    if details.budget is not None:
+        updates["status.budget"] = False
+        updates["budget"] = details.budget
+
+    query = {
+        "_id": details.eventid,
+        "clubid": user["uid"] if user is not None and user["role"] == "club" else None,
+    }
+
+    updation = {"$set": updates}
+
+    upd_ref = eventsdb.update_one(query, updation)
+    if upd_ref.matched_count == 0:
+        raise Exception("You do not have permission to access this resource.")
+
+    event_ref = eventsdb.find_one({"_id": details.eventid})
+    return EventType.from_pydantic(Event.parse_obj(event_ref))
+
+
+@strawberry.mutation
 def progressEvent(
     eventid: str,
     info: Info,
-    cc_progress_budget: bool = False,
-    cc_progress_room: bool = False,
+    cc_progress_budget: bool | None = None,
+    cc_progress_room: bool | None = None,
 ) -> EventType:
     """
     progress the event state status for different users
@@ -99,8 +153,8 @@ def progressEvent(
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
         updation = {
-            "budget": False,
-            "room": False,
+            "budget": event_instance.status.budget or sum([b.amount for b in event_instance.budget]) == 0,
+            "room": event_instance.status.room or len(event_instance.location) == 0,
             "state": Event_State_Status.pending_cc.value,
         }
 
@@ -108,10 +162,13 @@ def progressEvent(
         if user["role"] != "cc":
             raise noaccess_error
         updation = {
-            "budget": cc_progress_budget
-            or sum([b.amount for b in event_instance.budget]) == 0,
-            "room": cc_progress_room or len(event_instance.location) == 0,
+            "budget": event_instance.status.budget or sum([b.amount for b in event_instance.budget]) == 0,
+            "room": event_instance.status.room or len(event_instance.location) == 0,
         }
+        if cc_progress_budget is not None:
+            updation["budget"] = cc_progress_budget
+        if cc_progress_room is not None:
+            updation["room"] = cc_progress_room
 
         if not updation["budget"]:
             updation["state"] = Event_State_Status.pending_budget.value
@@ -157,8 +214,12 @@ def progressEvent(
             "state": Event_State_Status.approved.value,
         }
 
-    eventsdb.update_one({"_id": eventid}, {"$set": {"status": updation}})
-    return EventType.from_pydantic(event_instance)
+    upd_ref = eventsdb.update_one({"_id": eventid}, {"$set": {"status": updation}})
+    if upd_ref.matched_count == 0:
+        raise noaccess_error
+
+    event_ref = eventsdb.find_one({"_id": eventid})
+    return EventType.from_pydantic(Event.parse_obj(event_ref))
 
 
 @strawberry.mutation
@@ -198,6 +259,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
 # register all mutations
 mutations = [
     createEvent,
+    editEvent,
     progressEvent,
     deleteEvent,
 ]

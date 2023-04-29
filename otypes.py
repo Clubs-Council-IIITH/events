@@ -75,3 +75,21 @@ class InputEventDetails:
     additional: str | None = None
     population: str | None = None
     budget: List[BudgetInput] | None = None
+
+
+@strawberry.input()
+class InputEditEventDetails:
+    name: str | None = None
+    eventid: str
+    location: List[Event_Location] | None = None
+    description: str | None = None
+    # clubid: str # not editable
+    mode: Event_Mode | None = Event_Mode.hybrid
+    poster: str | None = None
+    datetimeperiod: List[datetime] | None = None
+    audience: List[Audience] | None = None
+    link: str | None = None
+    equipment: str | None = None
+    additional: str | None = None
+    population: str | None = None
+    budget: List[BudgetInput] | None = None
