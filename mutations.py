@@ -28,6 +28,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         not user
         or not details.clubid
         or (user["role"] != "club" or user["uid"] != details.clubid)
+        or (user["role"] != "cc") # allow CC to create events too
     ):
         raise Exception("You do not have permission to access this resource.")
 
@@ -56,6 +57,10 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.population = details.population
     if details.budget is not None:
         event_instance.budget = details.budget
+
+    # if creator is CC, set state to approved
+    if user["role"] == "cc":
+        event_instance.status.state = Event_State_Status.approved
 
     created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
     created_event = Event.parse_obj(eventsdb.find_one({"_id": ObjectId(created_id)}))
@@ -104,7 +109,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
 
     query = {
         "_id": ObjectId(details.eventid),
-        "clubid": user["uid"] if user is not None and user["role"] == "club" else None,
+        "clubid": user["uid"] if (user is not None and user["role"] == "club") else details.clubid if (user["role"] == "cc") else None,
     }
 
     updation = {"$set": updates}
