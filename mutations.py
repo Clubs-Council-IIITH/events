@@ -89,7 +89,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.mode is not None:
         updates["mode"] = Event_Mode(details.mode)
     if details.location is not None:
-        updates["status.room"] = False
+        updates["status.room"] = False or user["role"] == "cc"
         updates["location"] = [Event_Location(loc) for loc in details.location]
     if details.description is not None:
         updates["description"] = details.description
@@ -106,7 +106,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.population is not None:
         updates["population"] = details.population
     if details.budget is not None:
-        updates["status.budget"] = False
+        updates["status.budget"] = False or user["role"] == "cc"
         updates["budget"] = details.budget
 
     query = {
