@@ -27,8 +27,10 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if (
         not user
         or not details.clubid
-        or (user["role"] != "club" or user["uid"] != details.clubid)
-        or (user["role"] != "cc") # allow CC to create events too
+        or not (
+            (user["role"] == "club" and user["uid"] == details.clubid) or
+            (user["role"] == "cc") # allow CC to create events too
+        )
     ):
         raise Exception("You do not have permission to access this resource.")
 
