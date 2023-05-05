@@ -31,8 +31,6 @@ class Event_State_Status(StrEnum):
     pending_room = auto()
     # after room is approved (through any track), the event is `approved`
     approved = auto()
-    # once the finishing time of the event passes, the state moves to `completed`
-    completed = auto()
     # if the event is deleted, its state is `deleted`
     deleted = auto()
 

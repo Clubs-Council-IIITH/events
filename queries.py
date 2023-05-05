@@ -28,7 +28,6 @@ def event(eventid: str, info: Info) -> EventType:
         event["status"]["state"]
         not in {
             Event_State_Status.approved.value,
-            Event_State_Status.completed.value,
         }
         and (
             user is None
@@ -67,7 +66,6 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
         searchspace["status.state"] = {
             "$in": [
                 Event_State_Status.approved.value,
-                Event_State_Status.completed.value,
             ]
         }
 
@@ -88,7 +86,6 @@ def recentEvents(info: Info) -> List[EventType]:
     searchspace["status.state"] = {
         "$in": [
             Event_State_Status.approved.value,
-            Event_State_Status.completed.value,
         ]
     }
 
