@@ -73,7 +73,7 @@ class InputEventDetails:
     link: str | None = None
     equipment: str | None = None
     additional: str | None = None
-    population: str | None = None
+    population: int | None = None
     budget: List[BudgetInput] | None = None
 
 
@@ -91,5 +91,5 @@ class InputEditEventDetails:
     link: str | None = None
     equipment: str | None = None
     additional: str | None = None
-    population: str | None = None
+    population: int | None = None
     budget: List[BudgetInput] | None = None
