@@ -3,6 +3,7 @@ import strawberry
 from fastapi.encoders import jsonable_encoder
 from typing import List, Tuple
 from datetime import datetime
+import dateutil.parser as dp
 
 from db import eventsdb
 from bson import ObjectId
@@ -204,11 +205,13 @@ def availableRooms(timeslot: Tuple[datetime, datetime], info: Info) -> RoomListT
 
     free_rooms = set(Event_Location)
     for approved_event in approved_events:
+        start_time = dp.parse(approved_event["datetimeperiod"][0])
+        end_time = dp.parse(approved_event["datetimeperiod"][1])
         if (
-            timeslot[1] > approved_event.datetimeperiod[0]
-            and timeslot[0] < approved_event.datetimeperiod[1]
+            timeslot[1] > start_time
+            and timeslot[0] < end_time
         ):
-            free_rooms.difference_update(approved_event.location)
+            free_rooms.difference_update(approved_event['location'])
 
     return RoomListType.from_pydantic(RoomList.parse_obj({"locations": free_rooms}))
 
