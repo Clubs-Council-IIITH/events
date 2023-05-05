@@ -70,6 +70,14 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
         }
 
     events = eventsdb.find(searchspace)
+
+    # sort events in descending order of time
+    events = sorted(
+        events,
+        key=lambda event: event["datetimeperiod"][0],
+        reverse=True,
+    )
+
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
 
 
@@ -118,6 +126,14 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
             "status.state": Event_State_Status.incomplete.value,
         }
     )
+
+    # sort events in ascending order of time
+    events = sorted(
+        events,
+        key=lambda event: event["datetimeperiod"][0],
+        reverse=False,
+    )
+
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
 
 
@@ -139,6 +155,14 @@ def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
         searchspace["clubid"] = clubid
 
     events = eventsdb.find(searchspace)
+
+    # sort events in descending order of time
+    events = sorted(
+        events,
+        key=lambda event: event["datetimeperiod"][0],
+        reverse=True,
+    )
+    
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
 
 
@@ -178,6 +202,14 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
         searchspace["clubid"] = clubid
 
     events = eventsdb.find(searchspace)
+
+    # sort events in ascending order of time
+    events = sorted(
+        events,
+        key=lambda event: event["datetimeperiod"][0],
+        reverse=False,
+    )
+
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
 
 
