@@ -97,7 +97,7 @@ class Event_Location(StrEnum):
     vsh1 = auto()
     vsh2 = auto()
     # Other
-    ampi = auto()
+    amphi = auto()
     cieg = auto()
     sarg = auto()
     # Academic Rooms
