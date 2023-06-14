@@ -25,7 +25,7 @@ class Event(BaseModel):
     status: Event_Status = Event_Status()
     location: List[Event_Location] = []
     description: event_desc_type | None = (
-        None  # todo(FE): if None, use "No description available."
+        "No description available."
     )
     mode: Event_Mode = Event_Mode.hybrid
     poster: str | None = None
