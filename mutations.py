@@ -3,7 +3,6 @@ import strawberry
 from fastapi.encoders import jsonable_encoder
 
 from db import eventsdb
-from bson import ObjectId
 
 # import all models and types
 from models import Event
@@ -65,7 +64,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.status.state = Event_State_Status.approved
 
     created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
-    created_event = Event.parse_obj(eventsdb.find_one({"_id": ObjectId(created_id)}))
+    created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
 
     return EventType.from_pydantic(created_event)
 
@@ -112,7 +111,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["budget"] = details.budget
 
     query = {
-        "_id": ObjectId(details.eventid),
+        "_id": details.eventid,
         "clubid": user["uid"] if (user is not None and user["role"] == "club") else details.clubid if (user["role"] == "cc") else None,
     }
 
@@ -122,7 +121,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if upd_ref.matched_count == 0:
         raise Exception("You do not have permission to access this resource.")
 
-    event_ref = eventsdb.find_one({"_id": ObjectId(details.eventid)})
+    event_ref = eventsdb.find_one({"_id": details.eventid})
     return EventType.from_pydantic(Event.parse_obj(event_ref))
 
 
@@ -152,7 +151,7 @@ def progressEvent(
 
     user = info.context.user
 
-    event_ref = eventsdb.find_one({"_id": ObjectId(eventid)})
+    event_ref = eventsdb.find_one({"_id": eventid})
     if event_ref is None or user is None:
         raise noaccess_error
     event_instance = Event.parse_obj(event_ref)
@@ -224,11 +223,11 @@ def progressEvent(
             "state": Event_State_Status.approved.value,
         }
 
-    upd_ref = eventsdb.update_one({"_id": ObjectId(eventid)}, {"$set": {"status": updation}})
+    upd_ref = eventsdb.update_one({"_id": eventid}, {"$set": {"status": updation}})
     if upd_ref.matched_count == 0:
         raise noaccess_error
 
-    event_ref = eventsdb.find_one({"_id": ObjectId(eventid)})
+    event_ref = eventsdb.find_one({"_id": eventid})
     return EventType.from_pydantic(Event.parse_obj(event_ref))
 
 
@@ -240,7 +239,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
     user = info.context.user
 
     query = {
-        "_id": ObjectId(eventid),
+        "_id": eventid,
     }
     if user["role"] not in ["cc"]:
         # if user is not an admin, they can only delete their own events
@@ -262,7 +261,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
             "Can not access event. Either it does not exist or user does not have perms."
         )
 
-    event_ref = eventsdb.find_one({"_id": ObjectId(eventid)})
+    event_ref = eventsdb.find_one({"_id": eventid})
     return EventType.from_pydantic(Event.parse_obj(event_ref))
 
 

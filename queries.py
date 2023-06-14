@@ -6,12 +6,11 @@ from datetime import datetime
 import dateutil.parser as dp
 
 from db import eventsdb
-from bson import ObjectId
 
 # import all models and types
 from models import Event
 from otypes import Info, EventType, RoomList, RoomListType
-from mtypes import Event_State_Status, Event_Location, PyObjectId
+from mtypes import Event_State_Status, Event_Location
 
 
 @strawberry.field
@@ -20,7 +19,7 @@ def event(eventid: str, info: Info) -> EventType:
     return event with given id if it is visible to the user
     """
     user = info.context.user
-    event = eventsdb.find_one({"_id": ObjectId(eventid)})
+    event = eventsdb.find_one({"_id": eventid})
 
     allevents = eventsdb.find({})
 
