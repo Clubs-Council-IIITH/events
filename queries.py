@@ -237,8 +237,8 @@ def availableRooms(timeslot: Tuple[datetime, datetime], info: Info) -> RoomListT
         start_time = dp.parse(approved_event["datetimeperiod"][0])
         end_time = dp.parse(approved_event["datetimeperiod"][1])
         if (
-            timeslot[1] > start_time
-            and timeslot[0] < end_time
+            timeslot[1] >= start_time
+            and timeslot[0] <= end_time
         ):
             free_rooms.difference_update(approved_event['location'])
 
