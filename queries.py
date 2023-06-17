@@ -105,7 +105,7 @@ def recentEvents(info: Info) -> List[EventType]:
         reverse=True,
     )
 
-    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events[:10]]
+    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events[:12]]
 
 
 @strawberry.field
