@@ -16,4 +16,4 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY --from=python_cache /venv /venv
 COPY . .
 RUN strawberry export-schema main > schema.graphql
-ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+ENTRYPOINT [ "./entrypoint.sh" ]
