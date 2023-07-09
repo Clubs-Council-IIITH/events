@@ -1,5 +1,6 @@
 import strawberry
 
+from pydantic import HttpUrl, parse_obj_as
 from fastapi.encoders import jsonable_encoder
 
 from db import eventsdb
@@ -8,6 +9,7 @@ from db import eventsdb
 from models import Event
 from otypes import Info, InputEventDetails, EventType, InputEditEventDetails
 from mtypes import (
+    BudgetType,
     Event_Mode,
     Event_Location,
     Audience,
@@ -27,8 +29,8 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         not user
         or not details.clubid
         or not (
-            (user["role"] == "club" and user["uid"] == details.clubid) or
-            (user["role"] == "cc") # allow CC to create events too
+            (user["role"] == "club" and user["uid"] == details.clubid)
+            or (user["role"] == "cc")  # allow CC to create events too
         )
     ):
         raise Exception("You do not have permission to access this resource.")
@@ -36,7 +38,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     event_instance = Event(
         name=details.name,
         clubid=details.clubid,
-        datetimeperiod=details.datetimeperiod,
+        datetimeperiod=tuple(details.datetimeperiod),
     )
     if details.mode is not None:
         event_instance.mode = Event_Mode(details.mode)
@@ -49,7 +51,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if details.audience is not None:
         event_instance.audience = [Audience(aud) for aud in details.audience]
     if details.link is not None:
-        event_instance.link = details.link
+        event_instance.link = parse_obj_as(HttpUrl, details.link)
     if details.equipment is not None:
         event_instance.equipment = details.equipment
     if details.additional is not None:
@@ -57,7 +59,14 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if details.population is not None:
         event_instance.population = details.population
     if details.budget is not None:
-        event_instance.budget = details.budget
+        event_instance.budget = list(
+            map(
+                lambda x: BudgetType(
+                    amount=x.amount, description=x.description, advance=x.advance
+                ),
+                details.budget,
+            )
+        )
 
     # if creator is CC, set state to approved
     if user["role"] == "cc":
@@ -80,7 +89,9 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     # if the update is done by CC, set state to approved
     # else set status to incomplete
     updates = {
-        "status.state": Event_State_Status.approved if user["role"] == "cc" else Event_State_Status.incomplete,
+        "status.state": Event_State_Status.approved
+        if user["role"] == "cc"
+        else Event_State_Status.incomplete,
     }
 
     if details.name is not None:
@@ -108,14 +119,25 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["population"] = details.population
     if details.budget is not None:
         updates["status.budget"] = False or user["role"] == "cc"
-        updates["budget"] = details.budget
+        updates["budget"] = list(
+            map(
+                lambda x: BudgetType(
+                    amount=x.amount, description=x.description, advance=x.advance
+                ),
+                details.budget,
+            )
+        )
 
     query = {
         "_id": details.eventid,
-        "clubid": user["uid"] if (user is not None and user["role"] == "club") else details.clubid if (user["role"] == "cc") else None,
+        "clubid": user["uid"]
+        if (user is not None and user["role"] == "club")
+        else details.clubid
+        if (user["role"] == "cc")
+        else None,
     }
 
-    updation = {"$set": updates}
+    updation = {"$set": jsonable_encoder(updates)}
 
     upd_ref = eventsdb.update_one(query, updation)
     if upd_ref.matched_count == 0:
@@ -162,7 +184,8 @@ def progressEvent(
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
         updation = {
-            "budget": event_instance.status.budget or sum([b.amount for b in event_instance.budget]) == 0,
+            "budget": event_instance.status.budget
+            or sum([b.amount for b in event_instance.budget]) == 0,
             "room": event_instance.status.room or len(event_instance.location) == 0,
             "state": Event_State_Status.pending_cc.value,
         }
@@ -171,7 +194,8 @@ def progressEvent(
         if user["role"] != "cc":
             raise noaccess_error
         updation = {
-            "budget": event_instance.status.budget or sum([b.amount for b in event_instance.budget]) == 0,
+            "budget": event_instance.status.budget
+            or sum([b.amount for b in event_instance.budget]) == 0,
             "room": event_instance.status.room or len(event_instance.location) == 0,
         }
         if cc_progress_budget is not None:
