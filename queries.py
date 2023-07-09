@@ -161,7 +161,7 @@ def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
         key=lambda event: event["datetimeperiod"][0],
         reverse=True,
     )
-    
+
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
 
 
@@ -185,6 +185,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
             requested_states |= {Event_State_Status.pending_room.value}
         if "club" == user["role"] and user["uid"] == clubid:
             requested_states |= {
+                Event_State_Status.incomplete.value,
                 Event_State_Status.pending_cc.value,
                 Event_State_Status.pending_budget.value,
                 Event_State_Status.pending_room.value,
@@ -235,11 +236,8 @@ def availableRooms(timeslot: Tuple[datetime, datetime], info: Info) -> RoomListT
     for approved_event in approved_events:
         start_time = dp.parse(approved_event["datetimeperiod"][0])
         end_time = dp.parse(approved_event["datetimeperiod"][1])
-        if (
-            timeslot[1] >= start_time
-            and timeslot[0] <= end_time
-        ):
-            free_rooms.difference_update(approved_event['location'])
+        if timeslot[1] >= start_time and timeslot[0] <= end_time:
+            free_rooms.difference_update(approved_event["location"])
 
     return RoomListType.from_pydantic(RoomList.parse_obj({"locations": free_rooms}))
 
