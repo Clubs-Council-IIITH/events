@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from typing import List, Tuple
 from datetime import datetime
 import dateutil.parser as dp
+import requests
 
 from db import eventsdb
 
@@ -11,6 +12,33 @@ from db import eventsdb
 from models import Event
 from otypes import Info, EventType, RoomList, RoomListType
 from mtypes import Event_State_Status, Event_Location
+
+def getClubs(cookies=None):
+    """
+    Function to call the all clubs query
+    """
+    try:
+        query = """
+                    query AllClubs {
+                        allClubs {
+                            cid
+                            name
+                        }
+                    }
+                """
+        if cookies:
+            request = requests.post(
+                "http://gateway/graphql",
+                json={"query": query},
+                cookies=cookies,
+            )
+        else:
+            request = requests.post(
+                "http://gateway/graphql", json={"query": query}
+            )
+        return request.json()["data"]["allClubs"]
+    except:
+        return []
 
 
 @strawberry.field
@@ -22,6 +50,11 @@ def event(eventid: str, info: Info) -> EventType:
     event = eventsdb.find_one({"_id": eventid})
 
     allevents = eventsdb.find({})
+
+    allclubs = getClubs(info.context.cookies)
+    list_allclubs = list()
+    for club in allclubs:
+        list_allclubs.append(club["cid"])
 
     if event is None or (
         event["status"]["state"]
@@ -35,7 +68,7 @@ def event(eventid: str, info: Info) -> EventType:
                 and (user["role"] != "club" or user["uid"] != event["clubid"])
             )
         )
-    ):
+    ) or event["clubid"] not in list_allclubs:
         raise Exception(
             "Can not access event. Either it does not exist or user does not have perms."
         )
@@ -61,6 +94,12 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
     searchspace = dict()
     if clubid is not None:
         searchspace["clubid"] = clubid
+    else:
+        allclubs = getClubs(info.context.cookies)
+        list_allclubs = list()
+        for club in allclubs:
+            list_allclubs.append(club["cid"])
+        searchspace["clubid"] = {"$in": list_allclubs}
     if restrictAccess:
         searchspace["status.state"] = {
             "$in": [
@@ -95,6 +134,12 @@ def recentEvents(info: Info) -> List[EventType]:
             Event_State_Status.approved.value,
         ]
     }
+
+    allclubs = getClubs(info.context.cookies)
+    list_allclubs = list()
+    for club in allclubs:
+        list_allclubs.append(club["cid"])
+    searchspace["clubid"] = {"$in": list_allclubs}
 
     events = eventsdb.find(searchspace)
 
@@ -152,6 +197,12 @@ def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
     }
     if clubid is not None:
         searchspace["clubid"] = clubid
+    else:
+        allclubs = getClubs(info.context.cookies)
+        list_allclubs = list()
+        for club in allclubs:
+            list_allclubs.append(club["cid"])
+        searchspace["clubid"] = {"$in": list_allclubs}
 
     events = eventsdb.find(searchspace)
 
