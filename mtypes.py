@@ -24,34 +24,23 @@ class Event_State_Status(StrEnum):
     # after the club fills all the details, they progress it
     pending_cc = auto()
     # cc chooses to progress the state status, the budget status and the room status
-    # if budget status is unapproved, the event is `pending_budget`, else skip to next
-    pending_budget = auto()
+    # if budget status is unapproved, the event is `pending_slc`, else skip to next
+    pending_slc = auto()
     # after budget is approved (through any track),
-    # if room status is unapproved, the event is `pending_room`, else skip to next
-    pending_room = auto()
+    # if room status is unapproved, the event is `pending_slo`, else skip to next
+    pending_slo = auto()
     # after room is approved (through any track), the event is `approved`
     approved = auto()
     # if the event is deleted, its state is `deleted`
     deleted = auto()
 
-
-# @strawberry.enum
-# class Event_Room_Status (Enum) :
-#     unapproved = auto()
-#     approved = auto()
-# @strawberry.enum
-# class Event_Budget_Status (Enum) :
-#     unapproved = auto()
-#     approved = auto()
-
-
 @strawberry.type
 class Event_Status:
     state: Event_State_Status = Event_State_Status.incomplete
-    # room: Event_Room_Status = Event_Room_Status.unapproved
-    # budget: Event_Budget_Status = Event_Budget_Status.unapproved
-    room: bool = False
-    budget: bool = False
+    # slo: Event_Room_Status = Event_Room_Status.unapproved
+    # slc: Event_Budget_Status = Event_Budget_Status.unapproved
+    slo: bool = False
+    slc: bool = False
 
     # def __init__ (self, state: Event_State_Status = None, room: Event_Room_Status = None, budget: Event_Budget_Status = None) :
     #     self.state: Event_State_Status = Event_State_Status.incomplete if state is None else state
@@ -60,12 +49,12 @@ class Event_Status:
     def __init__(
         self,
         state: Event_State_Status = Event_State_Status.incomplete,
-        room: bool = False,
-        budget: bool = False,
+        slo: bool = False,
+        slc: bool = False,
     ):
         self.state = state
-        self.room = room
-        self.budget = budget
+        self.slo = slo
+        self.slc = slc
 
 
 # Event Modes

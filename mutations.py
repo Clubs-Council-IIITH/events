@@ -71,6 +71,8 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     # if creator is CC, set state to approved
     if user["role"] == "cc":
         event_instance.status.state = Event_State_Status.approved
+        event_instance.status.slc = True
+        event_instance.status.slo = True
 
     created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
     created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
@@ -85,13 +87,23 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     return the event
     """
     user = info.context.user
+    event_ref = eventsdb.find_one({"_id": details.eventid})
+
+    if not event_ref:
+        raise Exception("Event does not exist.")
 
     # if the update is done by CC, set state to approved
     # else set status to incomplete
     updates = {
-        "status.state": Event_State_Status.approved
+        "status.state": event_ref.status.state
         if user["role"] == "cc"
         else Event_State_Status.incomplete,
+        "status.slc": event_ref.status.slc 
+        if user["role"] == "cc" 
+        else False,
+        "status.slo": event_ref.status.slo
+        if user["role"] == "cc"
+        else False,
     }
 
     if details.name is not None:
@@ -101,7 +113,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.mode is not None:
         updates["mode"] = Event_Mode(details.mode)
     if details.location is not None:
-        updates["status.room"] = False or user["role"] == "cc"
+        # updates["status.room"] = False or user["role"] == "cc"
         updates["location"] = [Event_Location(loc) for loc in details.location]
     if details.description is not None:
         updates["description"] = details.description
@@ -118,7 +130,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.population is not None:
         updates["population"] = details.population
     if details.budget is not None:
-        updates["status.budget"] = False or user["role"] == "cc"
+        # updates["status.budget"] = False or user["role"] == "cc"
         updates["budget"] = list(
             map(
                 lambda x: BudgetType(
@@ -151,8 +163,8 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
 def progressEvent(
     eventid: str,
     info: Info,
-    cc_progress_budget: bool | None = None,
-    cc_progress_room: bool | None = None,
+    cc_progress_slc: bool | None = None,
+    cc_progress_slo: bool | None = None,
 ) -> EventType:
     """
     progress the event state status for different users
@@ -161,9 +173,9 @@ def progressEvent(
     initially, the event is `incomplete`
     after the club fills all the details, they progress it
     cc chooses to progress the state status, the budget status and the room status
-    if budget status is unapproved, the event is `pending_budget`, else skip to next
+    if budget status is unapproved, the event is `pending_slc`, else skip to next
     after budget is approved (through any track),
-    if room status is unapproved, the event is `pending_room`, else skip to next
+    if room status is unapproved, the event is `pending_slo`, else skip to next
     after room is approved (through any track), the event is `approved`
     once the event is over, the club or cc can change the state to `completed`
     """
@@ -184,9 +196,9 @@ def progressEvent(
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
         updation = {
-            "budget": event_instance.status.budget,
+            "slc": event_instance.status.slc,
             # or sum([b.amount for b in event_instance.budget]) == 0,
-            "room": event_instance.status.room,
+            "slo": event_instance.status.slo,
             #   or len(event_instance.location) == 0,
             "state": Event_State_Status.pending_cc.value,
         }
@@ -195,46 +207,46 @@ def progressEvent(
         if user["role"] != "cc":
             raise noaccess_error
         updation = {
-            "budget": event_instance.status.budget,
+            "slc": event_instance.status.slc,
             # or sum([b.amount for b in event_instance.budget]) == 0,
-            "room": event_instance.status.room,
+            "slo": event_instance.status.slo,
             #   or len(event_instance.location) == 0,
         }
-        if cc_progress_budget is not None:
-            updation["budget"] = cc_progress_budget
-        if cc_progress_room is not None:
-            updation["room"] = cc_progress_room
+        if cc_progress_slc is not None:
+            updation["slc"] = cc_progress_slc
+        if cc_progress_slo is not None:
+            updation["slo"] = cc_progress_slo
 
-        if not updation["budget"]:
-            updation["state"] = Event_State_Status.pending_budget.value
-        elif not updation["room"]:
-            updation["state"] = Event_State_Status.pending_room.value
+        if not updation["slc"]:
+            updation["state"] = Event_State_Status.pending_slc.value
+        elif not updation["slo"]:
+            updation["state"] = Event_State_Status.pending_slo.value
         else:
             updation["state"] = Event_State_Status.approved.value
 
-    elif event_instance.status.state == Event_State_Status.pending_budget:
+    elif event_instance.status.state == Event_State_Status.pending_slc:
         if user["role"] != "slc":
             raise noaccess_error
-        assert event_instance.status.budget == False
+        assert event_instance.status.slc == False
         updation = {
-            "budget": True,
-            "room": event_instance.status.room,
+            "slc": True,
+            "slo": event_instance.status.slo,
             #   | len(event_instance.location) == 0,
         }
 
-        if not updation["room"]:
-            updation["state"] = Event_State_Status.pending_room.value
+        if not updation["slo"]:
+            updation["state"] = Event_State_Status.pending_slo.value
         else:
             updation["state"] = Event_State_Status.approved.value
 
-    elif event_instance.status.state == Event_State_Status.pending_room:
+    elif event_instance.status.state == Event_State_Status.pending_slo:
         if user["role"] != "slo":
             raise noaccess_error
-        assert event_instance.status.budget == True
-        assert event_instance.status.room == False
+        assert event_instance.status.slc == True
+        assert event_instance.status.slo == False
         updation = {
-            "budget": event_instance.status.budget,
-            "room": True,
+            "slc": event_instance.status.slc,
+            "slo": True,
             "state": Event_State_Status.approved.value,
         }
 
@@ -245,8 +257,8 @@ def progressEvent(
             raise noaccess_error
 
         updation = {
-            "budget": event_instance.status.budget,
-            "room": event_instance.status.room,
+            "slc": event_instance.status.slc,
+            "slo": event_instance.status.slo,
             "state": Event_State_Status.approved.value,
         }
 
@@ -276,8 +288,8 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         "$set": {
             "status": {
                 "state": Event_State_Status.deleted.value,
-                "budget": False,
-                "room": False,
+                "slc": False,
+                "slo": False,
             }
         }
     }

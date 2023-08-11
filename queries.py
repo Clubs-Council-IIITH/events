@@ -231,15 +231,15 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
         if "cc" == user["role"]:
             requested_states |= {Event_State_Status.pending_cc.value}
         if "slc" == user["role"]:
-            requested_states |= {Event_State_Status.pending_budget.value}
+            requested_states |= {Event_State_Status.pending_slc.value}
         if "slo" == user["role"]:
-            requested_states |= {Event_State_Status.pending_room.value}
+            requested_states |= {Event_State_Status.pending_slo.value}
         if "club" == user["role"] and user["uid"] == clubid:
             requested_states |= {
                 Event_State_Status.incomplete.value,
                 Event_State_Status.pending_cc.value,
-                Event_State_Status.pending_budget.value,
-                Event_State_Status.pending_room.value,
+                Event_State_Status.pending_slc.value,
+                Event_State_Status.pending_slo.value,
             }
     requested_states = list(requested_states)
 
