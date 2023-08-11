@@ -184,9 +184,10 @@ def progressEvent(
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
         updation = {
-            "budget": event_instance.status.budget
-            or sum([b.amount for b in event_instance.budget]) == 0,
-            "room": event_instance.status.room or len(event_instance.location) == 0,
+            "budget": event_instance.status.budget,
+            # or sum([b.amount for b in event_instance.budget]) == 0,
+            "room": event_instance.status.room,
+            #   or len(event_instance.location) == 0,
             "state": Event_State_Status.pending_cc.value,
         }
 
@@ -194,9 +195,10 @@ def progressEvent(
         if user["role"] != "cc":
             raise noaccess_error
         updation = {
-            "budget": event_instance.status.budget
-            or sum([b.amount for b in event_instance.budget]) == 0,
-            "room": event_instance.status.room or len(event_instance.location) == 0,
+            "budget": event_instance.status.budget,
+            # or sum([b.amount for b in event_instance.budget]) == 0,
+            "room": event_instance.status.room,
+            #   or len(event_instance.location) == 0,
         }
         if cc_progress_budget is not None:
             updation["budget"] = cc_progress_budget
@@ -216,7 +218,8 @@ def progressEvent(
         assert event_instance.status.budget == False
         updation = {
             "budget": True,
-            "room": event_instance.status.room | len(event_instance.location) == 0,
+            "room": event_instance.status.room,
+            #   | len(event_instance.location) == 0,
         }
 
         if not updation["room"]:
