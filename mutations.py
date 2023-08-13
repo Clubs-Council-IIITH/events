@@ -86,13 +86,13 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     """
     user = info.context.user
 
-    # if the update is done by CC, set state to approved
-    # else set status to incomplete
-    updates = {
-        "status.state": Event_State_Status.approved
-        if user["role"] == "cc"
-        else Event_State_Status.incomplete,
-    }
+    # # if the update is done by CC, set state to approved
+    # # else set status to incomplete
+    # updates = {
+    #     "status.state": Event_State_Status.approved
+    #     if user["role"] == "cc"
+    #     else Event_State_Status.incomplete,
+    # }
 
     if details.name is not None:
         updates["name"] = details.name
