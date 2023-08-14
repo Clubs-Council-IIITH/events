@@ -85,11 +85,14 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
     user = info.context.user
 
     restrictAccess = True
+    restrictCCAccess = True
     if user is not None:
         if user["role"] in {"cc", "slc", "slo"} or (
             user["role"] == "club" and user["uid"] == clubid
         ):
             restrictAccess = False
+            if not user["role"] in {"slc", "slo"}:
+                restrictCCAccess = False
 
     searchspace = dict()
     if clubid is not None:
@@ -104,6 +107,14 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
         searchspace["status.state"] = {
             "$in": [
                 Event_State_Status.approved.value,
+            ]
+        }
+    elif restrictCCAccess:
+        searchspace["status.state"] = {
+            "$in": [
+                Event_State_Status.approved.value,
+                Event_State_Status.pending_budget.value,
+                Event_State_Status.pending_room.value,
             ]
         }
 
