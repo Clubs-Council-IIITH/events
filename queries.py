@@ -234,6 +234,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
             requested_states |= {Event_State_Status.pending_budget.value}
         if "slo" == user["role"]:
             requested_states |= {Event_State_Status.pending_room.value}
+        # TODO: Send SLO events only when budget is approved
         if "club" == user["role"] and user["uid"] == clubid:
             requested_states |= {
                 Event_State_Status.incomplete.value,
