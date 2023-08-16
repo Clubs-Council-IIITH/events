@@ -71,6 +71,8 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     # if creator is CC, set state to approved
     if user["role"] == "cc":
         event_instance.status.state = Event_State_Status.approved
+        event_instance.status.budget = True
+        event_instance.status.room = True
 
     created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
     created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
@@ -85,14 +87,24 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     return the event
     """
     user = info.context.user
+    event_ref = eventsdb.find_one({"_id": details.eventid})
 
-    # # if the update is done by CC, set state to approved
-    # # else set status to incomplete
-    # updates = {
-    #     "status.state": Event_State_Status.approved
-    #     if user["role"] == "cc"
-    #     else Event_State_Status.incomplete,
-    # }
+    if not event_ref:
+        raise Exception("Event does not exist.")
+
+    # if the update is done by CC, set state to approved
+    # else set status to incomplete
+    updates = {
+        "status.state": event_ref.status.state
+        if user["role"] == "cc"
+        else Event_State_Status.incomplete,
+        "status.budget": event_ref.status.budget 
+        if user["role"] == "cc" 
+        else False,
+        "status.room": event_ref.status.room
+        if user["role"] == "cc"
+        else False,
+    }
 
     if details.name is not None:
         updates["name"] = details.name
@@ -101,7 +113,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.mode is not None:
         updates["mode"] = Event_Mode(details.mode)
     if details.location is not None:
-        updates["status.room"] = False or user["role"] == "cc"
+        # updates["status.room"] = False or user["role"] == "cc"
         updates["location"] = [Event_Location(loc) for loc in details.location]
     if details.description is not None:
         updates["description"] = details.description
@@ -118,7 +130,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.population is not None:
         updates["population"] = details.population
     if details.budget is not None:
-        updates["status.budget"] = False or user["role"] == "cc"
+        # updates["status.budget"] = False or user["role"] == "cc"
         updates["budget"] = list(
             map(
                 lambda x: BudgetType(
@@ -184,9 +196,10 @@ def progressEvent(
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
         updation = {
-            "budget": event_instance.status.budget
-            or sum([b.amount for b in event_instance.budget]) == 0,
-            "room": event_instance.status.room or len(event_instance.location) == 0,
+            "budget": False,
+            # or sum([b.amount for b in event_instance.budget]) == 0,
+            "room": False,
+            #   or len(event_instance.location) == 0,
             "state": Event_State_Status.pending_cc.value,
         }
 
@@ -194,9 +207,10 @@ def progressEvent(
         if user["role"] != "cc":
             raise noaccess_error
         updation = {
-            "budget": event_instance.status.budget
-            or sum([b.amount for b in event_instance.budget]) == 0,
-            "room": event_instance.status.room or len(event_instance.location) == 0,
+            "budget": event_instance.status.budget,
+            # or sum([b.amount for b in event_instance.budget]) == 0,
+            "room": event_instance.status.room,
+            #   or len(event_instance.location) == 0,
         }
         if cc_progress_budget is not None:
             updation["budget"] = cc_progress_budget
@@ -216,7 +230,8 @@ def progressEvent(
         assert event_instance.status.budget == False
         updation = {
             "budget": True,
-            "room": event_instance.status.room | len(event_instance.location) == 0,
+            "room": event_instance.status.room,
+            #   | len(event_instance.location) == 0,
         }
 
         if not updation["room"]:

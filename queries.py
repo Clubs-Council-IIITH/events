@@ -85,11 +85,14 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
     user = info.context.user
 
     restrictAccess = True
+    restrictCCAccess = True
     if user is not None:
         if user["role"] in {"cc", "slc", "slo"} or (
             user["role"] == "club" and user["uid"] == clubid
         ):
             restrictAccess = False
+            if not user["role"] in {"slc", "slo"}:
+                restrictCCAccess = False
 
     searchspace = dict()
     if clubid is not None:
@@ -104,6 +107,14 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
         searchspace["status.state"] = {
             "$in": [
                 Event_State_Status.approved.value,
+            ]
+        }
+    elif restrictCCAccess:
+        searchspace["status.state"] = {
+            "$in": [
+                Event_State_Status.approved.value,
+                Event_State_Status.pending_budget.value,
+                Event_State_Status.pending_room.value,
             ]
         }
 
@@ -227,6 +238,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     user = info.context.user
 
     requested_states = set()
+    searchspace = dict()
     if user is not None:
         if "cc" == user["role"]:
             requested_states |= {Event_State_Status.pending_cc.value}
@@ -234,6 +246,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
             requested_states |= {Event_State_Status.pending_budget.value}
         if "slo" == user["role"]:
             requested_states |= {Event_State_Status.pending_room.value}
+            searchspace["status.budget"] = True
         if "club" == user["role"] and user["uid"] == clubid:
             requested_states |= {
                 Event_State_Status.incomplete.value,
@@ -246,8 +259,8 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     if user is None or len(requested_states) == 0:
         raise Exception("You do not have permission to access this resource.")
 
-    searchspace = {
-        "status.state": {"$in": requested_states},
+    searchspace["status.state"] = {
+        "$in": requested_states,
     }
     if clubid is not None:
         searchspace["clubid"] = clubid
