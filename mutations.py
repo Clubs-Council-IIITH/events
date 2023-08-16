@@ -95,13 +95,13 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     # if the update is done by CC, set state to approved
     # else set status to incomplete
     updates = {
-        "status.state": event_ref.status.state
+        "status.state": event_ref["status"]["state"]
         if user["role"] == "cc"
         else Event_State_Status.incomplete,
-        "status.budget": event_ref.status.budget 
+        "status.budget": event_ref["status"]["budget"] 
         if user["role"] == "cc" 
         else False,
-        "status.room": event_ref.status.room
+        "status.room": event_ref["status"]["room"]
         if user["role"] == "cc"
         else False,
     }
