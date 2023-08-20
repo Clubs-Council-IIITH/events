@@ -105,6 +105,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         if user["role"] == "cc"
         else False,
     }
+    
 
     if details.name is not None:
         updates["name"] = details.name
