@@ -14,6 +14,7 @@ class Audience(StrEnum):
     pg = auto()
     stf = auto()
     fac = auto()
+    internal = auto()
 
 
 # Event States

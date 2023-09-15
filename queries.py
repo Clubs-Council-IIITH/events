@@ -109,6 +109,9 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
                 Event_State_Status.approved.value,
             ]
         }
+        searchspace["audience"] = {
+            "$nin": ["internal"]
+        }
     elif restrictCCAccess:
         searchspace["status.state"] = {
             "$in": [
@@ -144,6 +147,9 @@ def recentEvents(info: Info) -> List[EventType]:
         "$in": [
             Event_State_Status.approved.value,
         ]
+    }
+    searchspace["audience"] = {
+        "$nin": ["internal"]
     }
 
     allclubs = getClubs(info.context.cookies)
@@ -214,6 +220,10 @@ def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
         for club in allclubs:
             list_allclubs.append(club["cid"])
         searchspace["clubid"] = {"$in": list_allclubs}
+    
+    searchspace["audience"] = {
+        "$nin": ["internal"]
+    }
 
     events = eventsdb.find(searchspace)
 
