@@ -87,6 +87,13 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     return the event
     """
     user = info.context.user
+
+    if user is None:
+        raise Exception("Not Authenticated!")
+    
+    if (details.clubid != user["uid"] or user["role"] != "club") and user["role"] != "cc":
+        raise Exception("Not Authenticated to access this API")
+    
     event_ref = eventsdb.find_one({"_id": details.eventid})
 
     if not event_ref:
@@ -105,6 +112,9 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         if user["role"] == "cc"
         else False,
     }
+
+    if user["role"] == "club" and event_ref["status"]["state"] != Event_State_Status.incomplete:
+        raise Exception("Event has been already submitted for approval. Cannot edit now.")
     
 
     if details.name is not None:
@@ -277,6 +287,9 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
     change the state of the event to `deleted` if the user has permissions
     """
     user = info.context.user
+
+    if user is None or user["role"] not in ["club", "cc"]:
+        raise Exception("Not Authenticated!")
 
     query = {
         "_id": eventid,
