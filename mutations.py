@@ -102,28 +102,26 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     # if the update is done by CC, set state to approved
     # else set status to incomplete
     updates = {
-        "status.state": event_ref["status"]["state"]
-        if user["role"] == "cc"
-        else Event_State_Status.incomplete,
-        "status.budget": event_ref["status"]["budget"] 
-        if user["role"] == "cc" 
-        else False,
-        "status.room": event_ref["status"]["room"]
-        if user["role"] == "cc"
-        else False,
+        "status.state": event_ref["status"]["state"],
+        # if user["role"] == "cc"
+        # else Event_State_Status.incomplete,
+        "status.budget": event_ref["status"]["budget"],
+        # if user["role"] == "cc" 
+        # else False,
+        "status.room": event_ref["status"]["room"],
+        # if user["role"] == "cc"
+        # else False,
     }
 
-    if user["role"] == "club" and event_ref["status"]["state"] != Event_State_Status.incomplete:
-        raise Exception("Event has been already submitted for approval. Cannot edit now.")
-    
+    updatable = user["role"] == "cc" or (user["role"] == "club" and event_ref["status"]["state"] != Event_State_Status.incomplete)
 
-    if details.name is not None:
+    if details.name is not None and updatable:
         updates["name"] = details.name
-    if details.datetimeperiod is not None:
+    if details.datetimeperiod is not None and updatable:
         updates["datetimeperiod"] = details.datetimeperiod
-    if details.mode is not None:
+    if details.mode is not None and updatable:
         updates["mode"] = Event_Mode(details.mode)
-    if details.location is not None:
+    if details.location is not None and updatable:
         # updates["status.room"] = False or user["role"] == "cc"
         updates["location"] = [Event_Location(loc) for loc in details.location]
     if details.description is not None:
@@ -140,7 +138,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["additional"] = details.additional
     if details.population is not None:
         updates["population"] = details.population
-    if details.budget is not None:
+    if details.budget is not None and updatable:
         # updates["status.budget"] = False or user["role"] == "cc"
         updates["budget"] = list(
             map(
