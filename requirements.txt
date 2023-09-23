@@ -3,6 +3,7 @@ click==8.1.3
 dnspython==2.3.0
 email-validator>=1.1.1,<2.0.0
 fastapi==0.97.0
+fiscalyear==0.4.0
 graphql-core==3.2.3
 greenlet==2.0.2
 h11==0.14.0

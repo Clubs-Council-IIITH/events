@@ -13,32 +13,7 @@ from models import Event
 from otypes import Info, EventType, RoomList, RoomListType
 from mtypes import Event_State_Status, Event_Location
 
-def getClubs(cookies=None):
-    """
-    Function to call the all clubs query
-    """
-    try:
-        query = """
-                    query AllClubs {
-                        allClubs {
-                            cid
-                            name
-                        }
-                    }
-                """
-        if cookies:
-            request = requests.post(
-                "http://gateway/graphql",
-                json={"query": query},
-                cookies=cookies,
-            )
-        else:
-            request = requests.post(
-                "http://gateway/graphql", json={"query": query}
-            )
-        return request.json()["data"]["allClubs"]
-    except:
-        return []
+from utils import getClubs
 
 
 @strawberry.field
@@ -49,26 +24,28 @@ def event(eventid: str, info: Info) -> EventType:
     user = info.context.user
     event = eventsdb.find_one({"_id": eventid})
 
-    allevents = eventsdb.find({})
-
     allclubs = getClubs(info.context.cookies)
     list_allclubs = list()
     for club in allclubs:
         list_allclubs.append(club["cid"])
 
-    if event is None or (
-        event["status"]["state"]
-        not in {
-            Event_State_Status.approved.value,
-        }
-        and (
-            user is None
-            or (
-                user["role"] not in {"cc", "slc", "slo"}
-                and (user["role"] != "club" or user["uid"] != event["clubid"])
+    if (
+        event is None
+        or (
+            event["status"]["state"]
+            not in {
+                Event_State_Status.approved.value,
+            }
+            and (
+                user is None
+                or (
+                    user["role"] not in {"cc", "slc", "slo"}
+                    and (user["role"] != "club" or user["uid"] != event["clubid"])
+                )
             )
         )
-    ) or event["clubid"] not in list_allclubs:
+        or event["clubid"] not in list_allclubs
+    ):
         raise Exception(
             "Can not access event. Either it does not exist or user does not have perms."
         )
@@ -109,9 +86,7 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
                 Event_State_Status.approved.value,
             ]
         }
-        searchspace["audience"] = {
-            "$nin": ["internal"]
-        }
+        searchspace["audience"] = {"$nin": ["internal"]}
     elif restrictCCAccess:
         searchspace["status.state"] = {
             "$in": [
@@ -148,9 +123,7 @@ def recentEvents(info: Info) -> List[EventType]:
             Event_State_Status.approved.value,
         ]
     }
-    searchspace["audience"] = {
-        "$nin": ["internal"]
-    }
+    searchspace["audience"] = {"$nin": ["internal"]}
 
     allclubs = getClubs(info.context.cookies)
     list_allclubs = list()
@@ -220,10 +193,8 @@ def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
         for club in allclubs:
             list_allclubs.append(club["cid"])
         searchspace["clubid"] = {"$in": list_allclubs}
-    
-    searchspace["audience"] = {
-        "$nin": ["internal"]
-    }
+
+    searchspace["audience"] = {"$nin": ["internal"]}
 
     events = eventsdb.find(searchspace)
 

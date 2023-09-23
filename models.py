@@ -19,14 +19,13 @@ from mtypes import (
 
 class Event(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    code: str | None
     name: event_name_type
     clubid: str
     datetimeperiod: Tuple[datetime, datetime]
     status: Event_Status = Event_Status()
     location: List[Event_Location] = []
-    description: event_desc_type | None = (
-        "No description available."
-    )
+    description: event_desc_type | None = "No description available."
     mode: Event_Mode = Event_Mode.hybrid
     poster: str | None = None
     audience: List[Audience] = []

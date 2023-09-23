@@ -16,6 +16,8 @@ from mtypes import (
     Event_State_Status,
 )
 
+from utils import getEventCode
+
 
 @strawberry.mutation
 def createEvent(details: InputEventDetails, info: Info) -> EventType:
@@ -74,6 +76,9 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.status.budget = True
         event_instance.status.room = True
 
+    # set event code
+    event_instance.code = getEventCode(details.clubid)
+
     created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
     created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
 
@@ -90,10 +95,12 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
 
     if user is None:
         raise Exception("Not Authenticated!")
-    
-    if (details.clubid != user["uid"] or user["role"] != "club") and user["role"] != "cc":
+
+    if (details.clubid != user["uid"] or user["role"] != "club") and user[
+        "role"
+    ] != "cc":
         raise Exception("Not Authenticated to access this API")
-    
+
     event_ref = eventsdb.find_one({"_id": details.eventid})
 
     if not event_ref:
@@ -106,14 +113,17 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         # if user["role"] == "cc"
         # else Event_State_Status.incomplete,
         "status.budget": event_ref["status"]["budget"],
-        # if user["role"] == "cc" 
+        # if user["role"] == "cc"
         # else False,
         "status.room": event_ref["status"]["room"],
         # if user["role"] == "cc"
         # else False,
     }
 
-    updatable = user["role"] == "cc" or (user["role"] == "club" and event_ref["status"]["state"] != Event_State_Status.incomplete)
+    updatable = user["role"] == "cc" or (
+        user["role"] == "club"
+        and event_ref["status"]["state"] != Event_State_Status.incomplete
+    )
 
     if details.name is not None and updatable:
         updates["name"] = details.name
