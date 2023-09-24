@@ -70,7 +70,6 @@ def getEventCode(clubid, event=None):
                 "_id": {"$ne": event["_id"]},
                 "clubid": clubid,
                 "datetimeperiod": {
-                    "$gte": (datetime.now() - timedelta(days=2 * 365)).isoformat(),
                     "$lte": event["datetimeperiod"][0],
                 },
             }
@@ -78,14 +77,26 @@ def getEventCode(clubid, event=None):
 
     # get count of events in the current fiscal year
     event_count = 0
-    for event in club_events:
+    for c_event in club_events:
         if (
             fiscalyear.FiscalDateTime.fromisoformat(
-                event["datetimeperiod"][0].split("+")[0]  # remove timezone because UTC
+                c_event["datetimeperiod"][0].split("+")[
+                    0
+                ]  # remove timezone because UTC
             ).fiscal_year
             == year
         ):
-            event_count += 1
+            if event:
+                if fiscalyear.FiscalDateTime.fromisoformat(
+                    c_event["datetimeperiod"][1].split("+")[
+                        0
+                    ]  # remove timezone because UTC
+                ) < fiscalyear.FiscalDateTime.fromisoformat(
+                    event["datetimeperiod"][1].split("+")[
+                        0
+                    ]  # remove timezone because UTC
+                ):
+                    event_count += 1
     event_count += 1
 
     if club_code is None:
