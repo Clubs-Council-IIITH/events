@@ -54,6 +54,20 @@ def event(eventid: str, info: Info) -> EventType:
 
 
 @strawberry.field
+def eventid(code: str, info: Info) -> str:
+    """
+    return eventid given event code
+    """
+
+    event = eventsdb.find_one({"code": code})
+
+    if event is None:
+        raise Exception("Event with given code does not exist.")
+
+    return event["_id"]
+
+
+@strawberry.field
 def events(clubid: str | None, info: Info) -> List[EventType]:
     """
     return all events visible to the user
@@ -291,6 +305,7 @@ def availableRooms(timeslot: Tuple[datetime, datetime], info: Info) -> RoomListT
 queries = [
     event,
     events,
+    eventid,
     recentEvents,
     incompleteEvents,
     approvedEvents,
