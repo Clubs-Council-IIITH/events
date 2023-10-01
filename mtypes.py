@@ -129,7 +129,6 @@ class BudgetType:
     description: str | None = None
     advance: bool = False
 
-
 # for handling mongo ObjectIds
 class PyObjectId(ObjectId):
     @classmethod

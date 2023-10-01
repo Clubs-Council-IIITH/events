@@ -5,7 +5,37 @@ from datetime import datetime, timedelta
 from db import eventsdb
 
 # start month of financial year
-fiscalyear.START_MONTH = 7
+fiscalyear.START_MONTH = 4
+
+def getMember(cid, uid, cookies=None):
+    """
+    Function to call the member query
+    """
+    try:
+        query = """
+                    query Member {
+                        member {
+                            _id
+                            cid
+                            uid
+                            poc
+                        }
+                    }
+                """
+        variables = {"memberInput": {"cid": cid, "uid": uid, "rid": None}}
+        if cookies:
+            request = requests.post(
+                "http://gateway/graphql",
+                json={"query": query, "variables": variables},
+                cookies=cookies,
+            )
+        else:
+            request = requests.post(
+                "http://gateway/graphql", json={"query": query, "variables": variables}
+            )
+        return request.json()["data"]["member"]
+    except:
+        return None
 
 
 def getClubs(cookies=None):

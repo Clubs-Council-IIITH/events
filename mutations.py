@@ -16,7 +16,7 @@ from mtypes import (
     Event_State_Status,
 )
 
-from utils import getEventCode
+from utils import getEventCode, getMember
 
 
 @strawberry.mutation
@@ -41,6 +41,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         name=details.name,
         clubid=details.clubid,
         datetimeperiod=tuple(details.datetimeperiod),
+        poc = details.poc,
     )
     if details.mode is not None:
         event_instance.mode = Event_Mode(details.mode)
@@ -69,6 +70,10 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
                 details.budget,
             )
         )
+    
+    # Check POC Details Exist or not
+    if not getMember(details.clubid, details.poc, cookies=info.context.cookies):
+        raise Exception("Member Details for POC does not exist")
 
     # if creator is CC, set state to approved
     if user["role"] == "cc":
@@ -134,6 +139,11 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.location is not None and updatable:
         # updates["status.room"] = False or user["role"] == "cc"
         updates["location"] = [Event_Location(loc) for loc in details.location]
+    if details.poc is not None:
+        updates["poc"] = details.poc
+        # Check POC Details Exist or not
+        if not getMember(details.clubid, details.poc, cookies=info.context.cookies):
+            raise Exception("Member Details for POC does not exist")
     if details.description is not None:
         updates["description"] = details.description
     if details.poster is not None:
