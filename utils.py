@@ -1,5 +1,8 @@
+import os
 import requests
 import fiscalyear
+
+from typing import List
 from datetime import datetime, timedelta
 
 from db import eventsdb
@@ -9,6 +12,7 @@ FISCAL_START_MONTH = 4
 
 # fiscalyear config
 fiscalyear.START_MONTH = FISCAL_START_MONTH
+
 
 def getMember(cid, uid, cookies=None):
     """
@@ -77,6 +81,15 @@ def getClubCode(clubid: str) -> str | None:
     return None
 
 
+# get club name from club id
+def getClubName(clubid: str) -> str | None:
+    allclubs = getClubs()
+    for club in allclubs:
+        if club["cid"] == clubid:
+            return club["name"]
+    return None
+
+
 # generate event code based on time and club
 def getEventCode(clubid):
     club_code = getClubCode(clubid)
@@ -106,3 +119,49 @@ def getEventCode(clubid):
         raise ValueError("Invalid clubid")
 
     return f"{club_code}{year}{event_count:03d}"  # format: CODE20XX00Y
+
+
+# get link to event (based on code)
+def getEventLink(code) -> str:
+    host = os.environ.get("HOST", "http://localhost")
+    return f"{host}/manage/events/code/{code}"
+
+
+# get email IDs of all members belonging to a role
+def getRoleEmails(role: str) -> List[str]:
+    try:
+        query = """
+            query Query($role: String!) {
+              usersByRole(role: $role) {
+                uid
+              }
+            }
+        """
+        variables = {"role": role}
+        request = requests.post(
+            "http://gateway/graphql", json={"query": query, "variables": variables}
+        )
+
+        # extract UIDs
+        uids = list(map(lambda o: o["uid"], request.json()["data"]["usersByRole"]))
+
+        # get emails of each UID
+        emails = []
+        for uid in uids:
+            query = """
+                query UserProfile($userInput: UserInput) {
+                  userProfile(userInput: $userInput) {
+                    email
+                  }
+                }
+            """
+            variables = {"userInput": {"uid": uid}}
+            request = requests.post(
+                "http://gateway/graphql", json={"query": query, "variables": variables}
+            )
+            emails.append(request.json()["data"]["userProfile"]["email"])
+
+        return emails
+
+    except:
+        return []

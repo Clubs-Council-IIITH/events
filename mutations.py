@@ -16,7 +16,8 @@ from mtypes import (
     Event_State_Status,
 )
 
-from utils import getEventCode, getMember
+from mailing import PROGRESS_EVENT_SUBJECT, PROGRESS_EVENT_BODY, triggerMail
+from utils import getClubName, getEventCode, getEventLink, getMember, getRoleEmails
 
 
 @strawberry.mutation
@@ -41,7 +42,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         name=details.name,
         clubid=details.clubid,
         datetimeperiod=tuple(details.datetimeperiod),
-        poc = details.poc,
+        poc=details.poc,
     )
     if details.mode is not None:
         event_instance.mode = Event_Mode(details.mode)
@@ -70,7 +71,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
                 details.budget,
             )
         )
-    
+
     # Check POC Details Exist or not
     if not getMember(details.clubid, details.poc, cookies=info.context.cookies):
         raise Exception("Member Details for POC does not exist")
@@ -296,7 +297,42 @@ def progressEvent(
         raise noaccess_error
 
     event_ref = eventsdb.find_one({"_id": eventid})
-    return EventType.from_pydantic(Event.parse_obj(event_ref))
+    event = Event.parse_obj(event_ref)
+
+    # trigger mail notification
+    mail_uid = user["uid"]
+    mail_club = getClubName(event.clubid)
+    mail_event = event.name
+    mail_eventlink = getEventLink(event.code)
+
+    mail_subject = PROGRESS_EVENT_SUBJECT.safe_substitute(
+        club=mail_club,
+        event=mail_event,
+    )
+    mail_body = PROGRESS_EVENT_BODY.safe_substitute(
+        club=mail_club,
+        event=mail_event,
+        eventlink=mail_eventlink,
+        uid=mail_uid,
+    )
+    mail_to = []
+    if event.status.state == Event_State_Status.pending_cc:
+        mail_to = getRoleEmails("cc")
+    if event.status.state == Event_State_Status.pending_budget:
+        mail_to = getRoleEmails("slc")
+    if event.status.state == Event_State_Status.pending_room:
+        mail_to = getRoleEmails("slo")
+
+    if len(mail_to):
+        triggerMail(
+            mail_uid,
+            mail_subject,
+            mail_body,
+            toRecipients=mail_to,
+            cookies=info.context.cookies,
+        )
+
+    return EventType.from_pydantic(event)
 
 
 @strawberry.mutation
