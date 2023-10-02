@@ -20,15 +20,15 @@ def getMember(cid, uid, cookies=None):
     """
     try:
         query = """
-                    query Member {
-                        member {
-                            _id
-                            cid
-                            uid
-                            poc
-                        }
-                    }
-                """
+            query Member($memberInput: SimpleMemberInput!) {
+              member(memberInput: $memberInput) {
+                _id
+                cid
+                poc
+                uid
+              }
+            }
+        """
         variables = {"memberInput": {"cid": cid, "uid": uid, "rid": None}}
         if cookies:
             request = requests.post(
@@ -41,6 +41,7 @@ def getMember(cid, uid, cookies=None):
                 "http://gateway/graphql", json={"query": query, "variables": variables}
             )
         return request.json()["data"]["member"]
+
     except:
         return None
 
