@@ -5,7 +5,10 @@ from datetime import datetime, timedelta
 from db import eventsdb
 
 # start month of financial year
-fiscalyear.START_MONTH = 7
+FISCAL_START_MONTH = 7
+
+# fiscalyear config
+fiscalyear.START_MONTH = FISCAL_START_MONTH
 
 
 def getClubs(cookies=None):
@@ -45,37 +48,18 @@ def getClubCode(clubid: str) -> str | None:
 
 
 # generate event code based on time and club
-def getEventCode(clubid, event=None):
+def getEventCode(clubid):
     club_code = getClubCode(clubid)
-    if event:
-        year = fiscalyear.FiscalDateTime.fromisoformat(
-            event["datetimeperiod"][0].split("+")[0]  # remove timezone because UTC
-        ).fiscal_year
-    else:
-        year = fiscalyear.FiscalYear.current().fiscal_year
+    year = fiscalyear.FiscalYear.current().fiscal_year
+    club_events = eventsdb.find(
+        {
+            "clubid": clubid,
+            "datetimeperiod": {
+                "$gte": (datetime.now() - timedelta(days=2 * 365)).isoformat()
+            },
+        }
+    )
 
-    # fetch all events of the club from the last 2 years
-    if not event:
-        club_events = eventsdb.find(
-            {
-                "clubid": clubid,
-                "datetimeperiod": {
-                    "$gte": (datetime.now() - timedelta(days=2 * 365)).isoformat()
-                },
-            }
-        )
-    else:
-        club_events = eventsdb.find(
-            {
-                "_id": {"$ne": event["_id"]},
-                "clubid": clubid,
-                "datetimeperiod": {
-                    "$lte": event["datetimeperiod"][0],
-                },
-            }
-        )
-
-    # get count of events in the current fiscal year
     event_count = 0
     for c_event in club_events:
         if (
@@ -86,18 +70,7 @@ def getEventCode(clubid, event=None):
             ).fiscal_year
             == year
         ):
-            if event:
-                if fiscalyear.FiscalDateTime.fromisoformat(
-                    c_event["datetimeperiod"][1].split("+")[
-                        0
-                    ]  # remove timezone because UTC
-                ) < fiscalyear.FiscalDateTime.fromisoformat(
-                    event["datetimeperiod"][1].split("+")[
-                        0
-                    ]  # remove timezone because UTC
-                ):
-                    event_count += 1
-    event_count += 1
+            event_count += 1
 
     if club_code is None:
         raise ValueError("Invalid clubid")
