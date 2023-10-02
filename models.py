@@ -34,6 +34,7 @@ class Event(BaseModel):
     additional: event_othr_type | None = None
     population: event_popu_type | None = None
     budget: List[BudgetType] = []
+    poc: str | None = None
 
     class Config:
         allow_population_by_field_name = True

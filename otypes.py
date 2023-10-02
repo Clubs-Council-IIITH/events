@@ -75,6 +75,7 @@ class InputEventDetails:
     additional: str | None = None
     population: int | None = None
     budget: List[BudgetInput] | None = None
+    poc: str
 
 
 @strawberry.input()
@@ -93,3 +94,4 @@ class InputEditEventDetails:
     additional: str | None = None
     population: int | None = None
     budget: List[BudgetInput] | None = None
+    poc: str | None = None
