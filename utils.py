@@ -83,13 +83,17 @@ def getClubCode(clubid: str) -> str | None:
 
 
 # get club name from club id
-def getClubName(clubid: str) -> str | None:
+def getClubNameEmail(clubid: str, email = False, name = True) -> str | None:
     allclubs = getClubs()
     for club in allclubs:
         if club["cid"] == clubid:
-            return club["name"]
+            if email and name:
+                return club["name"], club["email"]
+            elif email:
+                return club["email"]
+            else:
+                return club["name"]
     return None
-
 
 # generate event code based on time and club
 def getEventCode(clubid):

@@ -16,8 +16,20 @@ from mtypes import (
     Event_State_Status,
 )
 
-from mailing import PROGRESS_EVENT_SUBJECT, PROGRESS_EVENT_BODY, triggerMail
-from utils import getClubName, getEventCode, getEventLink, getMember, getRoleEmails
+from mailing import (
+    PROGRESS_EVENT_SUBJECT,
+    PROGRESS_EVENT_BODY,
+    APPROVED_EVENT_SUBJECT,
+    APPROVED_EVENT_BODY,
+    triggerMail,
+)
+from utils import (
+    getClubNameEmail,
+    getEventCode,
+    getEventLink,
+    getMember,
+    getRoleEmails,
+)
 
 
 @strawberry.mutation
@@ -301,16 +313,19 @@ def progressEvent(
 
     # trigger mail notification
     mail_uid = user["uid"]
-    mail_club = getClubName(event.clubid)
+    mail_club= getClubNameEmail(event.clubid, email=True)
     mail_event = event.name
     mail_eventlink = getEventLink(event.code)
 
+    if mail_club is None:
+        raise Exception("Club does not exist.")
+
     mail_subject = PROGRESS_EVENT_SUBJECT.safe_substitute(
-        club=mail_club,
+        club=mail_club[0],
         event=mail_event,
     )
     mail_body = PROGRESS_EVENT_BODY.safe_substitute(
-        club=mail_club,
+        club=mail_club[0],
         event=mail_event,
         eventlink=mail_eventlink,
         uid=mail_uid,
@@ -322,6 +337,16 @@ def progressEvent(
         mail_to = getRoleEmails("slc")
     if event.status.state == Event_State_Status.pending_room:
         mail_to = getRoleEmails("slo")
+    if event.status.state == Event_State_Status.approved:
+        # mail to the club email
+        mail_to = [mail_club[1],]
+        mail_subject = APPROVED_EVENT_SUBJECT.safe_substitute(
+            event=mail_event,
+        )
+        mail_body = APPROVED_EVENT_BODY.safe_substitute(
+            event=mail_event,
+            eventlink=mail_eventlink,
+        )
 
     if len(mail_to):
         triggerMail(

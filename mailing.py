@@ -21,6 +21,23 @@ This is an automated email sent on behalf of $uid. Please do not reply to this e
 """
 )
 
+APPROVED_EVENT_SUBJECT = Template(
+    """
+[Events] Your event, $event, has been approved!
+"""
+)
+
+APPROVED_EVENT_BODY = Template(
+    """
+Your event, $event, has been approved.
+
+To view more details, visit the link below:
+$eventlink
+
+This is an automated email. Please do not reply to this email.
+"""
+)
+
 
 # API call to send mail notification
 def triggerMail(
