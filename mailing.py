@@ -4,7 +4,7 @@ from string import Template
 # email templates
 PROGRESS_EVENT_SUBJECT = Template(
     """ 
-[Events] Approval request from $club
+[Events] Approval request from $event
 """
 )
 
@@ -17,7 +17,7 @@ $eventlink
 
 
 
-This is an automated email sent on behalf of $uid. Please do not reply to this email.
+This is an automated email sent from the Clubs Council Website. Please do not reply to this email.
 """
 )
 
@@ -34,7 +34,8 @@ Your event, $event, has been approved.
 To view more details, visit the link below:
 $eventlink
 
-This is an automated email. Please do not reply to this email.
+
+This is an automated email sent from the Clubs Council Website. Please do not reply to this email.
 """
 )
 

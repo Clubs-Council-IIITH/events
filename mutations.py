@@ -321,14 +321,13 @@ def progressEvent(
         raise Exception("Club does not exist.")
 
     mail_subject = PROGRESS_EVENT_SUBJECT.safe_substitute(
-        club=mail_club[0],
         event=mail_event,
     )
     mail_body = PROGRESS_EVENT_BODY.safe_substitute(
         club=mail_club[0],
         event=mail_event,
         eventlink=mail_eventlink,
-        uid=mail_uid,
+        # uid=mail_uid,
     )
     mail_to = []
     if event.status.state == Event_State_Status.pending_cc:
