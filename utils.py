@@ -57,6 +57,7 @@ def getClubs(cookies=None):
                             cid
                             name
                             code
+                            email
                         }
                     }
                 """
@@ -83,7 +84,9 @@ def getClubCode(clubid: str) -> str | None:
 
 
 # get club name from club id
-def getClubNameEmail(clubid: str, email = False, name = True) -> str | None:
+def getClubNameEmail(
+    clubid: str, email=False, name=True
+) -> str | tuple[str, str] | None:
     allclubs = getClubs()
     for club in allclubs:
         if club["cid"] == clubid:
@@ -95,8 +98,9 @@ def getClubNameEmail(clubid: str, email = False, name = True) -> str | None:
                 return club["name"]
     return None
 
+
 # generate event code based on time and club
-def getEventCode(clubid):
+def getEventCode(clubid) -> str:
     club_code = getClubCode(clubid)
     year = fiscalyear.FiscalYear.current().fiscal_year
     club_events = eventsdb.find(
