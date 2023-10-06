@@ -273,7 +273,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
 
 
 @strawberry.field
-def availableRooms(timeslot: Tuple[datetime, datetime], info: Info) -> RoomListType:
+def availableRooms(timeslot: Tuple[datetime, datetime], eventid: str | None, info: Info) -> RoomListType:
     """
     return a list of all rooms that are available in the given timeslot
     NOTE: this is a public query, accessible to all.
@@ -297,6 +297,11 @@ def availableRooms(timeslot: Tuple[datetime, datetime], info: Info) -> RoomListT
         end_time = dp.parse(approved_event["datetimeperiod"][1])
         if timeslot[1] >= start_time and timeslot[0] <= end_time:
             free_rooms.difference_update(approved_event["location"])
+    
+    if eventid is not None:
+        event = eventsdb.find_one({"_id": eventid})
+        if event is not None:
+            free_rooms.update(event["location"])
 
     return RoomListType.from_pydantic(RoomList.parse_obj({"locations": free_rooms}))
 
