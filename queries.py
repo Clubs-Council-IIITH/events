@@ -145,14 +145,19 @@ def recentEvents(info: Info) -> List[EventType]:
         list_allclubs.append(club["cid"])
     searchspace["clubid"] = {"$in": list_allclubs}
 
-    events = eventsdb.find(searchspace)
+    current_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    upcoming_events_query = {
+        **searchspace,
+        "datetimeperiod.0": {"$gte": current_datetime}
+    }
+    past_events_query = {
+        **searchspace,
+        "datetimeperiod.0": {"$lt": current_datetime}
+    }
 
-    # sort events in descending order of time
-    events = sorted(
-        events,
-        key=lambda event: event["datetimeperiod"][0],
-        reverse=True,
-    )
+    upcoming_events = list(eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1))
+    past_events = list(eventsdb.find(past_events_query).sort("datetimeperiod.0", -1))
+    events = upcoming_events + past_events
 
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events[:12]]
 
