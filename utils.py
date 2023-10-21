@@ -119,9 +119,10 @@ def getEventCode(clubid, starttime) -> str:
         }
     )
 
-    event_count = len(list(club_events))
+    event_count = len(list(club_events)) + 1
+    code_year = str(year.fiscal_year - 1)[-2:] + str(year.fiscal_year)[-2:]
     
-    return f"{club_code}{year.fiscal_year}{event_count:03d}"  # format: CODE20XX00Y
+    return f"{club_code}{code_year}{event_count:03d}"  # format: CODE20XX00Y
 
 # get link to event (based on code)
 def getEventLink(code) -> str:

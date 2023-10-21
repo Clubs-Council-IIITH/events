@@ -17,14 +17,17 @@ def filter_set_by_prefix(input_set, prefix):
     return {item for item in input_set if item.startswith(prefix)}
 
 if __name__ == "__main__":
-    events = eventsdb.find()
+    events = eventsdb.find().sort("datetimeperiod.0", 1)
     codes = set()
     for event in events:
         idx = 1
         club_code = getClubCode(event["clubid"])
+        
         year = fiscalyear.FiscalDateTime.fromisoformat(
             event["datetimeperiod"][0].split("+")[0]
         ).fiscal_year
+        year = str(year - 1)[-2:] + str(year)[-2:]
+
         filtered_codes = filter_set_by_prefix(codes, f"{club_code}{year}")
         idx = len(filtered_codes) + 1
         code = f"{club_code}{year}{idx:03d}"
