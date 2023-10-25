@@ -1,7 +1,7 @@
 from bson import ObjectId
 from datetime import datetime
 from typing import Tuple, List
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import ConfigDict, BaseModel, Field, HttpUrl
 
 from mtypes import (
     Audience,
@@ -19,7 +19,7 @@ from mtypes import (
 
 class Event(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    code: str | None
+    code: str | None = None
     name: event_name_type
     clubid: str
     datetimeperiod: Tuple[datetime, datetime]
@@ -35,8 +35,7 @@ class Event(BaseModel):
     population: event_popu_type | None = None
     budget: List[BudgetType] = []
     poc: str | None = None
-
-    class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+    
+    # TODO[pydantic]: The following keys were removed: `json_encoders`.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
+    model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True, json_encoders={ObjectId: str})

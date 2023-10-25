@@ -1,7 +1,9 @@
 import strawberry
 from bson import ObjectId
 from enum import StrEnum, auto
-from pydantic import constr, conint
+from pydantic import Field, StringConstraints
+from pydantic_core import core_schema
+from typing_extensions import Annotated, Any
 
 
 # Audience of Events
@@ -117,10 +119,10 @@ class Event_Location(StrEnum):
     other = auto()
 
 
-event_name_type = constr(min_length=1, max_length=100)
-event_desc_type = constr(max_length=5000)
-event_popu_type = conint(ge=0)
-event_othr_type = constr(max_length=1000)
+event_name_type = Annotated[str, StringConstraints(min_length=1, max_length=100)]
+event_desc_type = Annotated[str, StringConstraints(max_length=5000)]
+event_popu_type = Annotated[int, Field(ge=0)]
+event_othr_type = Annotated[str, StringConstraints(max_length=1000)]
 
 
 @strawberry.type
@@ -132,8 +134,15 @@ class BudgetType:
 # for handling mongo ObjectIds
 class PyObjectId(ObjectId):
     @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    def __get_pydantic_core_schema__(cls, source_type: Any, handler):
+        return core_schema.union_schema(
+            [
+                # check if it's an instance first before doing any further work
+                core_schema.is_instance_schema(ObjectId),
+                core_schema.no_info_plain_validator_function(cls.validate),
+            ],
+            serialization=core_schema.to_string_ser_schema(),
+        )
 
     @classmethod
     def validate(cls, v):
@@ -142,5 +151,5 @@ class PyObjectId(ObjectId):
         return ObjectId(v)
 
     @classmethod
-    def __modify_schema__(cls, field_schema):
+    def __get_pydantic_json_schema__(cls, field_schema):
         field_schema.update(type="string")
