@@ -95,7 +95,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.status.room = True
 
     # set event code
-    event_instance.code = getEventCode(details.clubid)
+    event_instance.code = getEventCode(details.clubid, details.datetimeperiod[0])
 
     created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
     created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))

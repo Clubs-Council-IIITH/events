@@ -100,35 +100,29 @@ def getClubNameEmail(
 
 
 # generate event code based on time and club
-def getEventCode(clubid) -> str:
+def getEventCode(clubid, starttime) -> str:
     club_code = getClubCode(clubid)
-    year = fiscalyear.FiscalYear.current().fiscal_year
+    if club_code is None:
+        raise ValueError("Invalid clubid")
+    
+    year = fiscalyear.FiscalYear(fiscalyear.FiscalDateTime.fromisoformat(str(starttime).split("+")[0]).fiscal_year)
+    start = year.start
+    end = year.end
+
     club_events = eventsdb.find(
         {
             "clubid": clubid,
             "datetimeperiod": {
-                "$gte": (datetime.now() - timedelta(days=2 * 365)).isoformat()
+                "$gte": start.isoformat(),
+                "$lte": end.isoformat()
             },
         }
     )
 
-    event_count = 0
-    for c_event in club_events:
-        if (
-            fiscalyear.FiscalDateTime.fromisoformat(
-                c_event["datetimeperiod"][0].split("+")[
-                    0
-                ]  # remove timezone because UTC
-            ).fiscal_year
-            == year
-        ):
-            event_count += 1
-
-    if club_code is None:
-        raise ValueError("Invalid clubid")
-
-    return f"{club_code}{year}{event_count:03d}"  # format: CODE20XX00Y
-
+    event_count = len(list(club_events)) + 1
+    code_year = str(year.fiscal_year - 1)[-2:] + str(year.fiscal_year)[-2:]
+    
+    return f"{club_code}{code_year}{event_count:03d}"  # format: CODE20XX00Y
 
 # get link to event (based on code)
 def getEventLink(code) -> str:
