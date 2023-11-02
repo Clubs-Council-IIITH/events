@@ -68,7 +68,7 @@ def eventid(code: str, info: Info) -> str:
 
 
 @strawberry.field
-def events(clubid: str | None, info: Info) -> List[EventType]:
+def events(clubid: str | None, info: Info,) -> List[EventType]:
     """
     return all events visible to the user
     if clubid is specified, then return events of that club only
@@ -121,6 +121,57 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
 
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
 
+@strawberry.field
+def paginatedEvents(clubid: str | None,
+        info: Info,
+        skip: int = 0,
+        limit: int = 20) -> List[EventType]:
+    """
+    return all events visible to the user
+    if clubid is specified, then return events of that club only
+    """
+    user = info.context.user
+
+    restrictAccess = True
+    restrictCCAccess = True
+    if user is not None:
+        if user["role"] in {"cc", "slc", "slo"} or (
+            user["role"] == "club" and user["uid"] == clubid
+        ):
+            restrictAccess = False
+            if not user["role"] in {"slc", "slo"}:
+                restrictCCAccess = False
+
+    searchspace = dict()
+    if clubid is not None:
+        searchspace["clubid"] = clubid
+    else:
+        allclubs = getClubs(info.context.cookies)
+        list_allclubs = list()
+        for club in allclubs:
+            list_allclubs.append(club["cid"])
+        searchspace["clubid"] = {"$in": list_allclubs}
+    if restrictAccess:
+        searchspace["status.state"] = {
+            "$in": [
+                Event_State_Status.approved.value,
+            ]
+        }
+        searchspace["audience"] = {"$nin": ["internal"]}
+    elif restrictCCAccess:
+        searchspace["status.state"] = {
+            "$in": [
+                Event_State_Status.approved.value,
+                Event_State_Status.pending_budget.value,
+                Event_State_Status.pending_room.value,
+            ]
+        }
+
+    events_cursor = eventsdb.find(searchspace).sort("datetimeperiod", -1).skip(skip).limit(limit)
+    events = list(events_cursor)
+
+    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
+
 
 # TODO: this is a temporary query; remove it later once pagination has been implemented for the `events` query
 @strawberry.field
@@ -145,14 +196,19 @@ def recentEvents(info: Info) -> List[EventType]:
         list_allclubs.append(club["cid"])
     searchspace["clubid"] = {"$in": list_allclubs}
 
-    events = eventsdb.find(searchspace)
+    current_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    upcoming_events_query = {
+        **searchspace,
+        "datetimeperiod.0": {"$gte": current_datetime}
+    }
+    past_events_query = {
+        **searchspace,
+        "datetimeperiod.0": {"$lt": current_datetime}
+    }
 
-    # sort events in descending order of time
-    events = sorted(
-        events,
-        key=lambda event: event["datetimeperiod"][0],
-        reverse=True,
-    )
+    upcoming_events = list(eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1))
+    past_events = list(eventsdb.find(past_events_query).sort("datetimeperiod.0", -1))
+    events = upcoming_events + past_events
 
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events[:12]]
 
@@ -310,6 +366,7 @@ def availableRooms(timeslot: Tuple[datetime, datetime], eventid: str | None, inf
 queries = [
     event,
     events,
+    paginatedEvents,
     eventid,
     recentEvents,
     incompleteEvents,
