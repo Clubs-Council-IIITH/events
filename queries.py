@@ -68,7 +68,13 @@ def eventid(code: str, info: Info) -> str:
 
 
 @strawberry.field
-def events(clubid: str | None, info: Info) -> List[EventType]:
+def events(
+    clubid: str | None, 
+    info: Info,
+    paginationOn: bool = False,
+    skip: int = 0,
+    limit: int = 20
+    ) -> List[EventType]:
     """
     return all events visible to the user
     if clubid is specified, then return events of that club only
@@ -110,17 +116,12 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
             ]
         }
 
-    events = eventsdb.find(searchspace)
-
-    # sort events in descending order of time
-    events = sorted(
-        events,
-        key=lambda event: event["datetimeperiod"][0],
-        reverse=True,
-    )
+    if paginationOn:
+        events = eventsdb.find(searchspace).sort("datetimeperiod", -1).skip(skip).limit(limit)
+    else:
+        events = eventsdb.find(searchspace).sort("datetimeperiod", -1)
 
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
-
 
 # TODO: this is a temporary query; remove it later once pagination has been implemented for the `events` query
 @strawberry.field
@@ -191,7 +192,13 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
 
 
 @strawberry.field
-def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
+def approvedEvents(
+    clubid: str | None, 
+    info: Info,
+    pagination: bool = False,
+    skip: int = 0,
+    limit: int = 20
+    ) -> List[EventType]:
     """
     if clubid is set, return approved events of that club.
     else return approved events of every club.
@@ -215,14 +222,10 @@ def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
 
     searchspace["audience"] = {"$nin": ["internal"]}
 
-    events = eventsdb.find(searchspace)
-
-    # sort events in descending order of time
-    events = sorted(
-        events,
-        key=lambda event: event["datetimeperiod"][0],
-        reverse=True,
-    )
+    if pagination:
+        events = eventsdb.find(searchspace).sort("datetimeperiod", -1).skip(skip).limit(limit)
+    else:
+        events = eventsdb.find(searchspace).sort("datetimeperiod", -1)
 
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
 
