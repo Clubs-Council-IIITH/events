@@ -71,7 +71,7 @@ def eventid(code: str, info: Info) -> str:
 def events(
     clubid: str | None, 
     info: Info,
-    pagination: bool = False,
+    paginationOn: bool = False,
     skip: int = 0,
     limit: int = 20
     ) -> List[EventType]:
@@ -116,7 +116,7 @@ def events(
             ]
         }
 
-    if pagination:
+    if paginationOn:
         events = eventsdb.find(searchspace).sort("datetimeperiod", -1).skip(skip).limit(limit)
     else:
         events = eventsdb.find(searchspace).sort("datetimeperiod", -1)
