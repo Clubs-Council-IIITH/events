@@ -71,7 +71,7 @@ def eventid(code: str, info: Info) -> str:
 def events(
     clubid: str | None, 
     info: Info,
-    paginationOn: bool = False,
+    paginationOn: bool = True,
     skip: int = 0,
     limit: int = 20
     ) -> List[EventType]:
@@ -79,6 +79,9 @@ def events(
     return all events visible to the user
     if clubid is specified, then return events of that club only
     """
+    if limit == 0 and skip == 0:
+        paginationOn = False
+
     user = info.context.user
 
     restrictAccess = True
