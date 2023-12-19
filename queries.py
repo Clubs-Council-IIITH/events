@@ -198,15 +198,18 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
 def approvedEvents(
     clubid: str | None, 
     info: Info,
-    pagination: bool = False,
+    paginationOn: bool = True,
     skip: int = 0,
-    limit: int = 20
+    limit: int = 0
     ) -> List[EventType]:
     """
     if clubid is set, return approved events of that club.
     else return approved events of every club.
     NOTE: this is a public query, accessible to all.
     """
+    if limit == 0 and skip == 0:
+        paginationOn = False
+    
     user = info.context.user
 
     requested_state = Event_State_Status.approved.value
@@ -225,7 +228,7 @@ def approvedEvents(
 
     searchspace["audience"] = {"$nin": ["internal"]}
 
-    if pagination:
+    if paginationOn:
         events = eventsdb.find(searchspace).sort("datetimeperiod", -1).skip(skip).limit(limit)
     else:
         events = eventsdb.find(searchspace).sort("datetimeperiod", -1)
