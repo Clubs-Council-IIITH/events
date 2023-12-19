@@ -73,7 +73,7 @@ def events(
     info: Info,
     paginationOn: bool = True,
     skip: int = 0,
-    limit: int = 20
+    limit: int = 0
     ) -> List[EventType]:
     """
     return all events visible to the user
