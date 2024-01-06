@@ -68,21 +68,28 @@ def eventid(code: str, info: Info) -> str:
 
 
 @strawberry.field
-def events(clubid: str | None, info: Info) -> List[EventType]:
+def events(clubid: str | None, public: bool | None, info: Info) -> List[EventType]:
     """
-    return all events visible to the user
-    if clubid is specified, then return events of that club only
+    if public is set, then return only public/approved events
+    else
+        return all events visible to the user
+        if clubid is specified, then return events of that club only
     """
     user = info.context.user
 
     restrictAccess = True
+    clubAccess = False
     restrictCCAccess = True
-    if user is not None:
-        if user["role"] in {"cc", "slc", "slo"} or (
-            user["role"] == "club" and user["uid"] == clubid
-        ):
+    if user is not None and (public is None or public == False):
+        if user["role"] in {"cc", "slc", "slo"}:
             restrictAccess = False
             if not user["role"] in {"slc", "slo"}:
+                restrictCCAccess = False
+
+        if user["role"] == "club":
+            clubAccess = True
+            restrictAccess = False
+            if user["uid"] == clubid:
                 restrictCCAccess = False
 
     searchspace = dict()
@@ -102,13 +109,19 @@ def events(clubid: str | None, info: Info) -> List[EventType]:
         }
         searchspace["audience"] = {"$nin": ["internal"]}
     elif restrictCCAccess:
+        statuses = [
+            Event_State_Status.approved.value,
+            Event_State_Status.pending_budget.value,
+            Event_State_Status.pending_room.value,
+        ]
+        if clubAccess:
+            searchspace["audience"] = {"$nin": ["internal"]}
+            statuses.append(Event_State_Status.pending_cc.value)
+
         searchspace["status.state"] = {
-            "$in": [
-                Event_State_Status.approved.value,
-                Event_State_Status.pending_budget.value,
-                Event_State_Status.pending_room.value,
-            ]
+            "$in": statuses,
         }
+
 
     events = eventsdb.find(searchspace)
 
