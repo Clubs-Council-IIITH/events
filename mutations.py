@@ -1,5 +1,6 @@
 import strawberry
-
+import datetime
+from datetime import datetime
 from pydantic import HttpUrl, parse_obj_as
 from fastapi.encoders import jsonable_encoder
 
@@ -19,6 +20,7 @@ from mtypes import (
 from mailing import (
     PROGRESS_EVENT_SUBJECT,
     PROGRESS_EVENT_BODY,
+    PROGRESS_EVENT_BODY_FOR_SLO,
     APPROVED_EVENT_SUBJECT,
     APPROVED_EVENT_BODY,
     triggerMail,
@@ -95,7 +97,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.status.room = True
 
     # set event code
-    event_instance.code = getEventCode(details.clubid, details.datetimeperiod[0])
+    event_instance.code = getEventCode(details.clubid)
 
     created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
     created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
@@ -311,6 +313,8 @@ def progressEvent(
     event_ref = eventsdb.find_one({"_id": eventid})
     event = Event.parse_obj(event_ref)
 
+    poc_details = event_instance.poc
+
     # trigger mail notification
     mail_uid = user["uid"]
     mail_club= getClubNameEmail(event.clubid, email=True)
@@ -329,6 +333,40 @@ def progressEvent(
         eventlink=mail_eventlink,
         # uid=mail_uid,
     )
+    if (event.status.state == Event_State_Status.pending_budget) or (event.status.state == Event_State_Status.pending_room):
+        print(event)
+        mail_description = event.description
+        student_count=event.population
+        mail_location = ''
+        if(event.mode == Event_Mode.online):
+            mail_location = "online"
+        else: 
+            mail_location=', '.join([str(elem) for elem in event.location])
+        mail_date=event.datetimeperiod[0]
+        event_start_time=event.datetimeperiod[0]
+        event_end_time=event.datetimeperiod[1]
+
+        poc_name = 'Undefined'
+        poc_id = 'Undefined'
+        poc_email = 'undefined'
+        poc_phone = 'undefined'
+
+        mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
+            club=mail_club[0],
+            event=mail_event,
+            description=mail_description,
+            student_count=student_count,
+            date=mail_date,
+            start_Time=event_start_time,
+            end_Time=event_end_time,
+            room_no=mail_location,
+            poc_name=poc_details,
+            poc_id=poc_id,
+            poc_email=poc_email,
+            poc_phone=poc_phone,
+            # uid=mail_uid,
+        )
+
     mail_to = []
     if event.status.state == Event_State_Status.pending_cc:
         mail_to = getRoleEmails("cc")
@@ -348,13 +386,17 @@ def progressEvent(
         )
 
     if len(mail_to):
-        triggerMail(
-            mail_uid,
-            mail_subject,
-            mail_body,
-            toRecipients=mail_to,
-            cookies=info.context.cookies,
-        )
+        print(mail_uid,end='\n')
+        print(mail_subject,end='\n')
+        print(mail_body,end='\n')
+        print(mail_to,end='\n')
+        # triggerMail(
+        #     mail_uid,
+        #     mail_subject,
+        #     mail_body,
+        #     toRecipients=mail_to,
+        #     cookies=info.context.cookies,
+        # )
 
     return EventType.from_pydantic(event)
 

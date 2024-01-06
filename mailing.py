@@ -21,6 +21,32 @@ This is an automated email sent from the Clubs Council Website. Please do not re
 """
 )
 
+PROGRESS_EVENT_BODY_FOR_SLO = Template(
+    """
+Respected sir,
+
+$club needs a room for their event, so kindly requesting you to proceed with the room booking request.
+
+    1. Purpose: $event
+    2. Description by Club: $description
+    3. Expected number of students: $student_count
+    4. Date and Day: $date
+    5. Start Time: $start_Time
+    6. End Time: $end_Time
+    7. Location: $room_no
+    8. POC -
+        Name: $poc_name
+        ID: $poc_id
+        Email: $poc_email
+        Phone: $poc_phone
+
+Best Regards,
+Clubs Council.
+        
+This is an automated email sent from the Clubs Council Website. Please do not reply to this email.
+"""
+)
+
 APPROVED_EVENT_SUBJECT = Template(
     """
 [Events] Your event, $event, has been approved!
