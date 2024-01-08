@@ -46,6 +46,42 @@ def getMember(cid, uid, cookies=None):
         return None
 
 
+def getUser(uid, cookies=None):
+    """
+    Function to get a particular user details
+    """
+    try:
+        query = """
+            query GetUserProfile($userInput: UserInput!) {
+                userProfile(userInput: $userInput) {
+                    firstName
+                    lastName
+                    email
+                    rollno
+                }
+                userMeta(userInput: $userInput) {
+                    phone
+                }
+            }
+        """
+        variable = {"userInput": {"uid": uid}}
+        if cookies:
+            request = requests.post(
+                "http://gateway/graphql",
+                json={"query": query, "variables": variable},
+                cookies=cookies,
+            )
+        else:
+            request = requests.post(
+                "http://gateway/graphql", json={"query": query, "variables": variable}
+            )
+
+        return request.json()["data"]["userProfile"], request.json()["data"]["userMeta"]
+    except:
+        return None
+
+
+
 def getClubs(cookies=None):
     """
     Function to call the all clubs query
