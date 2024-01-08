@@ -1,7 +1,7 @@
 import strawberry
 from bson import ObjectId
 from enum import StrEnum, auto
-from pydantic import Field, StringConstraints
+from pydantic import Field, StringConstraints, field_validator
 from pydantic_core import core_schema
 from typing_extensions import Annotated, Any
 
@@ -130,6 +130,14 @@ class BudgetType:
     amount: float
     description: str | None = None
     advance: bool = False
+
+    # Validators
+    @field_validator("amount")
+    @classmethod
+    def positive_amount(cls, value):
+        if value <= 0:
+            raise ValueError("Amount must be positive")
+        return value
 
 # for handling mongo ObjectIds
 class PyObjectId(ObjectId):
