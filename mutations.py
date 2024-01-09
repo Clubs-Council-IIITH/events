@@ -1,5 +1,4 @@
 import strawberry
-import datetime
 from datetime import datetime, timedelta
 from pydantic import HttpUrl, parse_obj_as
 from fastapi.encoders import jsonable_encoder
@@ -330,31 +329,31 @@ def progressEvent(
         club=mail_club[0],
         event=mail_event,
         eventlink=mail_eventlink,
-        # uid=mail_uid,
     )
 
-    if (event.status.state == Event_State_Status.pending_budget) or (event.status.state == Event_State_Status.pending_room):
-        print(event)
+    if event.status.state == Event_State_Status.pending_room:
         mail_description = event.description
         if(mail_description == ''):
             mail_description = "N/A"
-        student_count=event.population
+        
+        student_count = event.population
         mail_location = ''
         if(event.mode == Event_Mode.online):
             mail_location = "online"
-            student_count= "N/A"
+            student_count = "N/A"
         else:
-            mail_location=', '.join([str(elem) for elem in event.location])
+            mail_location = ', '.join([str(elem) for elem in event.location])
+        
         ist_offset = timedelta(hours=5, minutes=30)
 
-        start_dt=event.datetimeperiod[0] + ist_offset
-        end_dt=event.datetimeperiod[1] + ist_offset
-        mail_date=str(start_dt.strftime('%d-%m-%Y'))
-        event_start_time=str(start_dt.strftime('%d-%m-%Y')) + " " + str(start_dt.strftime('%H:%M'))
-        event_end_time=str(end_dt.strftime('%d-%m-%Y')) + " " + str(end_dt.strftime('%H:%M'))
+        start_dt = event.datetimeperiod[0] + ist_offset
+        end_dt = event.datetimeperiod[1] + ist_offset
+        mail_date = str(start_dt.strftime('%d-%m-%Y'))
+        event_start_time = str(start_dt.strftime('%d-%m-%Y')) + " " + str(start_dt.strftime('%H:%M'))
+        event_end_time = str(end_dt.strftime('%d-%m-%Y')) + " " + str(end_dt.strftime('%H:%M'))
 
         poc_details, poc_phone = getUser(event_instance.poc, info.context.cookies)
-        poc_name = poc_details["lastName"] + " " + poc_details["firstName"]
+        poc_name = poc_details["firstName"] + " " + poc_details["lastName"]
         poc_email = poc_details["email"]
         poc_roll = poc_details["rollno"]
         poc_phone = poc_phone["phone"]
@@ -377,7 +376,6 @@ def progressEvent(
             poc_roll=poc_roll,
             poc_email=poc_email,
             poc_phone=poc_phone,
-            # uid=mail_uid,
         )
 
 
