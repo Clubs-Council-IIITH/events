@@ -51,6 +51,10 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         )
     ):
         raise Exception("You do not have permission to access this resource.")
+    
+    # Check if the start time is before the end time
+    if details.datetimeperiod[0] >= details.datetimeperiod[1]:
+        raise Exception("Start time cannot be after end time.")
 
     event_instance = Event(
         name=details.name,
@@ -120,6 +124,10 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         "role"
     ] != "cc":
         raise Exception("Not Authenticated to access this API")
+    
+    if details.datetimeperiod is not None:
+        if details.datetimeperiod[0] >= details.datetimeperiod[1]:
+            raise Exception("Start datetime cannot be same/after end datetime.")
 
     event_ref = eventsdb.find_one({"_id": details.eventid})
 

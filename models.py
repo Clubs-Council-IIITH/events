@@ -1,7 +1,14 @@
 from bson import ObjectId
 from datetime import datetime
 from typing import Tuple, List
-from pydantic import ConfigDict, BaseModel, Field, HttpUrl
+from pydantic import (
+    ConfigDict, 
+    field_validator,
+    BaseModel, 
+    Field, 
+    HttpUrl,
+    ValidationInfo
+)
 
 from mtypes import (
     Audience,
@@ -35,6 +42,12 @@ class Event(BaseModel):
     population: event_popu_type | None = None
     budget: List[BudgetType] = []
     poc: str | None = None
+
+    @field_validator("datetimeperiod")
+    def check_end_year(cls, value, info: ValidationInfo):
+        if value[0] >= value[1]:
+            raise ValueError("Start date cannot be same/after end date")
+        return value
     
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
     # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
