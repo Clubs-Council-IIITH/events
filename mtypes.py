@@ -104,6 +104,9 @@ class Event_Location(StrEnum):
     warehouse = auto()
     cieg = auto()
     sarg = auto()
+    felig = auto()
+    footg = auto()
+    guest = auto()
     # Academic Rooms
     h105 = auto()
     h205 = auto()
