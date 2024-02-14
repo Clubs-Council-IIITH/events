@@ -12,6 +12,7 @@ from mtypes import (
     BudgetType,
     Event_Mode,
     Event_Location,
+    Event_Full_Location,
     Audience,
     Event_State_Status,
 )
@@ -350,7 +351,7 @@ def progressEvent(
             mail_location = "online"
             student_count = "N/A"
         else:
-            mail_location = ', '.join([str(elem) for elem in event.location])
+            mail_location = ', '.join([getattr(Event_Full_Location, loc) for loc in event.location])
         
         ist_offset = timedelta(hours=5, minutes=30)
 
