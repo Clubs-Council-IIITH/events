@@ -117,13 +117,12 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     return the event
     """
     user = info.context.user
+    allowed_roles = ["cc", "slo"]
 
     if user is None:
         raise Exception("Not Authenticated!")
 
-    if (details.clubid != user["uid"] or user["role"] != "club") and user[
-        "role"
-    ] != "cc":
+    if (details.clubid != user["uid"] or user["role"] != "club") and user["role"] not in allowed_roles:
         raise Exception("Not Authenticated to access this API")
     
     if details.datetimeperiod is not None:
@@ -149,7 +148,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         # else False,
     }
 
-    updatable = user["role"] == "cc" or (
+    updatable = user["role"] in allowed_roles or (
         user["role"] == "club"
         and event_ref["status"]["state"] != Event_State_Status.incomplete
     )
@@ -163,7 +162,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.location is not None and updatable:
         # updates["status.room"] = False or user["role"] == "cc"
         updates["location"] = [Event_Location(loc) for loc in details.location]
-    if details.poc is not None:
+    if details.poc is not None and event_ref["poc"] != details.poc:
         updates["poc"] = details.poc
         # Check POC Details Exist or not
         if not getMember(details.clubid, details.poc, cookies=info.context.cookies):
@@ -198,7 +197,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         "clubid": user["uid"]
         if (user is not None and user["role"] == "club")
         else details.clubid
-        if (user["role"] == "cc")
+        if (user["role"] in allowed_roles)
         else None,
     }
 
