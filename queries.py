@@ -1,10 +1,8 @@
 import strawberry
 
-from fastapi.encoders import jsonable_encoder
 from typing import List, Tuple
 from datetime import datetime
 import dateutil.parser as dp
-import requests
 
 from db import eventsdb
 
@@ -80,10 +78,10 @@ def events(clubid: str | None, public: bool | None, info: Info) -> List[EventTyp
     restrictAccess = True
     clubAccess = False
     restrictCCAccess = True
-    if user is not None and (public is None or public == False):
+    if user is not None and (public is None or public is False):
         if user["role"] in {"cc", "slc", "slo"}:
             restrictAccess = False
-            if not user["role"] in {"slc", "slo"}:
+            if user["role"] not in {"slc", "slo"}:
                 restrictCCAccess = False
 
         if user["role"] == "club":
@@ -122,7 +120,6 @@ def events(clubid: str | None, public: bool | None, info: Info) -> List[EventTyp
             "$in": statuses,
         }
 
-
     events = eventsdb.find(searchspace)
 
     # sort events in descending order of time
@@ -142,7 +139,6 @@ def recentEvents(info: Info) -> List[EventType]:
     return the recent 10 events across all clubs
     only publicly visible events are returned
     """
-    user = info.context.user
 
     searchspace = dict()
     searchspace["status.state"] = {
@@ -161,14 +157,13 @@ def recentEvents(info: Info) -> List[EventType]:
     current_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
     upcoming_events_query = {
         **searchspace,
-        "datetimeperiod.0": {"$gte": current_datetime}
+        "datetimeperiod.0": {"$gte": current_datetime},
     }
-    past_events_query = {
-        **searchspace,
-        "datetimeperiod.0": {"$lt": current_datetime}
-    }
+    past_events_query = {**searchspace, "datetimeperiod.0": {"$lt": current_datetime}}
 
-    upcoming_events = list(eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1))
+    upcoming_events = list(
+        eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1)
+    )
     past_events = list(eventsdb.find(past_events_query).sort("datetimeperiod.0", -1))
     events = upcoming_events + past_events
 
@@ -210,7 +205,6 @@ def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
     else return approved events of every club.
     NOTE: this is a public query, accessible to all.
     """
-    user = info.context.user
 
     requested_state = Event_State_Status.approved.value
 
@@ -291,12 +285,13 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
 
 
 @strawberry.field
-def availableRooms(timeslot: Tuple[datetime, datetime], eventid: str | None, info: Info) -> RoomListType:
+def availableRooms(
+    timeslot: Tuple[datetime, datetime], eventid: str | None, info: Info
+) -> RoomListType:
     """
     return a list of all rooms that are available in the given timeslot
     NOTE: this is a public query, accessible to all.
     """
-    user = info.context.user
     assert timeslot[0] < timeslot[1], "Invalid timeslot"
 
     approved_events = eventsdb.find(
@@ -315,7 +310,7 @@ def availableRooms(timeslot: Tuple[datetime, datetime], eventid: str | None, inf
         end_time = dp.parse(approved_event["datetimeperiod"][1])
         if timeslot[1] >= start_time and timeslot[0] <= end_time:
             free_rooms.difference_update(approved_event["location"])
-    
+
     if eventid is not None:
         event = eventsdb.find_one({"_id": eventid})
         if event is not None:

@@ -1,5 +1,5 @@
 import strawberry
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pydantic import HttpUrl, parse_obj_as
 from fastapi.encoders import jsonable_encoder
 
@@ -52,7 +52,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         )
     ):
         raise Exception("You do not have permission to access this resource.")
-    
+
     # Check if the start time is before the end time
     if details.datetimeperiod[0] >= details.datetimeperiod[1]:
         raise Exception("Start time cannot be after end time.")
@@ -122,9 +122,11 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if user is None:
         raise Exception("Not Authenticated!")
 
-    if (details.clubid != user["uid"] or user["role"] != "club") and user["role"] not in allowed_roles:
+    if (details.clubid != user["uid"] or user["role"] != "club") and user[
+        "role"
+    ] not in allowed_roles:
         raise Exception("Not Authenticated to access this API")
-    
+
     if details.datetimeperiod is not None:
         if details.datetimeperiod[0] >= details.datetimeperiod[1]:
             raise Exception("Start datetime cannot be same/after end datetime.")
@@ -242,7 +244,6 @@ def progressEvent(
         raise noaccess_error
     event_instance = Event.parse_obj(event_ref)
 
-    status_updation = dict()
 
     if event_instance.status.state == Event_State_Status.incomplete:
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
@@ -278,8 +279,8 @@ def progressEvent(
 
     elif event_instance.status.state == Event_State_Status.pending_budget:
         if user["role"] != "slc":
-                raise noaccess_error
-        assert event_instance.status.budget == False
+            raise noaccess_error
+        assert event_instance.status.budget is False
         updation = {
             "budget": True,
             "room": event_instance.status.room,
@@ -294,8 +295,8 @@ def progressEvent(
     elif event_instance.status.state == Event_State_Status.pending_room:
         if user["role"] != "slo":
             raise noaccess_error
-        assert event_instance.status.budget == True
-        assert event_instance.status.room == False
+        assert event_instance.status.budget is True
+        assert event_instance.status.room is False
         updation = {
             "budget": event_instance.status.budget,
             "room": True,
@@ -323,7 +324,7 @@ def progressEvent(
 
     # trigger mail notification
     mail_uid = user["uid"]
-    mail_club= getClubNameEmail(event.clubid, email=True)
+    mail_club = getClubNameEmail(event.clubid, email=True)
     mail_event = event.name
     mail_eventlink = getEventLink(event.code)
 
@@ -341,24 +342,30 @@ def progressEvent(
 
     if event.status.state == Event_State_Status.pending_room:
         mail_description = event.description
-        if(mail_description == ''):
+        if mail_description == "":
             mail_description = "N/A"
-        
+
         student_count = event.population
-        mail_location = ''
-        if(event.mode == Event_Mode.online):
+        mail_location = ""
+        if event.mode == Event_Mode.online:
             mail_location = "online"
             student_count = "N/A"
         else:
-            mail_location = ', '.join([getattr(Event_Full_Location, loc) for loc in event.location])
-        
+            mail_location = ", ".join(
+                [getattr(Event_Full_Location, loc) for loc in event.location]
+            )
+
         ist_offset = timedelta(hours=5, minutes=30)
 
         start_dt = event.datetimeperiod[0] + ist_offset
         end_dt = event.datetimeperiod[1] + ist_offset
-        mail_date = str(start_dt.strftime('%d-%m-%Y'))
-        event_start_time = str(start_dt.strftime('%d-%m-%Y')) + " " + str(start_dt.strftime('%H:%M'))
-        event_end_time = str(end_dt.strftime('%d-%m-%Y')) + " " + str(end_dt.strftime('%H:%M'))
+        mail_date = str(start_dt.strftime("%d-%m-%Y"))
+        event_start_time = (
+            str(start_dt.strftime("%d-%m-%Y")) + " " + str(start_dt.strftime("%H:%M"))
+        )
+        event_end_time = (
+            str(end_dt.strftime("%d-%m-%Y")) + " " + str(end_dt.strftime("%H:%M"))
+        )
 
         poc_details, poc_phone = getUser(event_instance.poc, info.context.cookies)
         poc_name = poc_details["firstName"] + " " + poc_details["lastName"]
@@ -369,7 +376,6 @@ def progressEvent(
             poc_phone = "Unknown"
         if not poc_roll:
             poc_roll = "Unknown"
-
 
         mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
             club=mail_club[0],
@@ -386,7 +392,6 @@ def progressEvent(
             poc_phone=poc_phone,
         )
 
-
     mail_to = []
     if event.status.state == Event_State_Status.pending_cc:
         mail_to = getRoleEmails("cc")
@@ -396,7 +401,9 @@ def progressEvent(
         mail_to = getRoleEmails("slo")
     if event.status.state == Event_State_Status.approved:
         # mail to the club email
-        mail_to = [mail_club[1],]
+        mail_to = [
+            mail_club[1],
+        ]
         mail_subject = APPROVED_EVENT_SUBJECT.safe_substitute(
             event=mail_event,
         )

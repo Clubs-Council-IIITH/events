@@ -13,8 +13,10 @@ from utils import getClubCode, FISCAL_START_MONTH
 
 fiscalyear.START_MONTH = FISCAL_START_MONTH
 
+
 def filter_set_by_prefix(input_set, prefix):
     return {item for item in input_set if item.startswith(prefix)}
+
 
 if __name__ == "__main__":
     events = eventsdb.find().sort("datetimeperiod.0", 1)
@@ -22,7 +24,7 @@ if __name__ == "__main__":
     for event in events:
         idx = 1
         club_code = getClubCode(event["clubid"])
-        
+
         year = fiscalyear.FiscalDateTime.fromisoformat(
             event["datetimeperiod"][0].split("+")[0]
         ).fiscal_year

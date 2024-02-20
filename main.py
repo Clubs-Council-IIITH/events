@@ -24,6 +24,7 @@ Query = create_type("Query", queries)
 # create mutation types
 Mutation = create_type("Mutation", mutations)
 
+
 # override context getter
 async def get_context() -> Context:
     return Context()
@@ -38,10 +39,6 @@ schema = strawberry.federation.Schema(
 )
 
 # serve API with FastAPI router
-gql_app = GraphQLRouter(
-    schema, 
-    graphiql=True,
-    context_getter=get_context
-)
+gql_app = GraphQLRouter(schema, graphiql=True, context_getter=get_context)
 app = FastAPI(debug=DEBUG)
 app.include_router(gql_app, prefix="/graphql")

@@ -6,7 +6,7 @@ from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
 
 from pydantic import BaseModel
-from typing import Dict, List, NewType
+from typing import Dict, List
 from functools import cached_property
 from datetime import datetime
 
