@@ -2,12 +2,12 @@ from bson import ObjectId
 from datetime import datetime
 from typing import Tuple, List
 from pydantic import (
-    ConfigDict, 
+    ConfigDict,
     field_validator,
-    BaseModel, 
-    Field, 
+    BaseModel,
+    Field,
     HttpUrl,
-    ValidationInfo
+    ValidationInfo,
 )
 
 from mtypes import (
@@ -48,7 +48,11 @@ class Event(BaseModel):
         if value[0] >= value[1]:
             raise ValueError("Start date cannot be same/after end date")
         return value
-    
+
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
     # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
-    model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True, json_encoders={ObjectId: str})
+    model_config = ConfigDict(
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
+        json_encoders={ObjectId: str},
+    )

@@ -3,7 +3,6 @@ import requests
 import fiscalyear
 
 from typing import List
-from datetime import datetime, timedelta
 
 from db import eventsdb
 
@@ -42,7 +41,7 @@ def getMember(cid, uid, cookies=None):
             )
         return request.json()["data"]["member"]
 
-    except:
+    except Exception:
         return None
 
 
@@ -77,9 +76,8 @@ def getUser(uid, cookies=None):
             )
 
         return request.json()["data"]["userProfile"], request.json()["data"]["userMeta"]
-    except:
+    except Exception:
         return None
-
 
 
 def getClubs(cookies=None):
@@ -106,7 +104,7 @@ def getClubs(cookies=None):
         else:
             request = requests.post("http://gateway/graphql", json={"query": query})
         return request.json()["data"]["allClubs"]
-    except:
+    except Exception:
         return []
 
 
@@ -140,25 +138,27 @@ def getEventCode(clubid, starttime) -> str:
     club_code = getClubCode(clubid)
     if club_code is None:
         raise ValueError("Invalid clubid")
-    
-    year = fiscalyear.FiscalYear(fiscalyear.FiscalDateTime.fromisoformat(str(starttime).split("+")[0]).fiscal_year)
+
+    year = fiscalyear.FiscalYear(
+        fiscalyear.FiscalDateTime.fromisoformat(
+            str(starttime).split("+")[0]
+        ).fiscal_year
+    )
     start = year.start
     end = year.end
 
     club_events = eventsdb.find(
         {
             "clubid": clubid,
-            "datetimeperiod": {
-                "$gte": start.isoformat(),
-                "$lte": end.isoformat()
-            },
+            "datetimeperiod": {"$gte": start.isoformat(), "$lte": end.isoformat()},
         }
     )
 
     event_count = len(list(club_events)) + 1
     code_year = str(year.fiscal_year - 1)[-2:] + str(year.fiscal_year)[-2:]
-    
+
     return f"{club_code}{code_year}{event_count:03d}"  # format: CODE20XX00Y
+
 
 # get link to event (based on code)
 def getEventLink(code) -> str:
@@ -202,5 +202,5 @@ def getRoleEmails(role: str) -> List[str]:
 
         return emails
 
-    except:
+    except Exception:
         return []

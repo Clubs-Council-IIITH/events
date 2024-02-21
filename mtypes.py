@@ -78,6 +78,7 @@ class Event_Mode(StrEnum):
     online = auto()
     offline = auto()
 
+
 # Event Full Locations
 class Event_Full_Location:
     h101 = "Himalaya 101"
@@ -172,6 +173,7 @@ class BudgetType:
         if value <= 0:
             raise ValueError("Amount must be positive")
         return value
+
 
 # for handling mongo ObjectIds
 class PyObjectId(ObjectId):

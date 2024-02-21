@@ -101,5 +101,5 @@ def triggerMail(
                 "http://gateway/graphql", json={"query": query, "variables": variables}
             )
 
-    except:
+    except Exception:
         return None
