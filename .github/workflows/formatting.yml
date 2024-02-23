@@ -1,0 +1,41 @@
+name: Auto Linting and Formatting
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+      
+      - name: Lint with ruff
+        run: ruff check --fix *.py
+      
+      - name: Format with ruff
+        run: ruff format *.py
+      
+      - name: Remove ruff cache
+        run: rm -rf .ruff_cache
+      
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Apply Linting & Formatting Fixes
+      
+      - name: Remove Linting Branch
+        run: git push origin --delete linting
+
+  
