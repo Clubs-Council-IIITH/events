@@ -244,7 +244,6 @@ def progressEvent(
         raise noaccess_error
     event_instance = Event.parse_obj(event_ref)
 
-
     if event_instance.status.state == Event_State_Status.incomplete:
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
