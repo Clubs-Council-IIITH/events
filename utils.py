@@ -127,9 +127,9 @@ def getClubNameEmail(
             if email and name:
                 return club["name"], club["email"]
             elif email:
-                return club["email"]
+                return "", club["email"]
             else:
-                return club["name"]
+                return club["name"], ""
     return None
 
 
