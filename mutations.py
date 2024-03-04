@@ -332,13 +332,13 @@ def progressEvent(
         raise Exception("Club does not exist.")
     else:
         clubname, mail_club = mail_club
-    
+
     mail_event_title = event.name
     mail_eventlink = getEventLink(event.code)
     mail_description = event.description
     if mail_description == "":
         mail_description = "N/A"
-    
+
     student_count = event.population
     mail_location = ""
     if event.mode == Event_Mode.online:
@@ -348,7 +348,7 @@ def progressEvent(
         mail_location = ", ".join(
             [getattr(Event_Full_Location, loc) for loc in event.location]
         )
-    
+
     ist_offset = timedelta(hours=5, minutes=30)
     start_dt = event.datetimeperiod[0] + ist_offset
     end_dt = event.datetimeperiod[1] + ist_offset
@@ -369,7 +369,6 @@ def progressEvent(
     if not poc_roll:
         poc_roll = "Unknown"
 
-    
     # Mail Subject and Body
     mail_subject = PROGRESS_EVENT_SUBJECT.safe_substitute(
         event=mail_event_title,

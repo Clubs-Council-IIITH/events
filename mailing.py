@@ -1,5 +1,6 @@
 import requests
 
+
 # API call to send mail notification
 def triggerMail(
     uid,
