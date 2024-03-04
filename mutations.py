@@ -8,6 +8,7 @@ from db import eventsdb
 # import all models and types
 from models import Event
 from otypes import Info, InputEventDetails, EventType, InputEditEventDetails
+from mailing import triggerMail
 from mtypes import (
     BudgetType,
     Event_Mode,
@@ -17,13 +18,13 @@ from mtypes import (
     Event_State_Status,
 )
 
-from mailing import (
+from mailing_templates import (
     PROGRESS_EVENT_SUBJECT,
     PROGRESS_EVENT_BODY,
     PROGRESS_EVENT_BODY_FOR_SLO,
-    APPROVED_EVENT_SUBJECT,
-    APPROVED_EVENT_BODY,
-    triggerMail,
+    CLUB_EVENT_SUBJECT,
+    APPROVED_EVENT_BODY_FOR_CLUB,
+    SUBMIT_EVENT_BODY_FOR_CLUB,
 )
 from utils import (
     getClubNameEmail,
@@ -322,69 +323,73 @@ def progressEvent(
     event = Event.parse_obj(event_ref)
 
     # trigger mail notification
+
+    # Data Preparation for the mailing
     mail_uid = user["uid"]
     mail_club = getClubNameEmail(event.clubid, email=True)
-    mail_event = event.name
-    mail_eventlink = getEventLink(event.code)
 
     if mail_club is None:
         raise Exception("Club does not exist.")
+    else:
+        clubname, mail_club = mail_club
+    
+    mail_event_title = event.name
+    mail_eventlink = getEventLink(event.code)
+    mail_description = event.description
+    if mail_description == "":
+        mail_description = "N/A"
+    
+    student_count = event.population
+    mail_location = ""
+    if event.mode == Event_Mode.online:
+        mail_location = "online"
+        student_count = "N/A"
+    else:
+        mail_location = ", ".join(
+            [getattr(Event_Full_Location, loc) for loc in event.location]
+        )
+    
+    ist_offset = timedelta(hours=5, minutes=30)
+    start_dt = event.datetimeperiod[0] + ist_offset
+    end_dt = event.datetimeperiod[1] + ist_offset
+    event_start_time = (
+        str(start_dt.strftime("%d-%m-%Y")) + " " + str(start_dt.strftime("%H:%M"))
+    )
+    event_end_time = (
+        str(end_dt.strftime("%d-%m-%Y")) + " " + str(end_dt.strftime("%H:%M"))
+    )
 
+    poc_details, poc_phone = getUser(event.poc, info.context.cookies)
+    poc_name = poc_details["firstName"] + " " + poc_details["lastName"]
+    poc_email = poc_details["email"]
+    poc_roll = poc_details["rollno"]
+    poc_phone = poc_phone["phone"]
+    if not poc_phone:
+        poc_phone = "Unknown"
+    if not poc_roll:
+        poc_roll = "Unknown"
+
+    
+    # Mail Subject and Body
     mail_subject = PROGRESS_EVENT_SUBJECT.safe_substitute(
-        event=mail_event,
+        event=mail_event_title,
     )
     mail_body = PROGRESS_EVENT_BODY.safe_substitute(
-        club=mail_club[0],
-        event=mail_event,
+        club=clubname,
+        event=mail_event_title,
         eventlink=mail_eventlink,
     )
 
     if event.status.state == Event_State_Status.pending_room:
-        mail_description = event.description
-        if mail_description == "":
-            mail_description = "N/A"
-
-        student_count = event.population
-        mail_location = ""
-        if event.mode == Event_Mode.online:
-            mail_location = "online"
-            student_count = "N/A"
-        else:
-            mail_location = ", ".join(
-                [getattr(Event_Full_Location, loc) for loc in event.location]
-            )
-
-        ist_offset = timedelta(hours=5, minutes=30)
-
-        start_dt = event.datetimeperiod[0] + ist_offset
-        end_dt = event.datetimeperiod[1] + ist_offset
-        mail_date = str(start_dt.strftime("%d-%m-%Y"))
-        event_start_time = (
-            str(start_dt.strftime("%d-%m-%Y")) + " " + str(start_dt.strftime("%H:%M"))
-        )
-        event_end_time = (
-            str(end_dt.strftime("%d-%m-%Y")) + " " + str(end_dt.strftime("%H:%M"))
-        )
-
-        poc_details, poc_phone = getUser(event_instance.poc, info.context.cookies)
-        poc_name = poc_details["firstName"] + " " + poc_details["lastName"]
-        poc_email = poc_details["email"]
-        poc_roll = poc_details["rollno"]
-        poc_phone = poc_phone["phone"]
-        if not poc_phone:
-            poc_phone = "Unknown"
-        if not poc_roll:
-            poc_roll = "Unknown"
-
         mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
-            club=mail_club[0],
-            event=mail_event,
+            event_id=event.code,
+            club=clubname,
+            event=mail_event_title,
             description=mail_description,
             student_count=student_count,
-            date=mail_date,
-            start_Time=event_start_time,
-            end_Time=event_end_time,
-            room_no=mail_location,
+            start_time=event_start_time,
+            end_time=event_end_time,
+            location=mail_location,
             poc_name=poc_name,
             poc_roll=poc_roll,
             poc_email=poc_email,
@@ -394,6 +399,37 @@ def progressEvent(
     mail_to = []
     if event.status.state == Event_State_Status.pending_cc:
         mail_to = getRoleEmails("cc")
+
+        # Mail to club also for the successful submission of the event
+        mail_to_club = [
+            mail_club,
+        ]
+        mail_subject_club = CLUB_EVENT_SUBJECT.safe_substitute(
+            event_id=event.code,
+            event=mail_event_title,
+        )
+        mail_body_club = SUBMIT_EVENT_BODY_FOR_CLUB.safe_substitute(
+            event=mail_event_title,
+            eventlink=mail_eventlink,
+            event_id=event.code,
+            club=clubname,
+            description=mail_description,
+            start_time=event_start_time,
+            end_time=event_end_time,
+            location=mail_location,
+            poc_name=poc_name,
+            poc_roll=poc_roll,
+            poc_email=poc_email,
+            poc_phone=poc_phone,
+        )
+
+        triggerMail(
+            mail_uid,
+            mail_subject_club,
+            mail_body_club,
+            toRecipients=mail_to_club,
+            cookies=info.context.cookies,
+        )
     if event.status.state == Event_State_Status.pending_budget:
         mail_to = getRoleEmails("slc")
     if event.status.state == Event_State_Status.pending_room:
@@ -401,13 +437,14 @@ def progressEvent(
     if event.status.state == Event_State_Status.approved:
         # mail to the club email
         mail_to = [
-            mail_club[1],
+            mail_club,
         ]
-        mail_subject = APPROVED_EVENT_SUBJECT.safe_substitute(
-            event=mail_event,
+        mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
+            event_id=event.code,
+            event=mail_event_title,
         )
-        mail_body = APPROVED_EVENT_BODY.safe_substitute(
-            event=mail_event,
+        mail_body = APPROVED_EVENT_BODY_FOR_CLUB.safe_substitute(
+            event=mail_event_title,
             eventlink=mail_eventlink,
         )
 
