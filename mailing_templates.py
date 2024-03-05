@@ -55,6 +55,20 @@ Note: This automated email has been generated from the Clubs Council website. Fo
 """
 )
 
+DELETE_EVENT_BODY_FOR_CC = Template(
+    """
+Dear Clubs Council,
+
+$club has deleted the event, $event.
+
+To view more details, visit the link below:
+$eventlink
+
+
+Note: This automated email has been genrated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+"""
+)
+
 # Email Templates For Clubs
 
 CLUB_EVENT_SUBJECT = Template(
@@ -105,6 +119,20 @@ APPROVED_EVENT_BODY_FOR_CLUB = Template(
 Dear $club,
 
 Your event, $event, has been approved.
+
+To view more details, visit the link below:
+$eventlink
+
+
+Note: This automated email has been genrated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+"""
+)
+
+DELETE_EVENT_BODY_FOR_CLUB = Template(
+    """
+Dear $club,
+
+Your event, $event, has been deleted from the system, from the side of Clubs Council.
 
 To view more details, visit the link below:
 $eventlink
