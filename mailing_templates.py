@@ -132,7 +132,7 @@ DELETE_EVENT_BODY_FOR_CLUB = Template(
     """
 Dear $club,
 
-Your event, $event, has been deleted from the system, from the side of Clubs Council.
+Your event, $event, has been deleted from the system, from the side of $deleted_by.
 
 To view more details, visit the link below:
 $eventlink

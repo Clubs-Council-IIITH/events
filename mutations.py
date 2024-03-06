@@ -468,13 +468,13 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
     """
     user = info.context.user
 
-    if user is None or user["role"] not in ["club", "cc"]:
+    if user is None or user["role"] not in ["club", "cc", "slo"]:
         raise Exception("Not Authenticated!")
 
     query = {
         "_id": eventid,
     }
-    if user["role"] not in ["cc"]:
+    if user["role"] not in ["cc", "slo"]:
         # if user is not an admin, they can only delete their own events
         query["clubid"] = user["uid"]
 
@@ -513,7 +513,42 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
                 club=old_event.clubid,
                 event=old_event.name,
                 eventlink=getEventLink(old_event.code),
+                deleted_by="Clubs Council",
             )
+        if user["role"] == "slo":
+            mail_to = [
+                getClubNameEmail(old_event.clubid, email=True, name=False),
+            ]
+            mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
+                event=old_event.name,
+                eventlink=getEventLink(old_event.code),
+            )
+            mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
+                club=old_event.clubid,
+                event=old_event.name,
+                eventlink=getEventLink(old_event.code),
+                deleted_by="Student Life Office",
+            )
+
+            # Mail to CC for the deleted event
+            mail_to_cc = getRoleEmails("cc")
+            mail_subject_cc = PROGRESS_EVENT_SUBJECT.safe_substitute(
+                event=old_event.name,
+            )
+            mail_body_cc = DELETE_EVENT_BODY_FOR_CC.safe_substitute(
+                club="Student Life Office",
+                event=old_event.name,
+                eventlink=getEventLink(old_event.code),
+            )
+
+            triggerMail(
+                user["uid"],
+                mail_subject_cc,
+                mail_body_cc,
+                toRecipients=mail_to_cc,
+                cookies=info.context.cookies,
+            )
+
         elif user["role"] == "club":
             mail_to = getRoleEmails("cc")
             mail_subject = PROGRESS_EVENT_SUBJECT.safe_substitute(
