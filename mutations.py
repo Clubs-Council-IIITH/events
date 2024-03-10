@@ -445,6 +445,7 @@ def progressEvent(
             event=mail_event_title,
         )
         mail_body = APPROVED_EVENT_BODY_FOR_CLUB.safe_substitute(
+            club=clubname,
             event=mail_event_title,
             eventlink=mail_eventlink,
         )
