@@ -22,9 +22,11 @@ from mailing_templates import (
     PROGRESS_EVENT_SUBJECT,
     PROGRESS_EVENT_BODY,
     PROGRESS_EVENT_BODY_FOR_SLO,
+    DELETE_EVENT_BODY_FOR_CC,
     CLUB_EVENT_SUBJECT,
     APPROVED_EVENT_BODY_FOR_CLUB,
     SUBMIT_EVENT_BODY_FOR_CLUB,
+    DELETE_EVENT_BODY_FOR_CLUB,
 )
 from utils import (
     getClubNameEmail,
@@ -326,7 +328,7 @@ def progressEvent(
 
     # Data Preparation for the mailing
     mail_uid = user["uid"]
-    mail_club = getClubNameEmail(event.clubid, email=True)
+    mail_club = getClubNameEmail(event.clubid, email=True, name=True)
 
     if mail_club is None:
         raise Exception("Club does not exist.")
@@ -443,6 +445,7 @@ def progressEvent(
             event=mail_event_title,
         )
         mail_body = APPROVED_EVENT_BODY_FOR_CLUB.safe_substitute(
+            club=clubname,
             event=mail_event_title,
             eventlink=mail_eventlink,
         )
@@ -466,13 +469,13 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
     """
     user = info.context.user
 
-    if user is None or user["role"] not in ["club", "cc"]:
+    if user is None or user["role"] not in ["club", "cc", "slo"]:
         raise Exception("Not Authenticated!")
 
     query = {
         "_id": eventid,
     }
-    if user["role"] not in ["cc"]:
+    if user["role"] not in ["cc", "slo"]:
         # if user is not an admin, they can only delete their own events
         query["clubid"] = user["uid"]
 
@@ -486,14 +489,88 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         }
     }
 
+    old_ref = eventsdb.find_one(query)
     upd_ref = eventsdb.update_one(query, updation)
     if upd_ref.matched_count == 0:
         raise Exception(
             "Can not access event. Either it does not exist or user does not have perms."
         )
 
-    event_ref = eventsdb.find_one({"_id": eventid})
-    return EventType.from_pydantic(Event.parse_obj(event_ref))
+    # Send the event deleted email.
+    old_event = Event.parse_obj(old_ref)
+    if old_event.status.state not in [
+        Event_State_Status.deleted,
+        Event_State_Status.incomplete,
+    ]:
+        if user["role"] == "cc":
+            mail_to = [
+                getClubNameEmail(old_event.clubid, email=True, name=False),
+            ]
+            mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
+                event=old_event.name,
+                eventlink=getEventLink(old_event.code),
+            )
+            mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
+                club=old_event.clubid,
+                event=old_event.name,
+                eventlink=getEventLink(old_event.code),
+                deleted_by="Clubs Council",
+            )
+        if user["role"] == "slo":
+            mail_to = [
+                getClubNameEmail(old_event.clubid, email=True, name=False),
+            ]
+            mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
+                event=old_event.name,
+                eventlink=getEventLink(old_event.code),
+            )
+            mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
+                club=old_event.clubid,
+                event=old_event.name,
+                eventlink=getEventLink(old_event.code),
+                deleted_by="Student Life Office",
+            )
+
+            # Mail to CC for the deleted event
+            mail_to_cc = getRoleEmails("cc")
+            mail_subject_cc = PROGRESS_EVENT_SUBJECT.safe_substitute(
+                event=old_event.name,
+            )
+            mail_body_cc = DELETE_EVENT_BODY_FOR_CC.safe_substitute(
+                club="Student Life Office",
+                event=old_event.name,
+                eventlink=getEventLink(old_event.code),
+            )
+
+            triggerMail(
+                user["uid"],
+                mail_subject_cc,
+                mail_body_cc,
+                toRecipients=mail_to_cc,
+                cookies=info.context.cookies,
+            )
+
+        elif user["role"] == "club":
+            mail_to = getRoleEmails("cc")
+            mail_subject = PROGRESS_EVENT_SUBJECT.safe_substitute(
+                event=old_event.name,
+            )
+            mail_body = DELETE_EVENT_BODY_FOR_CC.safe_substitute(
+                club=old_event.clubid,
+                event=old_event.name,
+                eventlink=getEventLink(old_event.code),
+            )
+
+        triggerMail(
+            user["uid"],
+            mail_subject,
+            mail_body,
+            toRecipients=mail_to,
+            cookies=info.context.cookies,
+        )
+
+    upd_ref = eventsdb.find_one({"_id": eventid})
+    return EventType.from_pydantic(Event.parse_obj(upd_ref))
 
 
 # register all mutations
