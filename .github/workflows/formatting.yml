@@ -35,10 +35,10 @@ jobs:
         with:
           commit_message: Apply Linting & Formatting Fixes
       
-      - name: Remove Linting Branch
-        run: |
-          if git rev-parse --verify linting >/dev/null 2>&1; then
-            git push origin --delete linting
-          fi
+      # - name: Remove Linting Branch
+      #   run: |
+      #     if git rev-parse --verify linting >/dev/null 2>&1; then
+      #       git push origin --delete linting
+      #     fi
 
   
