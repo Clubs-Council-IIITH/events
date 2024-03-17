@@ -228,6 +228,7 @@ def progressEvent(
     info: Info,
     cc_progress_budget: bool | None = None,
     cc_progress_room: bool | None = None,
+    cc_approver: str | None = None,
 ) -> EventType:
     """
     progress the event state status for different users
@@ -277,6 +278,10 @@ def progressEvent(
             updation["budget"] = cc_progress_budget
         if cc_progress_room is not None:
             updation["room"] = cc_progress_room
+        if cc_approver is not None:
+            updation["cc_approver"] = cc_approver
+        else:
+            raise Exception("CC Approver is required to progress the event.")
 
         if not updation["budget"]:
             updation["state"] = Event_State_Status.pending_budget.value
