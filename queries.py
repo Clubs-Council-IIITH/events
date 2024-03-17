@@ -79,9 +79,11 @@ def events(clubid: str | None, public: bool | None, info: Info) -> List[EventTyp
     clubAccess = False
     restrictCCAccess = True
     if user is not None and (public is None or public is False):
-        if user["role"] in {"cc", "slc", "slo"}:
+        if user["role"] in ["cc", "slc", "slo"]:
             restrictAccess = False
-            if user["role"] not in {"slc", "slo"}:
+            if user["role"] in [
+                "cc",
+            ]:
                 restrictCCAccess = False
 
         if user["role"] == "club":
@@ -89,6 +91,10 @@ def events(clubid: str | None, public: bool | None, info: Info) -> List[EventTyp
             restrictAccess = False
             if user["uid"] == clubid:
                 restrictCCAccess = False
+
+    assert not (
+        restrictAccess and not restrictCCAccess
+    ), "restrictAccess and not restrictCCAccess can not be True at the same time."
 
     searchspace = dict()
     if clubid is not None:
@@ -115,7 +121,8 @@ def events(clubid: str | None, public: bool | None, info: Info) -> List[EventTyp
         if clubAccess:
             searchspace["audience"] = {"$nin": ["internal"]}
             statuses.append(Event_State_Status.pending_cc.value)
-
+            statuses.append(Event_State_Status.incomplete.value)
+        
         searchspace["status.state"] = {
             "$in": statuses,
         }
