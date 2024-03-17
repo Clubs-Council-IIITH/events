@@ -292,6 +292,7 @@ def progressEvent(
             "budget": True,
             "room": event_instance.status.room,
             #   | len(event_instance.location) == 0,
+            "slc_approver": user["uid"],
         }
 
         if not updation["room"]:
@@ -308,6 +309,7 @@ def progressEvent(
             "budget": event_instance.status.budget,
             "room": True,
             "state": Event_State_Status.approved.value,
+            "slo_approver": user["uid"],
         }
 
     elif event_instance.status.state == Event_State_Status.approved:
