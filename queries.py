@@ -122,7 +122,7 @@ def events(clubid: str | None, public: bool | None, info: Info) -> List[EventTyp
             searchspace["audience"] = {"$nin": ["internal"]}
             statuses.append(Event_State_Status.pending_cc.value)
             statuses.append(Event_State_Status.incomplete.value)
-        
+
         searchspace["status.state"] = {
             "$in": statuses,
         }
