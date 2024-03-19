@@ -103,9 +103,12 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
 
     # if creator is CC, set state to approved
     if user["role"] == "cc":
-        event_instance.status.state = Event_State_Status.approved
-        event_instance.status.budget = True
-        event_instance.status.room = True
+        event_instance.status.state = Event_State_Status.pending_cc
+        # event_instance.status.state = Event_State_Status.approved
+        # event_instance.status.budget = True
+        # event_instance.status.room = True
+    else:
+        event_instance.status.state = Event_State_Status.incomplete
 
     # set event code
     event_instance.code = getEventCode(details.clubid, details.datetimeperiod[0])
