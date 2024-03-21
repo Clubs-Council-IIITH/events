@@ -170,7 +170,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.location is not None and updatable:
         # updates["status.room"] = False or user["role"] == "cc"
         updates["location"] = [Event_Location(loc) for loc in details.location]
-    if details.poc is not None and event_ref["poc"] != details.poc:
+    if details.poc is not None and event_ref.get("poc", None) != details.poc:
         updates["poc"] = details.poc
         # Check POC Details Exist or not
         if not getMember(details.clubid, details.poc, cookies=info.context.cookies):
@@ -354,6 +354,12 @@ def progressEvent(
             [getattr(Event_Full_Location, loc) for loc in event.location]
         )
 
+    equipment, additional = "N/A", "N/A"
+    if event.equipment:
+        equipment = event.equipment
+    if event.additional:
+        additional = event.additional
+
     ist_offset = timedelta(hours=5, minutes=30)
     start_dt = event.datetimeperiod[0] + ist_offset
     end_dt = event.datetimeperiod[1] + ist_offset
@@ -394,6 +400,8 @@ def progressEvent(
             start_time=event_start_time,
             end_time=event_end_time,
             location=mail_location,
+            equipment=equipment,
+            additional=additional,
             poc_name=poc_name,
             poc_roll=poc_roll,
             poc_email=poc_email,
