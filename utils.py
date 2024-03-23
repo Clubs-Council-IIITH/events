@@ -1,6 +1,7 @@
 import os
 import requests
 import fiscalyear
+from datetime import datetime
 
 from typing import List
 
@@ -204,3 +205,25 @@ def getRoleEmails(role: str) -> List[str]:
 
     except Exception:
         return []
+
+
+def eventsWithSorting(searchspace):
+    """
+    Custom sorting of events based on
+    datetimeperiod with upcoming events first in ascending order
+    and then past events in descending order
+    """
+    current_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    upcoming_events_query = {
+        **searchspace,
+        "datetimeperiod.0": {"$gte": current_datetime},
+    }
+    past_events_query = {**searchspace, "datetimeperiod.0": {"$lt": current_datetime}}
+
+    upcoming_events = list(
+        eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1)
+    )
+    past_events = list(eventsdb.find(past_events_query).sort("datetimeperiod.0", -1))
+    events = upcoming_events + past_events
+
+    return events
