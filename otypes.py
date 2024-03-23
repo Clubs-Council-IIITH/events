@@ -6,7 +6,7 @@ from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
 
 from pydantic import BaseModel
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from functools import cached_property
 from datetime import datetime
 
@@ -95,3 +95,5 @@ class InputEditEventDetails:
     population: int | None = None
     budget: List[BudgetInput] | None = None
     poc: str | None = None
+
+timelot_type = Tuple[datetime, datetime]

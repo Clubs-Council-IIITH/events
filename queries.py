@@ -1,17 +1,15 @@
 import strawberry
+from typing import List
 
-from typing import List, Tuple
-from datetime import datetime
 import dateutil.parser as dp
 
 from db import eventsdb
 
 # import all models and types
 from models import Event
-from otypes import Info, EventType, RoomList, RoomListType
 from mtypes import Event_State_Status, Event_Location
-
-from utils import getClubs
+from otypes import Info, EventType, RoomList, RoomListType, timelot_type
+from utils import getClubs, eventsWithSorting
 
 
 @strawberry.field
@@ -66,7 +64,9 @@ def eventid(code: str, info: Info) -> str:
 
 
 @strawberry.field
-def events(clubid: str | None, public: bool | None, info: Info) -> List[EventType]:
+def events(
+    info: Info, clubid: str | None, public: bool | None, limit: int | None = None
+) -> List[EventType]:
     """
     if public is set, then return only public/approved events
     else
@@ -127,54 +127,12 @@ def events(clubid: str | None, public: bool | None, info: Info) -> List[EventTyp
             "$in": statuses,
         }
 
-    events = eventsdb.find(searchspace)
+    events = eventsWithSorting(searchspace)
 
-    # sort events in descending order of time
-    events = sorted(
-        events,
-        key=lambda event: event["datetimeperiod"][0],
-        reverse=True,
-    )
+    if limit is not None:
+        events = events[:limit]
 
     return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
-
-
-# TODO: this is a temporary query; remove it later once pagination has been implemented for the `events` query
-@strawberry.field
-def recentEvents(info: Info) -> List[EventType]:
-    """
-    return the recent 10 events across all clubs
-    only publicly visible events are returned
-    """
-
-    searchspace = dict()
-    searchspace["status.state"] = {
-        "$in": [
-            Event_State_Status.approved.value,
-        ]
-    }
-    searchspace["audience"] = {"$nin": ["internal"]}
-
-    allclubs = getClubs(info.context.cookies)
-    list_allclubs = list()
-    for club in allclubs:
-        list_allclubs.append(club["cid"])
-    searchspace["clubid"] = {"$in": list_allclubs}
-
-    current_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
-    upcoming_events_query = {
-        **searchspace,
-        "datetimeperiod.0": {"$gte": current_datetime},
-    }
-    past_events_query = {**searchspace, "datetimeperiod.0": {"$lt": current_datetime}}
-
-    upcoming_events = list(
-        eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1)
-    )
-    past_events = list(eventsdb.find(past_events_query).sort("datetimeperiod.0", -1))
-    events = upcoming_events + past_events
-
-    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events[:12]]
 
 
 @strawberry.field
@@ -293,7 +251,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
 
 @strawberry.field
 def availableRooms(
-    timeslot: Tuple[datetime, datetime], eventid: str | None, info: Info
+    timeslot: timelot_type, eventid: str | None, info: Info
 ) -> RoomListType:
     """
     return a list of all rooms that are available in the given timeslot
@@ -331,7 +289,6 @@ queries = [
     event,
     events,
     eventid,
-    recentEvents,
     incompleteEvents,
     approvedEvents,
     pendingEvents,
