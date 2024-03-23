@@ -263,6 +263,9 @@ def progressEvent(
             "room": False,
             #   or len(event_instance.location) == 0,
             "state": Event_State_Status.pending_cc.value,
+            "cc_approver": event_instance.status.cc_approver,
+            "slc_approver": event_instance.status.slc_approver,
+            "slo_approver": event_instance.status.slo_approver,
         }
 
     elif event_instance.status.state == Event_State_Status.pending_cc:
@@ -273,6 +276,9 @@ def progressEvent(
             # or sum([b.amount for b in event_instance.budget]) == 0,
             "room": event_instance.status.room,
             #   or len(event_instance.location) == 0,
+            "cc_approver": user["uid"],
+            "slc_approver": event_instance.status.slc_approver,
+            "slo_approver": event_instance.status.slo_approver,
         }
         if cc_progress_budget is not None:
             updation["budget"] = cc_progress_budget
@@ -299,6 +305,8 @@ def progressEvent(
             "room": event_instance.status.room,
             #   | len(event_instance.location) == 0,
             "slc_approver": user["uid"],
+            "slo_approver": event_instance.status.slo_approver,
+            "cc_approver": event_instance.status.cc_approver,
         }
 
         if not updation["room"]:
@@ -316,6 +324,8 @@ def progressEvent(
             "room": True,
             "state": Event_State_Status.approved.value,
             "slo_approver": user["uid"],
+            "slc_approver": event_instance.status.slc_approver,
+            "cc_approver": event_instance.status.cc_approver,
         }
 
     elif event_instance.status.state == Event_State_Status.approved:
@@ -328,6 +338,9 @@ def progressEvent(
             "budget": event_instance.status.budget,
             "room": event_instance.status.room,
             "state": Event_State_Status.approved.value,
+            "cc_approver": event_instance.status.cc_approver,
+            "slc_approver": event_instance.status.slc_approver,
+            "slo_approver": event_instance.status.slo_approver,
         }
 
     upd_ref = eventsdb.update_one({"_id": eventid}, {"$set": {"status": updation}})
