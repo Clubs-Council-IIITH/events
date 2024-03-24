@@ -1,4 +1,7 @@
 import requests
+import os
+
+inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
 
 # API call to send mail notification
@@ -12,8 +15,8 @@ def triggerMail(
 ) -> None:
     try:
         query = """
-            mutation Mutation($mailInput: MailInput!) {
-                sendMail(mailInput: $mailInput)
+            mutation Mutation($mailInput: MailInput!, $interCommunicationSecret: String) {
+                sendMail(mailInput: $mailInput, interCommunicationSecret: $interCommunicationSecret)
             }
         """
         variables = {
@@ -23,7 +26,8 @@ def triggerMail(
                 "uid": uid,
                 "toRecipients": toRecipients,
                 "ccRecipients": ccRecipients,
-            }
+            },
+            "interCommunicationCecret": inter_communication_secret,
         }
         if cookies:
             requests.post(
