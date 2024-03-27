@@ -24,7 +24,7 @@ if __name__ == "__main__":
         if (end_time - start_time) == timedelta(minutes=2):
             if fix:
                 # If so, set the end time to be 1 hour after the start time
-                end_time = start_time + timedelta(hours=1)
+                end_time = start_time + timedelta(hours=2)
 
                 event["datetimeperiod"][0] = start_time.isoformat() + "Z"
                 event["datetimeperiod"][1] = end_time.isoformat() + "Z"
