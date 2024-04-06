@@ -621,7 +621,7 @@ def updateEventsCid(
 
     if user is None or user["role"] not in ["cc"]:
         raise Exception("Not Authenticated!")
-    
+
     if inter_communication_secret != inter_communication_secret_global:
         raise Exception("Authentication Error! Invalid secret!")
 
