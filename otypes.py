@@ -96,4 +96,5 @@ class InputEditEventDetails:
     budget: List[BudgetInput] | None = None
     poc: str | None = None
 
+
 timelot_type = Tuple[datetime, datetime]
