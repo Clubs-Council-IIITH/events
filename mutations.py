@@ -2,6 +2,7 @@ import strawberry
 from datetime import timedelta
 from pydantic import HttpUrl, parse_obj_as
 from fastapi.encoders import jsonable_encoder
+import os
 
 from db import eventsdb
 
@@ -36,6 +37,8 @@ from utils import (
     getRoleEmails,
     getUser,
 )
+
+inter_communication_secret_global = os.getenv("INTER_COMMUNICATION_SECRET")
 
 
 @strawberry.mutation
@@ -604,10 +607,39 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
     return EventType.from_pydantic(Event.parse_obj(upd_ref))
 
 
+@strawberry.mutation
+def updateEventsCid(
+    info: Info,
+    old_cid: str,
+    new_cid: str,
+    inter_communication_secret: str | None = None,
+) -> int:
+    """
+    update all events of old_cid to new_cid
+    """
+    user = info.context.user
+
+    if user is None or user["role"] not in ["cc"]:
+        raise Exception("Not Authenticated!")
+    
+    if inter_communication_secret != inter_communication_secret_global:
+        raise Exception("Authentication Error! Invalid secret!")
+
+    updation = {
+        "$set": {
+            "clubid": new_cid,
+        }
+    }
+
+    upd_ref = eventsdb.update_many({"clubid": old_cid}, updation)
+    return upd_ref.modified_count
+
+
 # register all mutations
 mutations = [
     createEvent,
     editEvent,
     progressEvent,
     deleteEvent,
+    updateEventsCid,
 ]
