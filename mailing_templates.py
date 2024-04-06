@@ -16,7 +16,7 @@ To view more details and approve or reject the event, visit the link below:
 $eventlink
 
 
-Note: This automated email has been genrated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
 """
 )
 
@@ -68,7 +68,7 @@ To view more details, visit the link below:
 $eventlink
 
 
-Note: This automated email has been genrated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
 """
 )
 
@@ -127,7 +127,7 @@ To view more details, visit the link below:
 $eventlink
 
 
-Note: This automated email has been genrated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
 """
 )
 
@@ -141,6 +141,6 @@ To view more details, visit the link below:
 $eventlink
 
 
-Note: This automated email has been genrated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
 """
 )

@@ -55,6 +55,9 @@ class Event_Status:
     # budget: Event_Budget_Status = Event_Budget_Status.unapproved
     room: bool = False
     budget: bool = False
+    cc_approver: str | None = None
+    slo_approver: str | None = None
+    slc_approver: str | None = None
 
     # def __init__ (self, state: Event_State_Status = None, room: Event_Room_Status = None, budget: Event_Budget_Status = None) :
     #     self.state: Event_State_Status = Event_State_Status.incomplete if state is None else state
@@ -65,10 +68,16 @@ class Event_Status:
         state: Event_State_Status = Event_State_Status.incomplete,
         room: bool = False,
         budget: bool = False,
+        cc_approver: str | None = None,
+        slo_approver: str | None = None,
+        slc_approver: str | None = None,
     ):
         self.state = state
         self.room = room
         self.budget = budget
+        self.cc_approver = cc_approver
+        self.slo_approver = slo_approver
+        self.slc_approver = slc_approver
 
 
 # Event Modes
