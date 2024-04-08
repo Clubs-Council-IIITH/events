@@ -27,7 +27,7 @@ def triggerMail(
                 "toRecipients": toRecipients,
                 "ccRecipients": ccRecipients,
             },
-            "interCommunicationCecret": inter_communication_secret,
+            "interCommunicationSecret": inter_communication_secret,
         }
         if cookies:
             requests.post(
