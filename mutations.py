@@ -1,8 +1,9 @@
 import strawberry
-from datetime import timedelta
+from datetime import timedelta, datetime
 from pydantic import HttpUrl, parse_obj_as
 from fastapi.encoders import jsonable_encoder
 import os
+import logging
 
 from db import eventsdb
 
@@ -109,6 +110,9 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         # event_instance.status.room = True
     else:
         event_instance.status.state = Event_State_Status.incomplete
+
+    # debug
+    logging.error(event_instance)
 
     # set event code
     event_instance.code = getEventCode(details.clubid, details.datetimeperiod[0])
@@ -254,6 +258,10 @@ def progressEvent(
         raise noaccess_error
     event_instance = Event.parse_obj(event_ref)
 
+    # get current time
+    current_time = datetime.now()
+    time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
+
     if event_instance.status.state == Event_State_Status.incomplete:
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
@@ -266,6 +274,9 @@ def progressEvent(
             "cc_approver": event_instance.status.cc_approver,
             "slc_approver": event_instance.status.slc_approver,
             "slo_approver": event_instance.status.slo_approver,
+            "cc_approver_time": event_instance.status.cc_approver_time,
+            "slc_approver_time": event_instance.status.slc_approver_time,
+            "slo_approver_time": event_instance.status.slo_approver_time,
         }
 
     elif event_instance.status.state == Event_State_Status.pending_cc:
@@ -279,6 +290,9 @@ def progressEvent(
             "cc_approver": user["uid"],
             "slc_approver": event_instance.status.slc_approver,
             "slo_approver": event_instance.status.slo_approver,
+            "cc_approver_time": time_str,
+            "slc_approver_time": event_instance.status.slc_approver_time,
+            "slo_approver_time": event_instance.status.slo_approver_time,
         }
         if cc_progress_budget is not None:
             updation["budget"] = cc_progress_budget
@@ -292,8 +306,13 @@ def progressEvent(
         if not updation["budget"]:
             updation["state"] = Event_State_Status.pending_budget.value
         elif not updation["room"]:
+            # if budget is approved
+            updation["slc_approver_time"] = time_str
             updation["state"] = Event_State_Status.pending_room.value
         else:
+            # if both are approved
+            updation["slc_approver_time"] = time_str
+            updation["slo_approver_time"] = time_str
             updation["state"] = Event_State_Status.approved.value
 
     elif event_instance.status.state == Event_State_Status.pending_budget:
@@ -307,11 +326,15 @@ def progressEvent(
             "slc_approver": user["uid"],
             "slo_approver": event_instance.status.slo_approver,
             "cc_approver": event_instance.status.cc_approver,
+            "cc_approver_time": event_instance.status.cc_approver_time,
+            "slc_approver_time": time_str,
+            "slo_approver_time": event_instance.status.slo_approver_time,
         }
 
         if not updation["room"]:
             updation["state"] = Event_State_Status.pending_room.value
         else:
+            updation["slo_approver_time"] = time_str
             updation["state"] = Event_State_Status.approved.value
 
     elif event_instance.status.state == Event_State_Status.pending_room:
@@ -326,6 +349,9 @@ def progressEvent(
             "slo_approver": user["uid"],
             "slc_approver": event_instance.status.slc_approver,
             "cc_approver": event_instance.status.cc_approver,
+            "cc_approver_time": event_instance.status.cc_approver_time,
+            "slc_approver_time": event_instance.status.slc_approver_time,
+            "slo_approver_time": time_str,
         }
 
     elif event_instance.status.state == Event_State_Status.approved:
@@ -341,6 +367,9 @@ def progressEvent(
             "cc_approver": event_instance.status.cc_approver,
             "slc_approver": event_instance.status.slc_approver,
             "slo_approver": event_instance.status.slo_approver,
+            "cc_approver_time": event_instance.status.cc_approver_time,
+            "slc_approver_time": event_instance.status.slc_approver_time,
+            "slo_approver_time": event_instance.status.slo_approver_time,
         }
 
     upd_ref = eventsdb.update_one({"_id": eventid}, {"$set": {"status": updation}})

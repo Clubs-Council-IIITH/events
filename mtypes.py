@@ -56,8 +56,11 @@ class Event_Status:
     room: bool = False
     budget: bool = False
     cc_approver: str | None = None
+    cc_approver_time: str | None = None
     slo_approver: str | None = None
+    slo_approver_time: str | None = None
     slc_approver: str | None = None
+    slc_approver_time: str | None = None
 
     # def __init__ (self, state: Event_State_Status = None, room: Event_Room_Status = None, budget: Event_Budget_Status = None) :
     #     self.state: Event_State_Status = Event_State_Status.incomplete if state is None else state
@@ -69,15 +72,21 @@ class Event_Status:
         room: bool = False,
         budget: bool = False,
         cc_approver: str | None = None,
+        cc_approver_time: str = "notset",
         slo_approver: str | None = None,
+        slo_approver_time: str = "notset",
         slc_approver: str | None = None,
+        slc_approver_time: str = "notset",
     ):
         self.state = state
         self.room = room
         self.budget = budget
         self.cc_approver = cc_approver
+        self.cc_approver_time = cc_approver_time
         self.slo_approver = slo_approver
+        self.slo_approver_time = slo_approver_time
         self.slc_approver = slc_approver
+        self.slc_approver_time = slc_approver_time
 
 
 # Event Modes
