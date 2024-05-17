@@ -3,7 +3,6 @@ from datetime import timedelta, datetime
 from pydantic import HttpUrl, parse_obj_as
 from fastapi.encoders import jsonable_encoder
 import os
-import logging
 
 from db import eventsdb
 
@@ -375,44 +374,44 @@ def progressEvent(
         raise noaccess_error
 
     event_ref = eventsdb.find_one({"_id": eventid})
-    event = Event.parse_obj(event_ref)
+    updated_event_instance = Event.parse_obj(event_ref)
 
     # trigger mail notification
 
     # Data Preparation for the mailing
     mail_uid = user["uid"]
-    mail_club = getClubNameEmail(event.clubid, email=True, name=True)
+    mail_club = getClubNameEmail(updated_event_instance.clubid, email=True, name=True)
 
     if mail_club is None:
         raise Exception("Club does not exist.")
     else:
         clubname, mail_club = mail_club
 
-    mail_event_title = event.name
-    mail_eventlink = getEventLink(event.code)
-    mail_description = event.description
+    mail_event_title = updated_event_instance.name
+    mail_eventlink = getEventLink(updated_event_instance.code)
+    mail_description = updated_event_instance.description
     if mail_description == "":
         mail_description = "N/A"
 
-    student_count = event.population
+    student_count = updated_event_instance.population
     mail_location = ""
-    if event.mode == Event_Mode.online:
+    if updated_event_instance.mode == Event_Mode.online:
         mail_location = "online"
         student_count = "N/A"
     else:
         mail_location = ", ".join(
-            [getattr(Event_Full_Location, loc) for loc in event.location]
+            [getattr(Event_Full_Location, loc) for loc in updated_event_instance.location]
         )
 
     equipment, additional = "N/A", "N/A"
-    if event.equipment:
-        equipment = event.equipment
-    if event.additional:
-        additional = event.additional
+    if updated_event_instance.equipment:
+        equipment = updated_event_instance.equipment
+    if updated_event_instance.additional:
+        additional = updated_event_instance.additional
 
     ist_offset = timedelta(hours=5, minutes=30)
-    start_dt = event.datetimeperiod[0] + ist_offset
-    end_dt = event.datetimeperiod[1] + ist_offset
+    start_dt = updated_event_instance.datetimeperiod[0] + ist_offset
+    end_dt = updated_event_instance.datetimeperiod[1] + ist_offset
     event_start_time = (
         str(start_dt.strftime("%d-%m-%Y")) + " " + str(start_dt.strftime("%H:%M"))
     )
@@ -420,7 +419,10 @@ def progressEvent(
         str(end_dt.strftime("%d-%m-%Y")) + " " + str(end_dt.strftime("%H:%M"))
     )
 
-    poc_details, poc_phone = getUser(event.poc, info.context.cookies)
+    poc = getUser(updated_event_instance.poc, info.context.cookies)
+    if not poc:
+        raise Exception("POC does not exist.")
+    poc_details, poc_phone = poc
     poc_name = poc_details["firstName"] + " " + poc_details["lastName"]
     poc_email = poc_details["email"]
     poc_roll = poc_details["rollno"]
@@ -440,9 +442,9 @@ def progressEvent(
         eventlink=mail_eventlink,
     )
 
-    if event.status.state == Event_State_Status.pending_room:
+    if updated_event_instance.status.state == Event_State_Status.pending_room:
         mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
-            event_id=event.code,
+            event_id=updated_event_instance.code,
             club=clubname,
             event=mail_event_title,
             description=mail_description,
@@ -459,7 +461,7 @@ def progressEvent(
         )
 
     mail_to = []
-    if event.status.state == Event_State_Status.pending_cc:
+    if updated_event_instance.status.state == Event_State_Status.pending_cc:
         mail_to = getRoleEmails("cc")
 
         # Mail to club also for the successful submission of the event
@@ -467,13 +469,13 @@ def progressEvent(
             mail_club,
         ]
         mail_subject_club = CLUB_EVENT_SUBJECT.safe_substitute(
-            event_id=event.code,
+            event_id=updated_event_instance.code,
             event=mail_event_title,
         )
         mail_body_club = SUBMIT_EVENT_BODY_FOR_CLUB.safe_substitute(
             event=mail_event_title,
             eventlink=mail_eventlink,
-            event_id=event.code,
+            event_id=updated_event_instance.code,
             club=clubname,
             description=mail_description,
             start_time=event_start_time,
@@ -492,17 +494,17 @@ def progressEvent(
             toRecipients=mail_to_club,
             cookies=info.context.cookies,
         )
-    if event.status.state == Event_State_Status.pending_budget:
+    if updated_event_instance.status.state == Event_State_Status.pending_budget:
         mail_to = getRoleEmails("slc")
-    if event.status.state == Event_State_Status.pending_room:
+    if updated_event_instance.status.state == Event_State_Status.pending_room:
         mail_to = getRoleEmails("slo")
-    if event.status.state == Event_State_Status.approved:
+    if updated_event_instance.status.state == Event_State_Status.approved:
         # mail to the club email
         mail_to = [
             mail_club,
         ]
         mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
-            event_id=event.code,
+            event_id=updated_event_instance.code,
             event=mail_event_title,
         )
         mail_body = APPROVED_EVENT_BODY_FOR_CLUB.safe_substitute(
@@ -520,7 +522,7 @@ def progressEvent(
             cookies=info.context.cookies,
         )
 
-    return EventType.from_pydantic(event)
+    return EventType.from_pydantic(updated_event_instance)
 
 
 @strawberry.mutation
