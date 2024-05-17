@@ -7,6 +7,8 @@ from typing import List
 
 from db import eventsdb
 
+inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
+
 # start month of financial year
 FISCAL_START_MONTH = 4
 
@@ -171,13 +173,14 @@ def getEventLink(code) -> str:
 def getRoleEmails(role: str) -> List[str]:
     try:
         query = """
-            query Query($role: String!) {
-              usersByRole(role: $role) {
+            query Query($role: String!, $interCommunicationSecret: String) {
+              usersByRole(role: $role, interCommunicationSecret: $interCommunicationSecret) {
                 uid
               }
             }
         """
-        variables = {"role": role}
+        variables = {"role": role,
+                     "interCommunicationSecret": inter_communication_secret,}
         request = requests.post(
             "http://gateway/graphql", json={"query": query, "variables": variables}
         )
