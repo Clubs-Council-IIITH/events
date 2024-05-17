@@ -179,8 +179,10 @@ def getRoleEmails(role: str) -> List[str]:
               }
             }
         """
-        variables = {"role": role,
-                     "interCommunicationSecret": inter_communication_secret,}
+        variables = {
+            "role": role,
+            "interCommunicationSecret": inter_communication_secret,
+        }
         request = requests.post(
             "http://gateway/graphql", json={"query": query, "variables": variables}
         )
