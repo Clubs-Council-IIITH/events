@@ -111,9 +111,6 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     else:
         event_instance.status.state = Event_State_Status.incomplete
 
-    # debug
-    logging.error(event_instance)
-
     # set event code
     event_instance.code = getEventCode(details.clubid, details.datetimeperiod[0])
 
@@ -271,12 +268,13 @@ def progressEvent(
             "room": False,
             #   or len(event_instance.location) == 0,
             "state": Event_State_Status.pending_cc.value,
-            "cc_approver": event_instance.status.cc_approver,
-            "slc_approver": event_instance.status.slc_approver,
-            "slo_approver": event_instance.status.slo_approver,
-            "cc_approver_time": event_instance.status.cc_approver_time,
-            "slc_approver_time": event_instance.status.slc_approver_time,
-            "slo_approver_time": event_instance.status.slo_approver_time,
+
+            "cc_approver": None,
+            "slc_approver": None,
+            "slo_approver": None,
+            "cc_approver_time": "Not Approved",
+            "slc_approver_time": "Not Approved",
+            "slo_approver_time": "Not Approved",
         }
 
     elif event_instance.status.state == Event_State_Status.pending_cc:
@@ -307,12 +305,12 @@ def progressEvent(
             updation["state"] = Event_State_Status.pending_budget.value
         elif not updation["room"]:
             # if budget is approved
-            updation["slc_approver_time"] = time_str
+            updation["slc_approver_time"] = None
             updation["state"] = Event_State_Status.pending_room.value
         else:
             # if both are approved
-            updation["slc_approver_time"] = time_str
-            updation["slo_approver_time"] = time_str
+            updation["slc_approver_time"] = None
+            updation["slo_approver_time"] = None
             updation["state"] = Event_State_Status.approved.value
 
     elif event_instance.status.state == Event_State_Status.pending_budget:
