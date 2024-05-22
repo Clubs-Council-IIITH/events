@@ -153,7 +153,7 @@ def getEventCode(clubid, starttime) -> str:
     club_events = eventsdb.find(
         {
             "clubid": clubid,
-            "datetimeperiod": {"$gte": start.isoformat(), "$lte": end.isoformat()},
+            "start_time": {"$gte": start.isoformat(), "$lte": end.isoformat()},
         }
     )
 
@@ -221,14 +221,14 @@ def eventsWithSorting(searchspace):
     current_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
     upcoming_events_query = {
         **searchspace,
-        "datetimeperiod.0": {"$gte": current_datetime},
+        "start_time": {"$gte": current_datetime},
     }
-    past_events_query = {**searchspace, "datetimeperiod.0": {"$lt": current_datetime}}
+    past_events_query = {**searchspace, "start_time": {"$lt": current_datetime}}
 
     upcoming_events = list(
-        eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1)
+        eventsdb.find(upcoming_events_query).sort("start_time", 1)
     )
-    past_events = list(eventsdb.find(past_events_query).sort("datetimeperiod.0", -1))
+    past_events = list(eventsdb.find(past_events_query).sort("start_time", -1))
     events = upcoming_events + past_events
 
     return events

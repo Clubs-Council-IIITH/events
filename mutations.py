@@ -1,5 +1,5 @@
 import strawberry
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pydantic import HttpUrl, parse_obj_as
 from fastapi.encoders import jsonable_encoder
 import os
@@ -60,13 +60,23 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         raise Exception("You do not have permission to access this resource.")
 
     # Check if the start time is before the end time
-    if details.datetimeperiod[0] >= details.datetimeperiod[1]:
+    start_time_obj = datetime.strptime(details.start_time, "%d-%m-%Y %H:%M")
+    end_time_obj = datetime.strptime(details.end_time, "%d-%m-%Y %H:%M")
+
+    hours, minutes = details.duration.split(':')
+    duration_obj = timedelta.strptime(hours, minutes)
+
+    if start_time_obj >= end_time_obj:
         raise Exception("Start time cannot be after end time.")
+
+    if start_time_obj + duration_obj != end_time_obj:
+        raise Exception("Duration is not difference of end and start time!")
 
     event_instance = Event(
         name=details.name,
         clubid=details.clubid,
-        datetimeperiod=tuple(details.datetimeperiod),
+        start_time=details.start_time,
+        end_time=details.end_time,
         poc=details.poc,
     )
     if details.mode is not None:
@@ -111,7 +121,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.status.state = Event_State_Status.incomplete
 
     # set event code
-    event_instance.code = getEventCode(details.clubid, details.datetimeperiod[0])
+    event_instance.code = getEventCode(details.clubid, details.start_time)
 
     created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
     created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
@@ -136,9 +146,23 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     ] not in allowed_roles:
         raise Exception("Not Authenticated to access this API")
 
-    if details.datetimeperiod is not None:
-        if details.datetimeperiod[0] >= details.datetimeperiod[1]:
-            raise Exception("Start datetime cannot be same/after end datetime.")
+    # Check if the start time is before the end time
+    if (details.start_time is not None and
+        details.end_time is not None and
+        details.duration is not None):
+
+        start_time_obj = datetime.strptime(details.start_time, "%d-%m-%Y %H:%M")
+        end_time_obj = datetime.strptime(details.end_time, "%d-%m-%Y %H:%M")
+        hours, minutes = details.duration.split(':')
+        duration_obj = timedelta.strptime(hours, minutes)
+
+        if start_time_obj >= end_time_obj:
+            raise Exception("Start time cannot be after end time.")
+
+        if start_time_obj + duration_obj != end_time_obj:
+            raise Exception("Duration is not difference of end and start time!")
+
+
 
     event_ref = eventsdb.find_one({"_id": details.eventid})
 
@@ -166,8 +190,10 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
 
     if details.name is not None and updatable:
         updates["name"] = details.name
-    if details.datetimeperiod is not None and updatable:
-        updates["datetimeperiod"] = details.datetimeperiod
+    if details.start_time is not None and updatable:
+        updates["start_time"] = details.start_time
+    if details.end_time is not None and updatable:
+        updates["end_time"] = details.end_time
     if details.mode is not None and updatable:
         updates["mode"] = Event_Mode(details.mode)
     if details.location is not None and updatable:
@@ -383,15 +409,8 @@ def progressEvent(
     if event.additional:
         additional = event.additional
 
-    ist_offset = timedelta(hours=5, minutes=30)
-    start_dt = event.datetimeperiod[0] + ist_offset
-    end_dt = event.datetimeperiod[1] + ist_offset
-    event_start_time = (
-        str(start_dt.strftime("%d-%m-%Y")) + " " + str(start_dt.strftime("%H:%M"))
-    )
-    event_end_time = (
-        str(end_dt.strftime("%d-%m-%Y")) + " " + str(end_dt.strftime("%H:%M"))
-    )
+    event_start_time = event.start_time
+    event_end_time = event.end_time
 
     poc_details, poc_phone = getUser(event.poc, info.context.cookies)
     poc_name = poc_details["firstName"] + " " + poc_details["lastName"]

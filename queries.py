@@ -1,5 +1,6 @@
 import strawberry
 from typing import List
+from datetime import datetime
 
 import dateutil.parser as dp
 
@@ -8,9 +9,10 @@ from db import eventsdb
 # import all models and types
 from models import Event
 from mtypes import Event_State_Status, Event_Location
-from otypes import Info, EventType, RoomList, RoomListType, timelot_type
+from otypes import Info, EventType, RoomList, RoomListType
 from utils import getClubs, eventsWithSorting
 
+DATE_FORMAT="%d-%m-%Y %H:%M"
 
 @strawberry.field
 def event(eventid: str, info: Info) -> EventType:
@@ -156,7 +158,7 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     # sort events in ascending order of time
     events = sorted(
         events,
-        key=lambda event: event["datetimeperiod"][0],
+        key=lambda event: datetime.strptime(event["start_time"], DATE_FORMAT),
         reverse=False,
     )
 
@@ -192,7 +194,8 @@ def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
     # sort events in descending order of time
     events = sorted(
         events,
-        key=lambda event: event["datetimeperiod"][0],
+        key=lambda event: datetime.strptime(event["start_time"],
+                                            DATE_FORMAT),
         reverse=True,
     )
 
@@ -242,7 +245,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     # sort events in ascending order of time
     events = sorted(
         events,
-        key=lambda event: event["datetimeperiod"][0],
+        key=lambda event: datetime.strptime(event["start_time"],DATE_FORMAT) ,
         reverse=False,
     )
 
@@ -251,13 +254,16 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
 
 @strawberry.field
 def availableRooms(
-    timeslot: timelot_type, eventid: str | None, info: Info
+        input_start: str, input_end: str, eventid: str | None, info: Info
 ) -> RoomListType:
     """
     return a list of all rooms that are available in the given timeslot
     NOTE: this is a public query, accessible to all.
     """
-    assert timeslot[0] < timeslot[1], "Invalid timeslot"
+
+    inp_start_time = datetime.strptime(input_start, DATE_FORMAT)
+    inp_end_time = datetime.strptime(input_end, DATE_FORMAT)
+    assert inp_start_time < inp_end_time, "Invalid timeslot"
 
     approved_events = eventsdb.find(
         {
@@ -265,15 +271,16 @@ def availableRooms(
         },
         {
             "location": 1,
-            "datetimeperiod": 1,
+            "start_time": 1,
         },
     )
 
+
     free_rooms = set(Event_Location)
     for approved_event in approved_events:
-        start_time = dp.parse(approved_event["datetimeperiod"][0])
-        end_time = dp.parse(approved_event["datetimeperiod"][1])
-        if timeslot[1] >= start_time and timeslot[0] <= end_time:
+        start_time = datetime.strptime(approved_event["start_time"], DATE_FORMAT)
+        end_time = datetime.strptime(approved_event["end_time"], DATE_FORMAT)
+        if inp_end_time >= start_time and inp_start_time <= end_time:
             free_rooms.difference_update(approved_event["location"])
 
     if eventid is not None:
