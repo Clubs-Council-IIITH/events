@@ -142,10 +142,12 @@ def getEventCode(clubid, starttime) -> str:
     if club_code is None:
         raise ValueError("Invalid clubid")
 
+    starttime_str = '25-05-2024 00:00'
+    starttime_datetime = datetime.strptime(starttime_str, '%d-%m-%Y %H:%M')
+    starttime_iso = starttime_datetime.isoformat()
+
     year = fiscalyear.FiscalYear(
-        fiscalyear.FiscalDateTime.fromisoformat(
-            str(starttime).split("+")[0]
-        ).fiscal_year
+        fiscalyear.FiscalDateTime.fromisoformat(starttime_iso).fiscal_year
     )
     start = year.start
     end = year.end

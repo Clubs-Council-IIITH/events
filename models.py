@@ -46,31 +46,33 @@ class Event(BaseModel):
     budget: List[BudgetType] = []
     poc: str | None = None
 
-    #@field_validator('duration')
-    #def check_duration(cls, value, info: ValidationInfo):
-    #    time_obj = time.strptime(value, "%H-%M")
-    #    five_mins = time(0, 5)
-    #    assert time_obj > five_mins, "The duration of event should be larger than 5 minutes"
-    #    return value
+    @field_validator('duration')
+    def check_duration(cls, value: str, info: ValidationInfo):
+        hours, minutes = value.split(':')
+        time_obj = timedelta(hours=int(hours),minutes=int(minutes))
+        five_mins = timedelta(hours=0, minutes=5)
+        assert time_obj > five_mins, "The duration of event should be larger than 5 minutes"
+        return value
 
-    #@model_validator(mode='after')
-    #def checkdates(cls, values, info: ValidationInfo):
-    #    start_str = values.get('start_time')
-    #    end_str = values.get('end_time')
-    #    start_time_obj = datetime.strptime(start_str, "%d-%m-%Y %H:%M")
-    #    end_time_obj = datetime.strptime(end_str, "%d-%m-%Y %H:%M")
+    @model_validator(mode='after')
+    @classmethod
+    def checkdates(cls, values: dict, info: ValidationInfo):
+        start_str = values.start_time
+        end_str = values.end_time
+        start_time_obj = datetime.strptime(start_str, "%d-%m-%Y %H:%M")
+        end_time_obj = datetime.strptime(end_str, "%d-%m-%Y %H:%M")
 
-    #    duration_str = values.get('duration')
-    #    hours, minutes = duration_str.split(':')
-    #    duration_obj = timedelta.strptime(hours, minutes)
+        duration_str = values.duration
+        hours, minutes = duration_str.split(':')
+        duration_obj = timedelta(hours=int(hours), minutes=int(minutes))
 
-    #    validity =  start_time_obj < end_time_obj
-    #    assert validity, "The start time should be before end time"
+        validity =  start_time_obj < end_time_obj
+        assert validity, "The start time should be before end time"
 
-    #    duration_validity = ((start_time_obj + duration_obj) == end_time_obj)
-    #    assert duration_validity, "The duration is not matching with start and end times"
+        duration_validity = (start_time_obj + duration_obj) == end_time_obj
+        assert duration_validity, "The duration is not matching with start and end times"
 
-    #    return values
+        return values
 
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
     # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.

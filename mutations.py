@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from pydantic import HttpUrl, parse_obj_as
 from fastapi.encoders import jsonable_encoder
 import os
+import logging
 
 from db import eventsdb
 
@@ -64,7 +65,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     end_time_obj = datetime.strptime(details.end_time, "%d-%m-%Y %H:%M")
 
     hours, minutes = details.duration.split(':')
-    duration_obj = timedelta.strptime(hours, minutes)
+    duration_obj = timedelta(hours=int(hours), minutes=int(minutes))
 
     if start_time_obj >= end_time_obj:
         raise Exception("Start time cannot be after end time.")
@@ -72,11 +73,14 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if start_time_obj + duration_obj != end_time_obj:
         raise Exception("Duration is not difference of end and start time!")
 
+    
+
     event_instance = Event(
         name=details.name,
         clubid=details.clubid,
         start_time=details.start_time,
         end_time=details.end_time,
+        duration=details.duration,
         poc=details.poc,
     )
     if details.mode is not None:
@@ -122,6 +126,8 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
 
     # set event code
     event_instance.code = getEventCode(details.clubid, details.start_time)
+    logger = logging.getLogger("mylogger")
+    logger.info(event_instance)
 
     created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
     created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
@@ -154,7 +160,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         start_time_obj = datetime.strptime(details.start_time, "%d-%m-%Y %H:%M")
         end_time_obj = datetime.strptime(details.end_time, "%d-%m-%Y %H:%M")
         hours, minutes = details.duration.split(':')
-        duration_obj = timedelta.strptime(hours, minutes)
+        duration_obj = timedelta(hours=int(hours), minutes=int(minutes))
 
         if start_time_obj >= end_time_obj:
             raise Exception("Start time cannot be after end time.")
