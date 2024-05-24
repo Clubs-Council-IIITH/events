@@ -161,7 +161,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
 
     updatable = user["role"] in allowed_roles or (
         user["role"] == "club"
-        and event_ref["status"]["state"] != Event_State_Status.incomplete
+        and event_ref["status"]["state"] == Event_State_Status.incomplete
     )
 
     if details.name is not None and updatable:
