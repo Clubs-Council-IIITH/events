@@ -2,17 +2,13 @@ import strawberry
 from typing import List
 from datetime import datetime
 
-import dateutil.parser as dp
-
 from db import eventsdb
 
 # import all models and types
 from models import Event
 from mtypes import Event_State_Status, Event_Location
 from otypes import Info, EventType, RoomList, RoomListType
-from utils import getClubs, eventsWithSorting
-
-DATE_FORMAT="%d-%m-%Y %H:%M"
+from utils import getClubs, eventsWithSorting, DATE_FORMAT
 
 @strawberry.field
 def event(eventid: str, info: Info) -> EventType:

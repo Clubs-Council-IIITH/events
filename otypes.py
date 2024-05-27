@@ -88,9 +88,9 @@ class InputEditEventDetails:
     clubid: str | None  # not editable
     mode: Event_Mode | None = Event_Mode.hybrid
     poster: str | None = None
-    start_time: str
-    end_time: str
-    duration: str
+    start_time: str | None = None
+    end_time: str | None = None
+    duration: str | None = None
     audience: List[Audience] | None = None
     link: str | None = None
     equipment: str | None = None

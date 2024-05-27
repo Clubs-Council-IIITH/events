@@ -1,9 +1,7 @@
 import strawberry
-from datetime import datetime, timedelta
 from pydantic import HttpUrl, parse_obj_as
 from fastapi.encoders import jsonable_encoder
 import os
-import logging
 
 from db import eventsdb
 
@@ -37,6 +35,7 @@ from utils import (
     getMember,
     getRoleEmails,
     getUser,
+    check_event_time_validity,
 )
 
 inter_communication_secret_global = os.getenv("INTER_COMMUNICATION_SECRET")
@@ -60,20 +59,12 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     ):
         raise Exception("You do not have permission to access this resource.")
 
-    # Check if the start time is before the end time
-    start_time_obj = datetime.strptime(details.start_time, "%d-%m-%Y %H:%M")
-    end_time_obj = datetime.strptime(details.end_time, "%d-%m-%Y %H:%M")
-
-    hours, minutes = details.duration.split(':')
-    duration_obj = timedelta(hours=int(hours), minutes=int(minutes))
-
-    if start_time_obj >= end_time_obj:
-        raise Exception("Start time cannot be after end time.")
-
-    if start_time_obj + duration_obj != end_time_obj:
-        raise Exception("Duration is not difference of end and start time!")
-
-    
+    try:
+        check_event_time_validity(
+            details.start_time, details.end_time, details.duration
+        )
+    except Exception as e:
+        raise Exception(str(e))
 
     event_instance = Event(
         name=details.name,
@@ -126,8 +117,6 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
 
     # set event code
     event_instance.code = getEventCode(details.clubid, details.start_time)
-    logger = logging.getLogger("mylogger")
-    logger.info(event_instance)
 
     created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
     created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
@@ -153,22 +142,19 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         raise Exception("Not Authenticated to access this API")
 
     # Check if the start time is before the end time
-    if (details.start_time is not None and
-        details.end_time is not None and
-        details.duration is not None):
+    if (
+        details.start_time is not None
+        or details.end_time is not None
+        or details.duration is not None
+    ):
+        start_time = details.start_time if details.start_time else details.start_time
+        end_time = details.end_time if details.end_time else details.end_time
+        duration = details.duration if details.duration else details.duration
 
-        start_time_obj = datetime.strptime(details.start_time, "%d-%m-%Y %H:%M")
-        end_time_obj = datetime.strptime(details.end_time, "%d-%m-%Y %H:%M")
-        hours, minutes = details.duration.split(':')
-        duration_obj = timedelta(hours=int(hours), minutes=int(minutes))
-
-        if start_time_obj >= end_time_obj:
-            raise Exception("Start time cannot be after end time.")
-
-        if start_time_obj + duration_obj != end_time_obj:
-            raise Exception("Duration is not difference of end and start time!")
-
-
+        try:
+            check_event_time_validity(start_time, end_time, duration)
+        except Exception as e:
+            raise Exception(str(e))
 
     event_ref = eventsdb.find_one({"_id": details.eventid})
 
@@ -200,6 +186,8 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["start_time"] = details.start_time
     if details.end_time is not None and updatable:
         updates["end_time"] = details.end_time
+    if details.duration is not None and updatable:
+        updates["duration"] = details.duration
     if details.mode is not None and updatable:
         updates["mode"] = Event_Mode(details.mode)
     if details.location is not None and updatable:

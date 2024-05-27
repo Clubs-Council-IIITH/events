@@ -1,7 +1,7 @@
 import os
 import requests
 import fiscalyear
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from typing import List
 
@@ -144,9 +144,7 @@ def getEventCode(clubid, starttime) -> str:
     if club_code is None:
         raise ValueError("Invalid clubid")
 
-    starttime_str = '25-05-2024 00:00'
-    starttime_datetime = datetime.strptime(starttime_str, '%d-%m-%Y %H:%M')
-    starttime_iso = starttime_datetime.isoformat()
+    starttime_iso = (datetime.strptime(starttime, DATE_FORMAT)).isoformat()
 
     year = fiscalyear.FiscalYear(
         fiscalyear.FiscalDateTime.fromisoformat(starttime_iso).fiscal_year
@@ -219,7 +217,7 @@ def getRoleEmails(role: str) -> List[str]:
 def eventsWithSorting(searchspace):
     """
     Custom sorting of events based on
-    datetimeperiod with upcoming events first in ascending order
+    start_time with upcoming events first in ascending order
     and then past events in descending order
     """
     current_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
@@ -229,10 +227,25 @@ def eventsWithSorting(searchspace):
     }
     past_events_query = {**searchspace, "start_time": {"$lt": current_datetime}}
 
-    upcoming_events = list(
-        eventsdb.find(upcoming_events_query).sort("start_time", 1)
-    )
+    upcoming_events = list(eventsdb.find(upcoming_events_query).sort("start_time", 1))
     past_events = list(eventsdb.find(past_events_query).sort("start_time", -1))
     events = upcoming_events + past_events
 
     return events
+
+
+def check_event_time_validity(start_time: str, end_time: str, duration: str):
+    """
+    Function to check if the start_time is before end_time
+    """
+    start_time_obj = datetime.strptime(start_time, DATE_FORMAT)
+    end_time_obj = datetime.strptime(end_time, DATE_FORMAT)
+
+    hours, minutes = duration.split(":")
+    duration_obj = timedelta(hours=int(hours), minutes=int(minutes))
+
+    if start_time_obj >= end_time_obj:
+        raise Exception("Start time cannot be after end time.")
+
+    if start_time_obj + duration_obj != end_time_obj:
+        raise Exception("Duration is not difference of end and start time!")
