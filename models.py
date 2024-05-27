@@ -1,6 +1,7 @@
 from bson import ObjectId
 from datetime import datetime, timedelta
-from typing import Tuple, List
+from typing import List
+from typing_extensions import Self
 from pydantic import (
     ConfigDict,
     field_validator,
@@ -55,24 +56,23 @@ class Event(BaseModel):
         return value
 
     @model_validator(mode='after')
-    @classmethod
-    def checkdates(cls, values: dict, info: ValidationInfo):
-        start_str = values.start_time
-        end_str = values.end_time
+    def checkdates(self) -> Self:
+        start_str = self.start_time
+        end_str = self.end_time
         start_time_obj = datetime.strptime(start_str, "%d-%m-%Y %H:%M")
         end_time_obj = datetime.strptime(end_str, "%d-%m-%Y %H:%M")
 
-        duration_str = values.duration
+        duration_str = self.duration
         hours, minutes = duration_str.split(':')
         duration_obj = timedelta(hours=int(hours), minutes=int(minutes))
 
-        validity =  start_time_obj < end_time_obj
-        assert validity, "The start time should be before end time"
+        if start_time_obj >= end_time_obj:
+            raise ValueError("The start time should be before the end time")
+        
+        if (start_time_obj + duration_obj) != end_time_obj:
+            raise ValueError("The duration is not matching with start and end times")
 
-        duration_validity = (start_time_obj + duration_obj) == end_time_obj
-        assert duration_validity, "The duration is not matching with start and end times"
-
-        return values
+        return self
 
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
     # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
