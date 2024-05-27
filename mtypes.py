@@ -50,34 +50,50 @@ class Event_State_Status(StrEnum):
 
 @strawberry.type
 class Event_Status:
-    state: Event_State_Status = Event_State_Status.incomplete
+    state: Event_State_Status = Event_State_Status.incomplete # type: ignore
     # room: Event_Room_Status = Event_Room_Status.unapproved
     # budget: Event_Budget_Status = Event_Budget_Status.unapproved
     room: bool = False
     budget: bool = False
+
     cc_approver: str | None = None
+    cc_approver_time: str | None = None
+
     slo_approver: str | None = None
+    slo_approver_time: str | None = None
+
     slc_approver: str | None = None
+    slc_approver_time: str | None = None
 
     # def __init__ (self, state: Event_State_Status = None, room: Event_Room_Status = None, budget: Event_Budget_Status = None) :
     #     self.state: Event_State_Status = Event_State_Status.incomplete if state is None else state
     #     self.room: Event_Room_Status = Event_Room_Status.unapproved if room is None else room
     #     self.budget: Event_Budget_Status = Event_Budget_Status.unapproved if budget is None else budget
+    
     def __init__(
         self,
-        state: Event_State_Status = Event_State_Status.incomplete,
+        state: Event_State_Status = Event_State_Status.incomplete, # type: ignore
         room: bool = False,
         budget: bool = False,
         cc_approver: str | None = None,
+        cc_approver_time: str | None = None,
         slo_approver: str | None = None,
+        slo_approver_time: str | None = None,
         slc_approver: str | None = None,
+        slc_approver_time: str | None = None,
     ):
         self.state = state
         self.room = room
         self.budget = budget
+
         self.cc_approver = cc_approver
+        self.cc_approver_time = cc_approver_time
+
         self.slo_approver = slo_approver
+        self.slo_approver_time = slo_approver_time
+
         self.slc_approver = slc_approver
+        self.slc_approver_time = slc_approver_time
 
 
 # Event Modes
