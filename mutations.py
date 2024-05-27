@@ -267,7 +267,6 @@ def progressEvent(
             "room": False,
             #   or len(event_instance.location) == 0,
             "state": Event_State_Status.pending_cc.value,
-
             "cc_approver": None,
             "slc_approver": None,
             "slo_approver": None,
@@ -400,7 +399,10 @@ def progressEvent(
         student_count = "N/A"
     else:
         mail_location = ", ".join(
-            [getattr(Event_Full_Location, loc) for loc in updated_event_instance.location]
+            [
+                getattr(Event_Full_Location, loc)
+                for loc in updated_event_instance.location
+            ]
         )
 
     equipment, additional = "N/A", "N/A"
