@@ -51,10 +51,10 @@ class Event_State_Status(StrEnum):
 @strawberry.type
 class Event_Status:
     state: Event_State_Status = Event_State_Status.incomplete  # type: ignore
-    # room: Event_Room_Status = Event_Room_Status.unapproved
-    # budget: Event_Budget_Status = Event_Budget_Status.unapproved
-    room: bool = False
-    budget: bool = False
+    room: bool = False  # room: Event_Room_Status = Event_Room_Status.unapproved
+    budget: bool = False  # budget: Event_Budget_Status = Event_Budget_Status.unapproved
+
+    submission_time: str | None = None
 
     cc_approver: str | None = None
     cc_approver_time: str | None = None
@@ -75,6 +75,7 @@ class Event_Status:
         state: Event_State_Status = Event_State_Status.incomplete,  # type: ignore
         room: bool = False,
         budget: bool = False,
+        submission_time: str | None = None,
         cc_approver: str | None = None,
         cc_approver_time: str | None = None,
         slo_approver: str | None = None,
@@ -85,6 +86,8 @@ class Event_Status:
         self.state = state
         self.room = room
         self.budget = budget
+
+        self.submission_time = submission_time
 
         self.cc_approver = cc_approver
         self.cc_approver_time = cc_approver_time
