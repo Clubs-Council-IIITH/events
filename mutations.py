@@ -270,6 +270,7 @@ def progressEvent(
             "cc_approver": None,
             "slc_approver": None,
             "slo_approver": None,
+            "submission_time": time_str,
             "cc_approver_time": "Not Approved",
             "slc_approver_time": "Not Approved",
             "slo_approver_time": "Not Approved",
@@ -289,6 +290,7 @@ def progressEvent(
             "cc_approver_time": time_str,
             "slc_approver_time": event_instance.status.slc_approver_time,
             "slo_approver_time": event_instance.status.slo_approver_time,
+            "submission_time": event_instance.status.submission_time,
         }
         if cc_progress_budget is not None:
             updation["budget"] = cc_progress_budget
@@ -325,6 +327,7 @@ def progressEvent(
             "cc_approver_time": event_instance.status.cc_approver_time,
             "slc_approver_time": time_str,
             "slo_approver_time": event_instance.status.slo_approver_time,
+            "submission_time": event_instance.status.submission_time,
         }
 
         if not updation["room"]:
@@ -348,6 +351,7 @@ def progressEvent(
             "cc_approver_time": event_instance.status.cc_approver_time,
             "slc_approver_time": event_instance.status.slc_approver_time,
             "slo_approver_time": time_str,
+            "submission_time": event_instance.status.submission_time,
         }
 
     elif event_instance.status.state == Event_State_Status.approved:
@@ -360,6 +364,7 @@ def progressEvent(
             "budget": event_instance.status.budget,
             "room": event_instance.status.room,
             "state": Event_State_Status.approved.value,
+            "submission_time": event_instance.status.submission_time,
             "cc_approver": event_instance.status.cc_approver,
             "slc_approver": event_instance.status.slc_approver,
             "slo_approver": event_instance.status.slo_approver,
