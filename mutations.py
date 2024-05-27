@@ -572,8 +572,8 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
                 getClubNameEmail(old_event.clubid, email=True, name=False),
             ]
             mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
+                event_id=old_event.code,
                 event=old_event.name,
-                eventlink=getEventLink(old_event.code),
             )
             mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
                 club=old_event.clubid,
@@ -586,8 +586,8 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
                 getClubNameEmail(old_event.clubid, email=True, name=False),
             ]
             mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
+                event_id=old_event.code,
                 event=old_event.name,
-                eventlink=getEventLink(old_event.code),
             )
             mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
                 club=old_event.clubid,
