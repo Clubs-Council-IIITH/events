@@ -9,6 +9,8 @@ from db import eventsdb
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
+DATE_FORMAT = "%d-%m-%Y %H:%M"
+
 # start month of financial year
 FISCAL_START_MONTH = 4
 
