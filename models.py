@@ -1,9 +1,11 @@
 from bson import ObjectId
-from datetime import datetime
-from typing import Tuple, List
+from datetime import datetime, timedelta
+from typing import List
+from typing_extensions import Self
 from pydantic import (
     ConfigDict,
     field_validator,
+    model_validator,
     BaseModel,
     Field,
     HttpUrl,
@@ -29,7 +31,9 @@ class Event(BaseModel):
     code: str | None = None
     name: event_name_type
     clubid: str
-    datetimeperiod: Tuple[datetime, datetime]
+    start_time: str
+    end_time: str
+    duration: str
     status: Event_Status = Event_Status()
     location: List[Event_Location] = []
     description: event_desc_type | None = "No description available."
@@ -43,11 +47,32 @@ class Event(BaseModel):
     budget: List[BudgetType] = []
     poc: str | None = None
 
-    @field_validator("datetimeperiod")
-    def check_end_year(cls, value, info: ValidationInfo):
-        if value[0] >= value[1]:
-            raise ValueError("Start date cannot be same/after end date")
+    @field_validator('duration')
+    def check_duration(cls, value: str, info: ValidationInfo):
+        hours, minutes = value.split(':')
+        time_obj = timedelta(hours=int(hours),minutes=int(minutes))
+        five_mins = timedelta(hours=0, minutes=5)
+        assert time_obj > five_mins, "The duration of event should be larger than 5 minutes"
         return value
+
+    @model_validator(mode='after')
+    def checkdates(self) -> Self:
+        start_str = self.start_time
+        end_str = self.end_time
+        start_time_obj = datetime.strptime(start_str, "%d-%m-%Y %H:%M")
+        end_time_obj = datetime.strptime(end_str, "%d-%m-%Y %H:%M")
+
+        duration_str = self.duration
+        hours, minutes = duration_str.split(':')
+        duration_obj = timedelta(hours=int(hours), minutes=int(minutes))
+
+        if start_time_obj >= end_time_obj:
+            raise ValueError("The start time should be before the end time")
+        
+        if (start_time_obj + duration_obj) != end_time_obj:
+            raise ValueError("The duration is not matching with start and end times")
+
+        return self
 
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
     # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.

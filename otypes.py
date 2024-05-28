@@ -8,7 +8,6 @@ from strawberry.types.info import RootValueType
 from pydantic import BaseModel
 from typing import Dict, List, Tuple
 from functools import cached_property
-from datetime import datetime
 
 from models import Event
 from mtypes import PyObjectId, BudgetType, Event_Location, Event_Mode, Audience
@@ -68,7 +67,9 @@ class InputEventDetails:
     clubid: str
     mode: Event_Mode | None = Event_Mode.hybrid
     poster: str | None = None
-    datetimeperiod: List[datetime]
+    start_time: str
+    end_time: str
+    duration: str
     audience: List[Audience] | None = None
     link: str | None = None
     equipment: str | None = None
@@ -87,7 +88,9 @@ class InputEditEventDetails:
     clubid: str | None  # not editable
     mode: Event_Mode | None = Event_Mode.hybrid
     poster: str | None = None
-    datetimeperiod: List[datetime] | None = None
+    start_time: str | None = None
+    end_time: str | None = None
+    duration: str | None = None
     audience: List[Audience] | None = None
     link: str | None = None
     equipment: str | None = None
@@ -96,5 +99,3 @@ class InputEditEventDetails:
     budget: List[BudgetInput] | None = None
     poc: str | None = None
 
-
-timelot_type = Tuple[datetime, datetime]
