@@ -1,5 +1,6 @@
 import strawberry
 from pydantic import HttpUrl, parse_obj_as
+from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 import os
 
@@ -436,8 +437,8 @@ def progressEvent(
     if updated_event_instance.additional:
         additional = updated_event_instance.additional
 
-    event_start_time = event.start_time
-    event_end_time = event.end_time
+    event_start_time = updated_event_instance.start_time
+    event_end_time = updated_event_instance.end_time
 
     poc = getUser(updated_event_instance.poc, info.context.cookies)
     if not poc:
