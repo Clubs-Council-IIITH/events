@@ -2,6 +2,7 @@ import os
 import requests
 import fiscalyear
 from datetime import datetime
+import pytz
 
 from typing import List
 
@@ -218,7 +219,8 @@ def eventsWithSorting(searchspace):
     datetimeperiod with upcoming events first in ascending order
     and then past events in descending order
     """
-    current_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    ist = pytz.timezone('Asia/Kolkata')
+    current_datetime = datetime.now(ist).strftime("%Y-%m-%dT%H:%M:%S+00:00")
     upcoming_events_query = {
         **searchspace,
         "datetimeperiod.0": {"$gte": current_datetime},
