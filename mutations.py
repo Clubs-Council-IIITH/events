@@ -256,7 +256,7 @@ def progressEvent(
     event_instance = Event.parse_obj(event_ref)
 
     # get current time
-    ist = pytz.timezone('Asia/Kolkata')
+    ist = pytz.timezone("Asia/Kolkata")
     current_time = datetime.now(ist)
     time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
 

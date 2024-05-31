@@ -219,7 +219,7 @@ def eventsWithSorting(searchspace):
     datetimeperiod with upcoming events first in ascending order
     and then past events in descending order
     """
-    ist = pytz.timezone('Asia/Kolkata')
+    ist = pytz.timezone("Asia/Kolkata")
     current_datetime = datetime.now(ist).strftime("%Y-%m-%dT%H:%M:%S+00:00")
     upcoming_events_query = {
         **searchspace,
