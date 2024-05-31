@@ -5,9 +5,9 @@ to run:
     export PYTHONPATH=`pwd`; python3 scripts/fix_end_times.py
 """
 
+from datetime import datetime, timedelta
 
 from db import eventsdb
-from datetime import datetime, timedelta
 
 fix = True
 
@@ -15,8 +15,12 @@ if __name__ == "__main__":
     events = eventsdb.find()
     for event in events:
         # Check if the difference between the start time and the end time is 2 minutes
-        start_time1 = datetime.fromisoformat(event["datetimeperiod"][0].split("+")[0])
-        end_time1 = datetime.fromisoformat(event["datetimeperiod"][1].split("+")[0])
+        start_time1 = datetime.fromisoformat(
+            event["datetimeperiod"][0].split("+")[0]
+        )
+        end_time1 = datetime.fromisoformat(
+            event["datetimeperiod"][1].split("+")[0]
+        )
 
         start_time = start_time1.replace(tzinfo=None)
         end_time = end_time1.replace(tzinfo=None)
@@ -31,5 +35,5 @@ if __name__ == "__main__":
 
                 print(event["datetimeperiod"])
                 eventsdb.update_one({"_id": event["_id"]}, {"$set": event})
-                
+
             print(f"Fixed end time for event {event['code']}")

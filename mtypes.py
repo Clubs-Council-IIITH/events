@@ -1,6 +1,7 @@
+from enum import StrEnum, auto
+
 import strawberry
 from bson import ObjectId
-from enum import StrEnum, auto
 from pydantic import Field, StringConstraints, field_validator
 from pydantic_core import core_schema
 from typing_extensions import Annotated, Any
@@ -51,8 +52,12 @@ class Event_State_Status(StrEnum):
 @strawberry.type
 class Event_Status:
     state: Event_State_Status = Event_State_Status.incomplete  # type: ignore
-    room: bool = False  # room: Event_Room_Status = Event_Room_Status.unapproved
-    budget: bool = False  # budget: Event_Budget_Status = Event_Budget_Status.unapproved
+    room: bool = (
+        False  # room: Event_Room_Status = Event_Room_Status.unapproved
+    )
+    budget: bool = (
+        False  # budget: Event_Budget_Status = Event_Budget_Status.unapproved
+    )
 
     submission_time: str | None = None
 
@@ -185,7 +190,9 @@ class Event_Location(StrEnum):
     other = auto()
 
 
-event_name_type = Annotated[str, StringConstraints(min_length=1, max_length=200)]
+event_name_type = Annotated[
+    str, StringConstraints(min_length=1, max_length=200)
+]
 event_desc_type = Annotated[str, StringConstraints(max_length=5000)]
 event_popu_type = Annotated[int, Field(ge=0)]
 event_othr_type = Annotated[str, StringConstraints(max_length=1000)]

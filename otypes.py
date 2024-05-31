@@ -1,17 +1,16 @@
 import json
-import strawberry
+from datetime import datetime
+from functools import cached_property
+from typing import Dict, List, Tuple
 
+import strawberry
+from pydantic import BaseModel
 from strawberry.fastapi import BaseContext
 from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
 
-from pydantic import BaseModel
-from typing import Dict, List, Tuple
-from functools import cached_property
-from datetime import datetime
-
 from models import Event
-from mtypes import PyObjectId, BudgetType, Event_Location, Event_Mode, Audience
+from mtypes import Audience, BudgetType, Event_Location, Event_Mode, PyObjectId
 
 
 # custom context class

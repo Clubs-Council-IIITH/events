@@ -1,15 +1,15 @@
-import strawberry
 from typing import List
 
 import dateutil.parser as dp
+import strawberry
 
 from db import eventsdb
 
 # import all models and types
 from models import Event
-from mtypes import Event_State_Status, Event_Location
-from otypes import Info, EventType, RoomList, RoomListType, timelot_type
-from utils import getClubs, eventsWithSorting
+from mtypes import Event_Location, Event_State_Status
+from otypes import EventType, Info, RoomList, RoomListType, timelot_type
+from utils import eventsWithSorting, getClubs
 
 
 @strawberry.field
@@ -36,7 +36,10 @@ def event(eventid: str, info: Info) -> EventType:
                 user is None
                 or (
                     user["role"] not in {"cc", "slc", "slo"}
-                    and (user["role"] != "club" or user["uid"] != event["clubid"])
+                    and (
+                        user["role"] != "club"
+                        or user["uid"] != event["clubid"]
+                    )
                 )
             )
         )
@@ -65,7 +68,10 @@ def eventid(code: str, info: Info) -> str:
 
 @strawberry.field
 def events(
-    info: Info, clubid: str | None, public: bool | None, limit: int | None = None
+    info: Info,
+    clubid: str | None,
+    public: bool | None,
+    limit: int | None = None,
 ) -> List[EventType]:
     """
     if public is set, then return only public/approved events
@@ -132,7 +138,9 @@ def events(
     if limit is not None:
         events = events[:limit]
 
-    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
+    return [
+        EventType.from_pydantic(Event.parse_obj(event)) for event in events
+    ]
 
 
 @strawberry.field
@@ -160,7 +168,9 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
         reverse=False,
     )
 
-    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
+    return [
+        EventType.from_pydantic(Event.parse_obj(event)) for event in events
+    ]
 
 
 @strawberry.field
@@ -196,7 +206,9 @@ def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
         reverse=True,
     )
 
-    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
+    return [
+        EventType.from_pydantic(Event.parse_obj(event)) for event in events
+    ]
 
 
 @strawberry.field
@@ -246,7 +258,9 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
         reverse=False,
     )
 
-    return [EventType.from_pydantic(Event.parse_obj(event)) for event in events]
+    return [
+        EventType.from_pydantic(Event.parse_obj(event)) for event in events
+    ]
 
 
 @strawberry.field
@@ -281,7 +295,9 @@ def availableRooms(
         if event is not None:
             free_rooms.update(event["location"])
 
-    return RoomListType.from_pydantic(RoomList.parse_obj({"locations": free_rooms}))
+    return RoomListType.from_pydantic(
+        RoomList.parse_obj({"locations": free_rooms})
+    )
 
 
 # register all queries

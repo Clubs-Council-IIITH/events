@@ -1,5 +1,6 @@
-import requests
 import os
+
+import requests
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
@@ -37,7 +38,8 @@ def triggerMail(
             )
         else:
             requests.post(
-                "http://gateway/graphql", json={"query": query, "variables": variables}
+                "http://gateway/graphql",
+                json={"query": query, "variables": variables},
             )
 
     except Exception:

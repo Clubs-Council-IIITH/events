@@ -9,7 +9,7 @@ to run:
 import fiscalyear
 
 from db import eventsdb
-from utils import getClubCode, FISCAL_START_MONTH
+from utils import FISCAL_START_MONTH, getClubCode
 
 fiscalyear.START_MONTH = FISCAL_START_MONTH
 

@@ -1,26 +1,27 @@
-from bson import ObjectId
 from datetime import datetime
-from typing import Tuple, List
+from typing import List, Tuple
+
+from bson import ObjectId
 from pydantic import (
-    ConfigDict,
-    field_validator,
     BaseModel,
+    ConfigDict,
     Field,
     HttpUrl,
     ValidationInfo,
+    field_validator,
 )
 
 from mtypes import (
     Audience,
     BudgetType,
-    Event_Status,
-    event_name_type,
-    event_desc_type,
-    event_popu_type,
-    event_othr_type,
-    Event_Mode,
     Event_Location,
+    Event_Mode,
+    Event_Status,
     PyObjectId,
+    event_desc_type,
+    event_name_type,
+    event_othr_type,
+    event_popu_type,
 )
 
 

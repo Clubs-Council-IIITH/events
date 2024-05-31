@@ -1,0 +1,12 @@
+[tool.ruff]
+line-length = 79
+indent-width = 4
+
+[tool.ruff.lint]
+# line too long, unsorted imports, unused imports
+extend-select = ["E501", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
