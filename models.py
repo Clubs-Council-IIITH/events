@@ -1,26 +1,27 @@
-from bson import ObjectId
 from datetime import datetime
-from typing import Tuple, List
+from typing import List, Tuple
+
+from bson import ObjectId
 from pydantic import (
-    ConfigDict,
-    field_validator,
     BaseModel,
+    ConfigDict,
     Field,
     HttpUrl,
     ValidationInfo,
+    field_validator,
 )
 
 from mtypes import (
     Audience,
     BudgetType,
-    Event_Status,
-    event_name_type,
-    event_desc_type,
-    event_popu_type,
-    event_othr_type,
-    Event_Mode,
     Event_Location,
+    Event_Mode,
+    Event_Status,
     PyObjectId,
+    event_desc_type,
+    event_name_type,
+    event_othr_type,
+    event_popu_type,
 )
 
 
@@ -50,7 +51,7 @@ class Event(BaseModel):
         return value
 
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.  # noqa: E501
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,

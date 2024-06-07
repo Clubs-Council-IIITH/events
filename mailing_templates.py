@@ -17,7 +17,7 @@ $eventlink
 
 
 Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
-"""
+"""  # noqa: E501
 )
 
 PROGRESS_EVENT_BODY_FOR_SLO = Template(
@@ -55,7 +55,7 @@ Clubs Council.
 
 
 Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
-"""
+"""  # noqa: E501
 )
 
 DELETE_EVENT_BODY_FOR_CC = Template(
@@ -69,7 +69,7 @@ $eventlink
 
 
 Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
-"""
+"""  # noqa: E501
 )
 
 # Email Templates For Clubs
@@ -114,7 +114,7 @@ Clubs Council.
 
 
 Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
-"""
+"""  # noqa: E501
 )
 
 APPROVED_EVENT_BODY_FOR_CLUB = Template(
@@ -128,7 +128,7 @@ $eventlink
 
 
 Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
-"""
+"""  # noqa: E501
 )
 
 DELETE_EVENT_BODY_FOR_CLUB = Template(
@@ -142,5 +142,5 @@ $eventlink
 
 
 Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
-"""
+"""  # noqa: E501
 )

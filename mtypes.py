@@ -1,6 +1,7 @@
+from enum import StrEnum, auto
+
 import strawberry
 from bson import ObjectId
-from enum import StrEnum, auto
 from pydantic import Field, StringConstraints, field_validator
 from pydantic_core import core_schema
 from typing_extensions import Annotated, Any
@@ -26,11 +27,11 @@ class Event_State_Status(StrEnum):
     incomplete = auto()
     # after the club fills all the details, they progress it
     pending_cc = auto()
-    # cc chooses to progress the state status, the budget status and the room status
-    # if budget status is unapproved, the event is `pending_budget`, else skip to next
+    # cc chooses to progress the state status, the budget status and the room status # noqa: E501
+    # if budget status is unapproved, the event is `pending_budget`, else skip to next  # noqa: E501
     pending_budget = auto()
     # after budget is approved (through any track),
-    # if room status is unapproved, the event is `pending_room`, else skip to next
+    # if room status is unapproved, the event is `pending_room`, else skip to next # noqa: E501
     pending_room = auto()
     # after room is approved (through any track), the event is `approved`
     approved = auto()
@@ -51,8 +52,8 @@ class Event_State_Status(StrEnum):
 @strawberry.type
 class Event_Status:
     state: Event_State_Status = Event_State_Status.incomplete  # type: ignore
-    room: bool = False  # room: Event_Room_Status = Event_Room_Status.unapproved
-    budget: bool = False  # budget: Event_Budget_Status = Event_Budget_Status.unapproved
+    room: bool = False  # room: Event_Room_Status = Event_Room_Status.unapproved # noqa: E501
+    budget: bool = False  # budget: Event_Budget_Status = Event_Budget_Status.unapproved # noqa: E501
 
     submission_time: str | None = None
 
@@ -64,11 +65,6 @@ class Event_Status:
 
     slc_approver: str | None = None
     slc_approver_time: str | None = None
-
-    # def __init__ (self, state: Event_State_Status = None, room: Event_Room_Status = None, budget: Event_Budget_Status = None) :
-    #     self.state: Event_State_Status = Event_State_Status.incomplete if state is None else state
-    #     self.room: Event_Room_Status = Event_Room_Status.unapproved if room is None else room
-    #     self.budget: Event_Budget_Status = Event_Budget_Status.unapproved if budget is None else budget
 
     def __init__(
         self,
@@ -185,7 +181,9 @@ class Event_Location(StrEnum):
     other = auto()
 
 
-event_name_type = Annotated[str, StringConstraints(min_length=1, max_length=200)]
+event_name_type = Annotated[
+    str, StringConstraints(min_length=1, max_length=200)
+]
 event_desc_type = Annotated[str, StringConstraints(max_length=5000)]
 event_popu_type = Annotated[int, Field(ge=0)]
 event_othr_type = Annotated[str, StringConstraints(max_length=1000)]

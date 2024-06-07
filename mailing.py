@@ -1,5 +1,6 @@
-import requests
 import os
+
+import requests
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
@@ -18,7 +19,7 @@ def triggerMail(
             mutation Mutation($mailInput: MailInput!, $interCommunicationSecret: String) {
                 sendMail(mailInput: $mailInput, interCommunicationSecret: $interCommunicationSecret)
             }
-        """
+        """  # noqa: E501
         variables = {
             "mailInput": {
                 "body": body,
@@ -37,7 +38,8 @@ def triggerMail(
             )
         else:
             requests.post(
-                "http://gateway/graphql", json={"query": query, "variables": variables}
+                "http://gateway/graphql",
+                json={"query": query, "variables": variables},
             )
 
     except Exception:

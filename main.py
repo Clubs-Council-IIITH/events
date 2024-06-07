@@ -1,19 +1,17 @@
+from os import getenv
+
 import strawberry
-
-from strawberry.tools import create_type
-from strawberry.fastapi import GraphQLRouter
-
 from fastapi import FastAPI
+from strawberry.fastapi import GraphQLRouter
+from strawberry.tools import create_type
 
 # override PyObjectId and Context scalars
 from mtypes import PyObjectId
-from os import getenv
-
+from mutations import mutations
 from otypes import Context, PyObjectIdType
 
 # import all queries and mutations
 from queries import queries
-from mutations import mutations
 
 # check whether running in debug mode
 DEBUG = int(getenv("GLOBAL_DEBUG", 0))

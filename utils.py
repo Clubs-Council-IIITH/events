@@ -1,10 +1,10 @@
 import os
-import requests
-import fiscalyear
 from datetime import datetime
-import pytz
-
 from typing import List
+
+import fiscalyear
+import pytz
+import requests
 
 from db import eventsdb
 
@@ -41,7 +41,8 @@ def getMember(cid, uid, cookies=None):
             )
         else:
             request = requests.post(
-                "http://gateway/graphql", json={"query": query, "variables": variables}
+                "http://gateway/graphql",
+                json={"query": query, "variables": variables},
             )
         return request.json()["data"]["member"]
 
@@ -76,10 +77,13 @@ def getUser(uid, cookies=None):
             )
         else:
             request = requests.post(
-                "http://gateway/graphql", json={"query": query, "variables": variable}
+                "http://gateway/graphql",
+                json={"query": query, "variables": variable},
             )
 
-        return request.json()["data"]["userProfile"], request.json()["data"]["userMeta"]
+        return request.json()["data"]["userProfile"], request.json()["data"][
+            "userMeta"
+        ]
     except Exception:
         return None
 
@@ -106,7 +110,9 @@ def getClubs(cookies=None):
                 cookies=cookies,
             )
         else:
-            request = requests.post("http://gateway/graphql", json={"query": query})
+            request = requests.post(
+                "http://gateway/graphql", json={"query": query}
+            )
         return request.json()["data"]["allClubs"]
     except Exception:
         return []
@@ -154,7 +160,10 @@ def getEventCode(clubid, starttime) -> str:
     club_events = eventsdb.find(
         {
             "clubid": clubid,
-            "datetimeperiod": {"$gte": start.isoformat(), "$lte": end.isoformat()},
+            "datetimeperiod": {
+                "$gte": start.isoformat(),
+                "$lte": end.isoformat(),
+            },
         }
     )
 
@@ -179,17 +188,20 @@ def getRoleEmails(role: str) -> List[str]:
                 uid
               }
             }
-        """
+        """  # noqa: E501
         variables = {
             "role": role,
             "interCommunicationSecret": inter_communication_secret,
         }
         request = requests.post(
-            "http://gateway/graphql", json={"query": query, "variables": variables}
+            "http://gateway/graphql",
+            json={"query": query, "variables": variables},
         )
 
         # extract UIDs
-        uids = list(map(lambda o: o["uid"], request.json()["data"]["usersByRole"]))
+        uids = list(
+            map(lambda o: o["uid"], request.json()["data"]["usersByRole"])
+        )
 
         # get emails of each UID
         emails = []
@@ -203,7 +215,8 @@ def getRoleEmails(role: str) -> List[str]:
             """
             variables = {"userInput": {"uid": uid}}
             request = requests.post(
-                "http://gateway/graphql", json={"query": query, "variables": variables}
+                "http://gateway/graphql",
+                json={"query": query, "variables": variables},
             )
             emails.append(request.json()["data"]["userProfile"]["email"])
 
@@ -225,12 +238,17 @@ def eventsWithSorting(searchspace):
         **searchspace,
         "datetimeperiod.0": {"$gte": current_datetime},
     }
-    past_events_query = {**searchspace, "datetimeperiod.0": {"$lt": current_datetime}}
+    past_events_query = {
+        **searchspace,
+        "datetimeperiod.0": {"$lt": current_datetime},
+    }
 
     upcoming_events = list(
         eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1)
     )
-    past_events = list(eventsdb.find(past_events_query).sort("datetimeperiod.0", -1))
+    past_events = list(
+        eventsdb.find(past_events_query).sort("datetimeperiod.0", -1)
+    )
     events = upcoming_events + past_events
 
     return events

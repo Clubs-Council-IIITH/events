@@ -1,35 +1,35 @@
-import strawberry
-from datetime import timedelta, datetime
-import pytz
-from pydantic import HttpUrl, parse_obj_as
-from fastapi.encoders import jsonable_encoder
 import os
+from datetime import datetime, timedelta
+
+import pytz
+import strawberry
+from fastapi.encoders import jsonable_encoder
+from pydantic import HttpUrl, parse_obj_as
 
 from db import eventsdb
+from mailing import triggerMail
+from mailing_templates import (
+    APPROVED_EVENT_BODY_FOR_CLUB,
+    CLUB_EVENT_SUBJECT,
+    DELETE_EVENT_BODY_FOR_CC,
+    DELETE_EVENT_BODY_FOR_CLUB,
+    PROGRESS_EVENT_BODY,
+    PROGRESS_EVENT_BODY_FOR_SLO,
+    PROGRESS_EVENT_SUBJECT,
+    SUBMIT_EVENT_BODY_FOR_CLUB,
+)
 
 # import all models and types
 from models import Event
-from otypes import Info, InputEventDetails, EventType, InputEditEventDetails
-from mailing import triggerMail
 from mtypes import (
-    BudgetType,
-    Event_Mode,
-    Event_Location,
-    Event_Full_Location,
     Audience,
+    BudgetType,
+    Event_Full_Location,
+    Event_Location,
+    Event_Mode,
     Event_State_Status,
 )
-
-from mailing_templates import (
-    PROGRESS_EVENT_SUBJECT,
-    PROGRESS_EVENT_BODY,
-    PROGRESS_EVENT_BODY_FOR_SLO,
-    DELETE_EVENT_BODY_FOR_CC,
-    CLUB_EVENT_SUBJECT,
-    APPROVED_EVENT_BODY_FOR_CLUB,
-    SUBMIT_EVENT_BODY_FOR_CLUB,
-    DELETE_EVENT_BODY_FOR_CLUB,
-)
+from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
     getClubNameEmail,
     getEventCode,
@@ -73,7 +73,9 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if details.mode is not None:
         event_instance.mode = Event_Mode(details.mode)
     if details.location is not None:
-        event_instance.location = [Event_Location(loc) for loc in details.location]
+        event_instance.location = [
+            Event_Location(loc) for loc in details.location
+        ]
     if details.description is not None:
         event_instance.description = details.description
     if details.poster is not None:
@@ -92,14 +94,18 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.budget = list(
             map(
                 lambda x: BudgetType(
-                    amount=x.amount, description=x.description, advance=x.advance
+                    amount=x.amount,
+                    description=x.description,
+                    advance=x.advance,
                 ),
                 details.budget,
             )
         )
 
     # Check POC Details Exist or not
-    if not getMember(details.clubid, details.poc, cookies=info.context.cookies):
+    if not getMember(
+        details.clubid, details.poc, cookies=info.context.cookies
+    ):
         raise Exception("Member Details for POC does not exist")
 
     # if creator is CC, set state to approved
@@ -112,9 +118,13 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.status.state = Event_State_Status.incomplete
 
     # set event code
-    event_instance.code = getEventCode(details.clubid, details.datetimeperiod[0])
+    event_instance.code = getEventCode(
+        details.clubid, details.datetimeperiod[0]
+    )
 
-    created_id = eventsdb.insert_one(jsonable_encoder(event_instance)).inserted_id
+    created_id = eventsdb.insert_one(
+        jsonable_encoder(event_instance)
+    ).inserted_id
     created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
 
     return EventType.from_pydantic(created_event)
@@ -139,7 +149,9 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
 
     if details.datetimeperiod is not None:
         if details.datetimeperiod[0] >= details.datetimeperiod[1]:
-            raise Exception("Start datetime cannot be same/after end datetime.")
+            raise Exception(
+                "Start datetime cannot be same/after end datetime."
+            )
 
     event_ref = eventsdb.find_one({"_id": details.eventid})
 
@@ -177,7 +189,9 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
         updates["poc"] = details.poc
         # Check POC Details Exist or not
-        if not getMember(details.clubid, details.poc, cookies=info.context.cookies):
+        if not getMember(
+            details.clubid, details.poc, cookies=info.context.cookies
+        ):
             raise Exception("Member Details for POC does not exist")
     if details.description is not None:
         updates["description"] = details.description
@@ -198,7 +212,9 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["budget"] = list(
             map(
                 lambda x: BudgetType(
-                    amount=x.amount, description=x.description, advance=x.advance
+                    amount=x.amount,
+                    description=x.description,
+                    advance=x.advance,
                 ),
                 details.budget,
             )
@@ -243,9 +259,9 @@ def progressEvent(
     if room status is unapproved, the event is `pending_room`, else skip to next
     after room is approved (through any track), the event is `approved`
     once the event is over, the club or cc can change the state to `completed`
-    """
+    """  # noqa: E501
     noaccess_error = Exception(
-        "Can not access event. Either it does not exist or user does not have perms."
+        "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
     )
 
     user = info.context.user
@@ -375,7 +391,9 @@ def progressEvent(
             "slo_approver_time": event_instance.status.slo_approver_time,
         }
 
-    upd_ref = eventsdb.update_one({"_id": eventid}, {"$set": {"status": updation}})
+    upd_ref = eventsdb.update_one(
+        {"_id": eventid}, {"$set": {"status": updation}}
+    )
     if upd_ref.matched_count == 0:
         raise noaccess_error
 
@@ -386,7 +404,9 @@ def progressEvent(
 
     # Data Preparation for the mailing
     mail_uid = user["uid"]
-    mail_club = getClubNameEmail(updated_event_instance.clubid, email=True, name=True)
+    mail_club = getClubNameEmail(
+        updated_event_instance.clubid, email=True, name=True
+    )
 
     if mail_club is None:
         raise Exception("Club does not exist.")
@@ -422,7 +442,9 @@ def progressEvent(
     start_dt = updated_event_instance.datetimeperiod[0] + ist_offset
     end_dt = updated_event_instance.datetimeperiod[1] + ist_offset
     event_start_time = (
-        str(start_dt.strftime("%d-%m-%Y")) + " " + str(start_dt.strftime("%H:%M"))
+        str(start_dt.strftime("%d-%m-%Y"))
+        + " "
+        + str(start_dt.strftime("%H:%M"))
     )
     event_end_time = (
         str(end_dt.strftime("%d-%m-%Y")) + " " + str(end_dt.strftime("%H:%M"))
@@ -503,7 +525,10 @@ def progressEvent(
             toRecipients=mail_to_club,
             cookies=info.context.cookies,
         )
-    if updated_event_instance.status.state == Event_State_Status.pending_budget:
+    if (
+        updated_event_instance.status.state
+        == Event_State_Status.pending_budget
+    ):
         mail_to = getRoleEmails("slc")
     if updated_event_instance.status.state == Event_State_Status.pending_room:
         mail_to = getRoleEmails("slo")
@@ -565,7 +590,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
     upd_ref = eventsdb.update_one(query, updation)
     if upd_ref.matched_count == 0:
         raise Exception(
-            "Can not access event. Either it does not exist or user does not have perms."
+            "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
         )
 
     # Send the event deleted email.
