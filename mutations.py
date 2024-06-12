@@ -463,7 +463,7 @@ def progressEvent(
     if not poc_roll:
         poc_roll = "Unknown"
 
-    # Mail Subject and Body
+    # Default Mail Subject and Body
     mail_subject = PROGRESS_EVENT_SUBJECT.safe_substitute(
         event=mail_event_title,
     )
@@ -473,25 +473,8 @@ def progressEvent(
         eventlink=mail_eventlink,
     )
 
-    if updated_event_instance.status.state == Event_State_Status.pending_room:
-        mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
-            event_id=updated_event_instance.code,
-            club=clubname,
-            event=mail_event_title,
-            description=mail_description,
-            student_count=student_count,
-            start_time=event_start_time,
-            end_time=event_end_time,
-            location=mail_location,
-            equipment=equipment,
-            additional=additional,
-            poc_name=poc_name,
-            poc_roll=poc_roll,
-            poc_email=poc_email,
-            poc_phone=poc_phone,
-        )
-
     mail_to = []
+    cc_to = []
     if updated_event_instance.status.state == Event_State_Status.pending_cc:
         mail_to = getRoleEmails("cc")
 
@@ -529,9 +512,27 @@ def progressEvent(
         updated_event_instance.status.state
         == Event_State_Status.pending_budget
     ):
+        cc_to = getRoleEmails("cc")
         mail_to = getRoleEmails("slc")
     if updated_event_instance.status.state == Event_State_Status.pending_room:
+        cc_to = getRoleEmails("cc")
         mail_to = getRoleEmails("slo")
+        mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
+            event_id=updated_event_instance.code,
+            club=clubname,
+            event=mail_event_title,
+            description=mail_description,
+            student_count=student_count,
+            start_time=event_start_time,
+            end_time=event_end_time,
+            location=mail_location,
+            equipment=equipment,
+            additional=additional,
+            poc_name=poc_name,
+            poc_roll=poc_roll,
+            poc_email=poc_email,
+            poc_phone=poc_phone,
+        )
     if updated_event_instance.status.state == Event_State_Status.approved:
         # mail to the club email
         mail_to = [
@@ -553,6 +554,7 @@ def progressEvent(
             mail_subject,
             mail_body,
             toRecipients=mail_to,
+            ccRecipients=cc_to,
             cookies=info.context.cookies,
         )
 
