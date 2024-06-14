@@ -226,7 +226,7 @@ def getRoleEmails(role: str) -> List[str]:
         return []
 
 
-def eventsWithSorting(searchspace):
+def eventsWithSorting(searchspace, date_filter=False):
     """
     Custom sorting of events based on
     datetimeperiod with upcoming events first in ascending order
@@ -234,6 +234,15 @@ def eventsWithSorting(searchspace):
     """
     ist = pytz.timezone("Asia/Kolkata")
     current_datetime = datetime.now(ist).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    if date_filter:
+        required_events_query = {
+            **searchspace,
+        }
+        events = list(
+            eventsdb.find(required_events_query).sort("datetimeperiod.0", -1)
+        )
+        return events
+
     upcoming_events_query = {
         **searchspace,
         "datetimeperiod.0": {"$gte": current_datetime},

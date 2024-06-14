@@ -1,5 +1,7 @@
 from typing import List
 
+import csv
+import io
 import dateutil.parser as dp
 import strawberry
 
@@ -7,8 +9,8 @@ from db import eventsdb
 
 # import all models and types
 from models import Event
-from mtypes import Event_Location, Event_State_Status
-from otypes import EventType, Info, RoomList, RoomListType, timelot_type
+from mtypes import Event_Location, Event_State_Status, Event_Full_Location
+from otypes import EventType, Info, RoomList, RoomListType, timelot_type, InputReportDetails, CSVResponse
 from utils import eventsWithSorting, getClubs
 
 
@@ -133,7 +135,7 @@ def events(
             "$in": statuses,
         }
 
-    events = eventsWithSorting(searchspace)
+    events = eventsWithSorting(searchspace, date_filter=False)
 
     if limit is not None:
         events = events[:limit]
@@ -299,6 +301,103 @@ def availableRooms(
         RoomList.parse_obj({"locations": free_rooms})
     )
 
+@strawberry.field
+def downloadEventsData(
+    details: InputReportDetails,
+    info: Info
+) -> CSVResponse:
+    """
+    Create events data in CSV format for the events with
+    given details in the given date period.
+    """
+    user = info.context.user
+    all_events = list()
+
+    allclubs = getClubs(info.context.cookies)
+    searchspace = dict()
+    if details.clubid:
+        clubid = details.clubid
+        if details.clubid == "allclubs":
+            clubid = None
+        if user is not None:
+            if clubid is not None:
+                searchspace["clubid"] = clubid
+            else:
+                list_allclubs = [club["cid"] for club in allclubs]
+                searchspace["clubid"] = {"$in": list_allclubs}
+
+            # filter by date
+            if details.datetimeperiod:
+                datetime_start = details.datetimeperiod[0].strftime("%Y-%m-%dT%H:%M:%S+00:00")
+                datetime_end = details.datetimeperiod[1].strftime("%Y-%m-%dT%H:%M:%S+00:00")
+                searchspace["datetimeperiod.0"] = {
+                    "$gte": datetime_start,
+                    "$lte": datetime_end,
+                }
+
+            # include only approved events
+            searchspace["status.state"] = {
+                "$in": [
+                    Event_State_Status.approved.value,
+                ]
+            }
+
+            all_events = eventsWithSorting(searchspace, date_filter=True)
+
+    header_mapping = {
+        "code": "Event Code",
+        "name": "Event Name",
+        "clubid": "Club",
+        "datetimeperiod.0": "StartDate",
+        "datetimeperiod.1": "EndDate",
+        "description": "Description",
+        "audience": "Audience",
+        "population": "Audience Count",
+        "mode": "Mode",
+        "location": "Venue",
+        "budget": "Budget",
+        "poster": "Poster URL"
+    }
+
+    # Prepare CSV content
+    csv_output = io.StringIO()
+    fieldnames = [header_mapping.get(field.lower(), field) for field in details.fields]
+
+    csv_writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
+    csv_writer.writeheader()
+
+    for event in all_events:
+        event_data = {}
+        for field in details.fields:
+            mapped_field = header_mapping.get(field, field)
+            value = event.get(field)
+
+            if field in ["datetimeperiod.0", "datetimeperiod.1"]:
+                value = event.get("datetimeperiod")
+                value = value[0].split('T')[0] if field == "datetimeperiod.0" else value[1].split('T')[0]
+            if value in [None, "", []]:
+                event_data[mapped_field] = "No " + mapped_field
+            elif field == "clubid":
+                event_data[mapped_field] = next((club["name"] for club in allclubs if club["cid"] == value), "")
+            elif field == "location":
+                if value == []:
+                    event_data[mapped_field] = "No location"
+                else:
+                    event_data[mapped_field] = ", ".join(getattr(Event_Full_Location, loc) for loc in value)
+                    event_data[mapped_field] = f"{event_data[mapped_field]}"
+            else:
+                event_data[mapped_field] = value
+        csv_writer.writerow(event_data)
+
+    csv_content = csv_output.getvalue()
+    csv_output.close()
+    return CSVResponse(
+        csvFile=csv_content,
+        successMessage="CSV file generated successfully",
+        errorMessage=""
+    )
+
+
 
 # register all queries
 queries = [
@@ -309,4 +408,5 @@ queries = [
     approvedEvents,
     pendingEvents,
     availableRooms,
+    downloadEventsData,
 ]

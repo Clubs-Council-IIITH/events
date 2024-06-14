@@ -95,5 +95,18 @@ class InputEditEventDetails:
     budget: List[BudgetInput] | None = None
     poc: str | None = None
 
+@strawberry.input()
+class InputReportDetails:
+    clubid: str | None
+    fields: List[str]
+    datetimeperiod: List[datetime] | None = None
+
+@strawberry.type
+class CSVResponse:
+    csvFile: str
+    successMessage: str
+    errorMessage: str
+
+
 
 timelot_type = Tuple[datetime, datetime]
