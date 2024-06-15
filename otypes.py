@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, date
 from functools import cached_property
 from typing import Dict, List, Tuple
 
@@ -99,7 +99,7 @@ class InputEditEventDetails:
 class InputReportDetails:
     clubid: str | None
     fields: List[str]
-    datetimeperiod: List[datetime] | None = None
+    dateperiod: List[date] | None = None
 
 @strawberry.type
 class CSVResponse:

@@ -301,11 +301,9 @@ def availableRooms(
         RoomList.parse_obj({"locations": free_rooms})
     )
 
+
 @strawberry.field
-def downloadEventsData(
-    details: InputReportDetails,
-    info: Info
-) -> CSVResponse:
+def downloadEventsData(details: InputReportDetails, info: Info) -> CSVResponse:
     """
     Create events data in CSV format for the events with
     given details in the given date period.
@@ -327,9 +325,13 @@ def downloadEventsData(
                 searchspace["clubid"] = {"$in": list_allclubs}
 
             # filter by date
-            if details.datetimeperiod:
-                datetime_start = details.datetimeperiod[0].strftime("%Y-%m-%dT%H:%M:%S+00:00")
-                datetime_end = details.datetimeperiod[1].strftime("%Y-%m-%dT%H:%M:%S+00:00")
+            if details.dateperiod:
+                datetime_start = details.dateperiod[0].strftime(
+                    "%Y-%m-%dT00:00:00+00:00"
+                )
+                datetime_end = details.dateperiod[1].strftime(
+                    "%Y-%m-%dT23:59:59+00:00"
+                )
                 searchspace["datetimeperiod.0"] = {
                     "$gte": datetime_start,
                     "$lte": datetime_end,
@@ -356,12 +358,14 @@ def downloadEventsData(
         "mode": "Mode",
         "location": "Venue",
         "budget": "Budget",
-        "poster": "Poster URL"
+        "poster": "Poster URL",
     }
 
     # Prepare CSV content
     csv_output = io.StringIO()
-    fieldnames = [header_mapping.get(field.lower(), field) for field in details.fields]
+    fieldnames = [
+        header_mapping.get(field.lower(), field) for field in details.fields
+    ]
 
     csv_writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
     csv_writer.writeheader()
@@ -374,16 +378,29 @@ def downloadEventsData(
 
             if field in ["datetimeperiod.0", "datetimeperiod.1"]:
                 value = event.get("datetimeperiod")
-                value = value[0].split('T')[0] if field == "datetimeperiod.0" else value[1].split('T')[0]
+                value = (
+                    value[0].split("T")[0]
+                    if field == "datetimeperiod.0"
+                    else value[1].split("T")[0]
+                )
             if value in [None, "", []]:
                 event_data[mapped_field] = "No " + mapped_field
             elif field == "clubid":
-                event_data[mapped_field] = next((club["name"] for club in allclubs if club["cid"] == value), "")
+                event_data[mapped_field] = next(
+                    (
+                        club["name"]
+                        for club in allclubs
+                        if club["cid"] == value
+                    ),
+                    "",
+                )
             elif field == "location":
                 if value == []:
                     event_data[mapped_field] = "No location"
                 else:
-                    event_data[mapped_field] = ", ".join(getattr(Event_Full_Location, loc) for loc in value)
+                    event_data[mapped_field] = ", ".join(
+                        getattr(Event_Full_Location, loc) for loc in value
+                    )
                     event_data[mapped_field] = f"{event_data[mapped_field]}"
             else:
                 event_data[mapped_field] = value
@@ -394,9 +411,8 @@ def downloadEventsData(
     return CSVResponse(
         csvFile=csv_content,
         successMessage="CSV file generated successfully",
-        errorMessage=""
+        errorMessage="",
     )
-
 
 
 # register all queries
