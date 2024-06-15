@@ -1,7 +1,7 @@
-from typing import List
-
 import csv
 import io
+from typing import List
+
 import dateutil.parser as dp
 import strawberry
 
@@ -9,8 +9,16 @@ from db import eventsdb
 
 # import all models and types
 from models import Event
-from mtypes import Event_Location, Event_State_Status, Event_Full_Location
-from otypes import EventType, Info, RoomList, RoomListType, timelot_type, InputReportDetails, CSVResponse
+from mtypes import Event_Full_Location, Event_Location, Event_State_Status
+from otypes import (
+    CSVResponse,
+    EventType,
+    Info,
+    InputReportDetails,
+    RoomList,
+    RoomListType,
+    timelot_type,
+)
 from utils import eventsWithSorting, getClubs
 
 
