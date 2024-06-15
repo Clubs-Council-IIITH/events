@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, date
 from functools import cached_property
 from typing import Dict, List, Tuple
 
@@ -94,6 +94,19 @@ class InputEditEventDetails:
     population: int | None = None
     budget: List[BudgetInput] | None = None
     poc: str | None = None
+
+@strawberry.input()
+class InputReportDetails:
+    clubid: str | None
+    fields: List[str]
+    dateperiod: List[date] | None = None
+
+@strawberry.type
+class CSVResponse:
+    csvFile: str
+    successMessage: str
+    errorMessage: str
+
 
 
 timelot_type = Tuple[datetime, datetime]
