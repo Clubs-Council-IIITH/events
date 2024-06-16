@@ -246,6 +246,7 @@ def progressEvent(
     cc_progress_budget: bool | None = None,
     cc_progress_room: bool | None = None,
     cc_approver: str | None = None,
+    slc_members_for_email: list[str] | None = None,
 ) -> EventType:
     """
     progress the event state status for different users
@@ -513,7 +514,15 @@ def progressEvent(
         == Event_State_Status.pending_budget
     ):
         cc_to = getRoleEmails("cc")
-        mail_to = getRoleEmails("slc")
+        slc_emails = getRoleEmails("slc")
+
+        if slc_members_for_email is not None:
+            mail_to = []
+            for email in slc_emails:
+                if email.split("@")[0] in slc_members_for_email:
+                   mail_to.append(email)
+        else:
+            mail_to = slc_emails
     if updated_event_instance.status.state == Event_State_Status.pending_room:
         cc_to = getRoleEmails("cc")
         mail_to = getRoleEmails("slo")
