@@ -431,11 +431,19 @@ def progressEvent(
             ]
         )
 
-    equipment, additional = "N/A", "N/A"
+    equipment, additional, budget = "N/A", "N/A", "N/A"
     if updated_event_instance.equipment:
         equipment = updated_event_instance.equipment
     if updated_event_instance.additional:
         additional = updated_event_instance.additional
+    if updated_event_instance.budget:
+        budget = ", ".join(
+            [
+                f"{bdgt.amount} {'advance' if bdgt.advance else ''} needed for {bdgt.description}"
+                for bdgt in updated_event_instance.budget
+            ]
+        )
+        budget += f". Total budget: {sum(bdgt.amount for bdgt in updated_event_instance.budget)}"
 
     ist_offset = timedelta(hours=5, minutes=30)
     start_dt = updated_event_instance.datetimeperiod[0] + ist_offset
@@ -526,6 +534,7 @@ def progressEvent(
             end_time=event_end_time,
             location=mail_location,
             equipment=equipment,
+            budget=budget,
             additional=additional,
             poc_name=poc_name,
             poc_roll=poc_roll,
