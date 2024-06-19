@@ -9,7 +9,7 @@ from strawberry.fastapi import BaseContext
 from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
 
-from models import Event
+from models import Event, Holiday
 from mtypes import Audience, BudgetType, Event_Location, Event_Mode, PyObjectId
 
 
@@ -54,12 +54,12 @@ class RoomListType:
     pass
 
 
-@strawberry.input()
+@strawberry.input
 class BudgetInput(BudgetType):
     pass
 
 
-@strawberry.input()
+@strawberry.input
 class InputEventDetails:
     name: str
     location: List[Event_Location] | None = None
@@ -77,7 +77,7 @@ class InputEventDetails:
     poc: str
 
 
-@strawberry.input()
+@strawberry.input
 class InputEditEventDetails:
     name: str | None = None
     eventid: str
@@ -96,8 +96,8 @@ class InputEditEventDetails:
     poc: str | None = None
 
 
-@strawberry.input()
-class InputReportDetails:
+@strawberry.input
+class InputDataReportDetails:
     clubid: str | None
     fields: List[str]
     dateperiod: List[date] | None = None
@@ -111,3 +111,17 @@ class CSVResponse:
 
 
 timelot_type = Tuple[datetime, datetime]
+
+# Holidays Types
+
+
+@strawberry.input
+class InputHolidayDetails:
+    date: date
+    name: str
+    description: str | None = None
+
+
+@strawberry.experimental.pydantic.type(model=Holiday, all_fields=True)
+class HolidayType:
+    pass

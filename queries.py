@@ -14,13 +14,15 @@ from otypes import (
     CSVResponse,
     EventType,
     Info,
-    InputReportDetails,
+    InputDataReportDetails,
     RoomList,
     RoomListType,
     timelot_type,
 )
 from utils import eventsWithSorting, getClubs
 
+# import queries of holidays
+from queries_holidays import queries as holiday_queries
 
 @strawberry.field
 def event(eventid: str, info: Info) -> EventType:
@@ -311,7 +313,9 @@ def availableRooms(
 
 
 @strawberry.field
-def downloadEventsData(details: InputReportDetails, info: Info) -> CSVResponse:
+def downloadEventsData(
+    details: InputDataReportDetails, info: Info
+) -> CSVResponse:
     """
     Create events data in CSV format for the events with
     given details in the given date period.
@@ -433,4 +437,4 @@ queries = [
     pendingEvents,
     availableRooms,
     downloadEventsData,
-]
+] + holiday_queries

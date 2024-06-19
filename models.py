@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import List, Tuple
 
 from bson import ObjectId
@@ -22,6 +22,7 @@ from mtypes import (
     event_name_type,
     event_othr_type,
     event_popu_type,
+    timezone,
 )
 
 
@@ -56,4 +57,25 @@ class Event(BaseModel):
         populate_by_name=True,
         arbitrary_types_allowed=True,
         json_encoders={ObjectId: str},
+    )
+
+
+class Holiday(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    name: str
+    date: date
+    description: str | None = None
+    created_time: datetime = Field(
+        default_factory=lambda: datetime.now(timezone), frozen=True
+    )
+
+    # TODO[pydantic]: The following keys were removed: `json_encoders`.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.  # noqa: E501
+    model_config = ConfigDict(
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
+        json_encoders={ObjectId: str},
+        str_max_length=5000,
+        extra="forbid",
+        str_strip_whitespace=True,
     )
