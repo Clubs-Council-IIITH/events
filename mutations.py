@@ -1,7 +1,6 @@
 import os
 from datetime import datetime, timedelta
 
-import pytz
 import strawberry
 from fastapi.encoders import jsonable_encoder
 from pydantic import HttpUrl, parse_obj_as
@@ -28,6 +27,7 @@ from mtypes import (
     Event_Location,
     Event_Mode,
     Event_State_Status,
+    timezone,
 )
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
@@ -272,8 +272,7 @@ def progressEvent(
     event_instance = Event.parse_obj(event_ref)
 
     # get current time
-    ist = pytz.timezone("Asia/Kolkata")
-    current_time = datetime.now(ist)
+    current_time = datetime.now(timezone)
     time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
 
     if event_instance.status.state == Event_State_Status.incomplete:

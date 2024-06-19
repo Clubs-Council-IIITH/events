@@ -5,6 +5,7 @@ from bson import ObjectId
 from pydantic import Field, StringConstraints, field_validator
 from pydantic_core import core_schema
 from typing_extensions import Annotated, Any
+import pytz
 
 
 # Audience of Events
@@ -226,3 +227,5 @@ class PyObjectId(ObjectId):
     @classmethod
     def __get_pydantic_json_schema__(cls, field_schema):
         field_schema.update(type="string")
+
+timezone = pytz.timezone("Asia/Kolkata")
