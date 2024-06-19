@@ -35,7 +35,20 @@ def holidays(
     ]
 
 
+@strawberry.field
+def holiday(id: str) -> HolidayType:
+    """
+    Get a holiday by id
+    returns a holiday
+    """
+
+    holiday = holidaysdb.find_one({"_id": id})
+
+    return HolidayType.from_pydantic(Holiday.parse_obj(holiday))
+
+
 # register all queries of holidays
 queries = [
     holidays,
+    holiday,
 ]
