@@ -19,11 +19,13 @@ def holidays(
 
     query = {}
     if start_date and end_date:
-        query["date"] = {"$gte": start_date, "$lte": end_date}
+        if start_date > end_date:
+            raise ValueError("Start date cannot be greater than end date.")
+        query["date"] = {"$gte": str(start_date), "$lte": str(end_date)}
     elif start_date:
-        query["date"] = {"$gte": start_date}
+        query["date"] = {"$gte": str(start_date)}
     elif end_date:
-        query["date"] = {"$lte": end_date}
+        query["date"] = {"$lte": str(end_date)}
 
     holidays = holidaysdb.find(query)
 
