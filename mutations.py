@@ -390,6 +390,10 @@ def progressEvent(
             "slo_approver_time": event_instance.status.slo_approver_time,
         }
 
+    poc = getUser(event_instance.poc, info.context.cookies)
+    if not poc:
+        raise Exception("POC does not exist.")
+
     upd_ref = eventsdb.update_one(
         {"_id": eventid}, {"$set": {"status": updation}}
     )
@@ -460,9 +464,6 @@ def progressEvent(
         str(end_dt.strftime("%d-%m-%Y")) + " " + str(end_dt.strftime("%H:%M"))
     )
 
-    poc = getUser(updated_event_instance.poc, info.context.cookies)
-    if not poc:
-        raise Exception("POC does not exist.")
     poc_details, poc_phone = poc
     poc_name = poc_details["firstName"] + " " + poc_details["lastName"]
     poc_email = poc_details["email"]
@@ -544,6 +545,7 @@ def progressEvent(
             poc_email=poc_email,
             poc_phone=poc_phone,
         )
+        print(mail_body)
     if updated_event_instance.status.state == Event_State_Status.approved:
         # mail to the club email
         mail_to = [
