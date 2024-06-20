@@ -437,14 +437,17 @@ def progressEvent(
     if updated_event_instance.additional:
         additional = updated_event_instance.additional
     if updated_event_instance.budget:
-        budget = ", ".join(
-            [
-                f"{bdgt.amount} {'advance' if bdgt.advance else ''} needed for {bdgt.description}"
-                for bdgt in updated_event_instance.budget
-            ]
-        )
-        budget += f". Total budget: {sum(bdgt.amount for bdgt in updated_event_instance.budget)}"
-
+        budget = "\n"
+        budget += "        -----------------------|----------|---------- \n"
+        budget += "       | Description           | Amount   | Advance  |\n"
+        budget += "       |-----------------------|----------|----------|\n"
+        for bdgt in updated_event_instance.budget:
+            budget += f"       | {bdgt.description:<21} | {bdgt.amount:<8} | {'Yes' if bdgt.advance else 'No':<8} |\n"
+        total_budget = sum(bdgt.amount for bdgt in updated_event_instance.budget)
+        budget += "       |-----------------------|----------|----------|\n"
+        budget += f"       | Total budget          | {total_budget:<8} |          |\n"
+        budget += "        -----------------------|----------|---------- \n"
+        
     ist_offset = timedelta(hours=5, minutes=30)
     start_dt = updated_event_instance.datetimeperiod[0] + ist_offset
     end_dt = updated_event_instance.datetimeperiod[1] + ist_offset
