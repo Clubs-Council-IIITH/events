@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timedelta
+from prettytable import PrettyTable
 
 import strawberry
 from fastapi.encoders import jsonable_encoder
@@ -441,17 +442,29 @@ def progressEvent(
     if updated_event_instance.additional:
         additional = updated_event_instance.additional
     if updated_event_instance.budget:
-        budget = "\n"
-        budget += "        -----------------------|----------|---------- \n"
-        budget += "       | Description           | Amount   | Advance  |\n"
-        budget += "       |-----------------------|----------|----------|\n"
-        for bdgt in updated_event_instance.budget:
-            budget += f"       | {bdgt.description:<21} | {bdgt.amount:<8} | {'Yes' if bdgt.advance else 'No':<8} |\n"
-        total_budget = sum(bdgt.amount for bdgt in updated_event_instance.budget)
-        budget += "       |-----------------------|----------|----------|\n"
-        budget += f"       | Total budget          | {total_budget:<8} |          |\n"
-        budget += "        -----------------------|----------|---------- \n"
-        
+        budget_table = PrettyTable()
+        budget_table.field_names = ["Description", "Amount", "Advance"]
+        for item in updated_event_instance.budget:
+            budget_table.add_row(
+                [
+                    item.description,
+                    item.amount,
+                    "Yes" if item.advance else "No",
+                ],
+                divider=True
+            )
+        total_budget = sum(
+            item.amount for item in updated_event_instance.budget
+        )
+        budget_table.add_row(["Total budget", total_budget, ""], divider=True)
+        budget_table.max_width['Description'] = 20
+        budget_table.max_width['Amount'] = 10
+        budget_table.max_width['Advance'] = 8
+        budget_table.align['Amount'] = "r"
+        budget_table.align['Advance'] = "c"
+
+        budget = "\n" + budget_table.get_string()
+
     ist_offset = timedelta(hours=5, minutes=30)
     start_dt = updated_event_instance.datetimeperiod[0] + ist_offset
     end_dt = updated_event_instance.datetimeperiod[1] + ist_offset
@@ -545,7 +558,6 @@ def progressEvent(
             poc_email=poc_email,
             poc_phone=poc_phone,
         )
-        print(mail_body)
     if updated_event_instance.status.state == Event_State_Status.approved:
         # mail to the club email
         mail_to = [
