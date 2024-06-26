@@ -458,8 +458,8 @@ def progressEvent(
         )
         budget_table.add_row(["Total budget", total_budget, ""], divider=True)
         budget_table.max_width['Description'] = 20
-        budget_table.max_width['Amount'] = 10
-        budget_table.max_width['Advance'] = 8
+        budget_table.max_width['Amount'] = 7
+        budget_table.max_width['Advance'] = 7
         budget_table.align['Amount'] = "r"
         budget_table.align['Advance'] = "c"
 
