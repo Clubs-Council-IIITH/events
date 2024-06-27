@@ -1,9 +1,9 @@
 import os
 from datetime import datetime, timedelta
-from prettytable import PrettyTable
 
 import strawberry
 from fastapi.encoders import jsonable_encoder
+from prettytable import PrettyTable
 from pydantic import HttpUrl, parse_obj_as
 
 from db import eventsdb
@@ -451,17 +451,17 @@ def progressEvent(
                     item.amount,
                     "Yes" if item.advance else "No",
                 ],
-                divider=True
+                divider=True,
             )
         total_budget = sum(
             item.amount for item in updated_event_instance.budget
         )
         budget_table.add_row(["Total budget", total_budget, ""], divider=True)
-        budget_table.max_width['Description'] = 20
-        budget_table.max_width['Amount'] = 7
-        budget_table.max_width['Advance'] = 7
-        budget_table.align['Amount'] = "r"
-        budget_table.align['Advance'] = "c"
+        budget_table.max_width["Description"] = 20
+        budget_table.max_width["Amount"] = 7
+        budget_table.max_width["Advance"] = 7
+        budget_table.align["Amount"] = "r"
+        budget_table.align["Advance"] = "c"
 
         budget = "\n" + budget_table.get_string()
 
