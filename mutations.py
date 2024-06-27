@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timedelta
+from prettytable import PrettyTable
 
 import strawberry
 from fastapi.encoders import jsonable_encoder
@@ -390,6 +391,10 @@ def progressEvent(
             "slo_approver_time": event_instance.status.slo_approver_time,
         }
 
+    poc = getUser(event_instance.poc, info.context.cookies)
+    if not poc:
+        raise Exception("POC does not exist.")
+
     upd_ref = eventsdb.update_one(
         {"_id": eventid}, {"$set": {"status": updation}}
     )
@@ -431,11 +436,34 @@ def progressEvent(
             ]
         )
 
-    equipment, additional = "N/A", "N/A"
+    equipment, additional, budget = "N/A", "N/A", "N/A"
     if updated_event_instance.equipment:
         equipment = updated_event_instance.equipment
     if updated_event_instance.additional:
         additional = updated_event_instance.additional
+    if updated_event_instance.budget:
+        budget_table = PrettyTable()
+        budget_table.field_names = ["Description", "Amount", "Advance"]
+        for item in updated_event_instance.budget:
+            budget_table.add_row(
+                [
+                    item.description,
+                    item.amount,
+                    "Yes" if item.advance else "No",
+                ],
+                divider=True
+            )
+        total_budget = sum(
+            item.amount for item in updated_event_instance.budget
+        )
+        budget_table.add_row(["Total budget", total_budget, ""], divider=True)
+        budget_table.max_width['Description'] = 20
+        budget_table.max_width['Amount'] = 7
+        budget_table.max_width['Advance'] = 7
+        budget_table.align['Amount'] = "r"
+        budget_table.align['Advance'] = "c"
+
+        budget = "\n" + budget_table.get_string()
 
     ist_offset = timedelta(hours=5, minutes=30)
     start_dt = updated_event_instance.datetimeperiod[0] + ist_offset
@@ -449,9 +477,6 @@ def progressEvent(
         str(end_dt.strftime("%d-%m-%Y")) + " " + str(end_dt.strftime("%H:%M"))
     )
 
-    poc = getUser(updated_event_instance.poc, info.context.cookies)
-    if not poc:
-        raise Exception("POC does not exist.")
     poc_details, poc_phone = poc
     poc_name = poc_details["firstName"] + " " + poc_details["lastName"]
     poc_email = poc_details["email"]
@@ -526,6 +551,7 @@ def progressEvent(
             end_time=event_end_time,
             location=mail_location,
             equipment=equipment,
+            budget=budget,
             additional=additional,
             poc_name=poc_name,
             poc_roll=poc_roll,
