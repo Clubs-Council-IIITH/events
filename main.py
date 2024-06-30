@@ -36,7 +36,9 @@ schema = strawberry.federation.Schema(
 
 # serve API with FastAPI router
 gql_app = GraphQLRouter(schema, graphiql=True, context_getter=get_context)
-app = FastAPI(debug=DEBUG,
-              title="CC Events Microservice",
-              description="Handles Data of Events & Holidays")
+app = FastAPI(
+    debug=DEBUG,
+    title="CC Events Microservice",
+    description="Handles Data of Events & Holidays",
+)
 app.include_router(gql_app, prefix="/graphql")

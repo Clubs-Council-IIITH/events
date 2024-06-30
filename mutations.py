@@ -30,6 +30,9 @@ from mtypes import (
     Event_State_Status,
     timezone,
 )
+
+# import mutations of holidays
+from mutations_holidays import mutations as holidays_mutations
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
     getClubNameEmail,
@@ -39,9 +42,6 @@ from utils import (
     getRoleEmails,
     getUser,
 )
-
-# import mutations of holidays
-from mutations_holidays import mutations as holidays_mutations
 
 inter_communication_secret_global = os.getenv("INTER_COMMUNICATION_SECRET")
 

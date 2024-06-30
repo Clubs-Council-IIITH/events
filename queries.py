@@ -19,10 +19,11 @@ from otypes import (
     RoomListType,
     timelot_type,
 )
-from utils import eventsWithSorting, getClubs
 
 # import queries of holidays
 from queries_holidays import queries as holiday_queries
+from utils import eventsWithSorting, getClubs
+
 
 @strawberry.field
 def event(eventid: str, info: Info) -> EventType:
