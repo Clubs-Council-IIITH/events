@@ -40,6 +40,9 @@ from utils import (
     getUser,
 )
 
+# import mutations of holidays
+from mutations_holidays import mutations as holidays_mutations
+
 inter_communication_secret_global = os.getenv("INTER_COMMUNICATION_SECRET")
 
 
@@ -732,4 +735,4 @@ mutations = [
     progressEvent,
     deleteEvent,
     updateEventsCid,
-]
+] + holidays_mutations
