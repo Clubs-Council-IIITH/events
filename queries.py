@@ -82,8 +82,8 @@ def eventid(code: str, info: Info) -> str:
 @strawberry.field
 def events(
     info: Info,
-    clubid: str | None,
-    public: bool | None,
+    clubid: str | None = None,
+    public: bool | None = None,
     limit: int | None = None,
 ) -> List[EventType]:
     """
