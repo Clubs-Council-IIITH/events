@@ -350,14 +350,22 @@ def downloadEventsData(
                     "$lte": datetime_end,
                 }
 
-            # include only approved events
-            searchspace["status.state"] = {
-                "$in": [
-                    Event_State_Status.approved.value,
-                ]
-            }
+            if details.allEvents:
+                all_events = eventsWithSorting(searchspace, date_filter=True)
+            else:
+                # include only approved events
+                searchspace["status.state"] = {
+                    "$in": [
+                        Event_State_Status.approved.value,
+                    ]
+                }
 
-            all_events = eventsWithSorting(searchspace, date_filter=True)
+                all_events = eventsWithSorting(searchspace, date_filter=True)
+
+    # add fields to the status fields like approval time etc
+    status_fields = [
+        "state"
+    ]
 
     header_mapping = {
         "code": "Event Code",
@@ -372,12 +380,20 @@ def downloadEventsData(
         "location": "Venue",
         "budget": "Budget",
         "poster": "Poster URL",
+        "state": "Status",
     }
 
     # Prepare CSV content
     csv_output = io.StringIO()
     fieldnames = [
-        header_mapping.get(field.lower(), field) for field in details.fields
+        header_mapping.get(field.lower(), field)
+        for field in details.fields
+        if field != "status"
+    ]
+
+    # Ensure status fields are added at the end
+    fieldnames += [
+        header_mapping.get(f, f) for f in status_fields if f not in fieldnames
     ]
 
     csv_writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
@@ -415,6 +431,31 @@ def downloadEventsData(
                         getattr(Event_Full_Location, loc) for loc in value
                     )
                     event_data[mapped_field] = f"{event_data[mapped_field]}"
+            elif field == "budget":
+                if isinstance(value, list):
+                    budget_items = [
+                        f"{item['description']} ({'Advance' if item['advance'] else 'Non-Advance'}): {item['amount']}"
+                        for item in value
+                    ]
+                    event_data[mapped_field] = ", ".join(budget_items)
+                else:
+                    event_data[mapped_field] = value
+            elif field == "status":
+
+                # Exclude 'budget' and 'room' from status and format remaining fields
+                status_value = event.get("status", {})
+                
+                # add status filters to add other status information
+                status_filtered = {
+                    k: v
+                    for k, v in status_value.items()
+                    if k in ["state"] 
+                }
+                for status_field, status_val in status_filtered.items():
+                    mapped_status_field = header_mapping.get(
+                        status_field, status_field
+                    )
+                    event_data[mapped_status_field] = status_val
             else:
                 event_data[mapped_field] = value
         csv_writer.writerow(event_data)
