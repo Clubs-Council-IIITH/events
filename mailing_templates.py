@@ -38,11 +38,13 @@ We are writing to request a venue for an event organized by $club. Please find t
     6. End Date  : $end_time
 
     7. Location  : $location
-    
-    8. Equipment Support      : $equipment
-    9. Additional Information : $additional
 
-    10. Point of Contact -
+    8. Budget    : $budget
+
+    9. Equipment Support       : $equipment
+    10. Additional Information : $additional
+
+    11. Point of Contact -
         Name   : $poc_name
         RollNo : $poc_roll
         Email  : $poc_email

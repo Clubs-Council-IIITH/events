@@ -1,5 +1,6 @@
 from enum import StrEnum, auto
 
+import pytz
 import strawberry
 from bson import ObjectId
 from pydantic import Field, StringConstraints, field_validator
@@ -226,3 +227,6 @@ class PyObjectId(ObjectId):
     @classmethod
     def __get_pydantic_json_schema__(cls, field_schema):
         field_schema.update(type="string")
+
+
+timezone = pytz.timezone("Asia/Kolkata")

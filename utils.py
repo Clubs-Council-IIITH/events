@@ -229,8 +229,12 @@ def getRoleEmails(role: str) -> List[str]:
 def eventsWithSorting(searchspace, date_filter=False):
     """
     Custom sorting of events based on
-    datetimeperiod with upcoming events first in ascending order
-    and then past events in descending order
+    datetimeperiod with
+    ongoing events first in ascending order of end time
+    then
+    upcoming events first in ascending order of start time
+    and then
+    past events in descending order of end time
     """
     ist = pytz.timezone("Asia/Kolkata")
     current_datetime = datetime.now(ist).strftime("%Y-%m-%dT%H:%M:%S+00:00")
@@ -243,21 +247,29 @@ def eventsWithSorting(searchspace, date_filter=False):
         )
         return events
 
+    ongoing_events_query = {
+        **searchspace,
+        "datetimeperiod.0": {"$lte": current_datetime},
+        "datetimeperiod.1": {"$gte": current_datetime},
+    }
     upcoming_events_query = {
         **searchspace,
-        "datetimeperiod.0": {"$gte": current_datetime},
+        "datetimeperiod.0": {"$gt": current_datetime},
     }
     past_events_query = {
         **searchspace,
-        "datetimeperiod.0": {"$lt": current_datetime},
+        "datetimeperiod.1": {"$lt": current_datetime},
     }
 
+    ongoing_events = list(
+        eventsdb.find(ongoing_events_query).sort("datetimeperiod.1", 1)
+    )
     upcoming_events = list(
         eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1)
     )
     past_events = list(
-        eventsdb.find(past_events_query).sort("datetimeperiod.0", -1)
+        eventsdb.find(past_events_query).sort("datetimeperiod.1", -1)
     )
-    events = upcoming_events + past_events
+    events = ongoing_events + upcoming_events + past_events
 
     return events

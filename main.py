@@ -5,12 +5,10 @@ from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
 from strawberry.tools import create_type
 
-# override PyObjectId and Context scalars
+# import queries, mutations, PyObjectId and Context scalars
 from mtypes import PyObjectId
 from mutations import mutations
 from otypes import Context, PyObjectIdType
-
-# import all queries and mutations
 from queries import queries
 
 # check whether running in debug mode
@@ -38,5 +36,9 @@ schema = strawberry.federation.Schema(
 
 # serve API with FastAPI router
 gql_app = GraphQLRouter(schema, graphiql=True, context_getter=get_context)
-app = FastAPI(debug=DEBUG)
+app = FastAPI(
+    debug=DEBUG,
+    title="CC Events Microservice",
+    description="Handles Data of Events & Holidays",
+)
 app.include_router(gql_app, prefix="/graphql")
