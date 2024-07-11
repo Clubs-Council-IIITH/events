@@ -9,7 +9,12 @@ from db import eventsdb
 
 # import all models and types
 from models import Event
-from mtypes import Event_Full_Location, Event_Location, Event_State_Status
+from mtypes import (
+    Event_Full_Location,
+    Event_Full_State_Status,
+    Event_Location,
+    Event_State_Status,
+)
 from otypes import (
     CSVResponse,
     EventType,
@@ -322,10 +327,12 @@ def downloadEventsData(
     given details in the given date period.
     """
     user = info.context.user
-    all_events = list()
+    include_status = user["role"] in ["cc", "slo"] and details.allEvents
 
+    all_events = list()
     allclubs = getClubs(info.context.cookies)
     searchspace = dict()
+
     if details.clubid:
         clubid = details.clubid
         if details.clubid == "allclubs":
@@ -350,12 +357,19 @@ def downloadEventsData(
                     "$lte": datetime_end,
                 }
 
-            # include only approved events
-            searchspace["status.state"] = {
-                "$in": [
-                    Event_State_Status.approved.value,
-                ]
-            }
+            if not include_status:
+                # include only approved events
+                searchspace["status.state"] = {
+                    "$in": [
+                        Event_State_Status.approved.value,
+                    ]
+                }
+            else:
+                searchspace["status.state"] = {
+                    "$nin": [
+                        Event_State_Status.deleted.value,
+                    ]
+                }
 
             all_events = eventsWithSorting(searchspace, date_filter=True)
 
@@ -372,13 +386,19 @@ def downloadEventsData(
         "location": "Venue",
         "budget": "Budget",
         "poster": "Poster URL",
+        "status": "Status",
     }
 
     # Prepare CSV content
     csv_output = io.StringIO()
     fieldnames = [
-        header_mapping.get(field.lower(), field) for field in details.fields
+        header_mapping.get(field.lower(), field)
+        for field in details.fields
+        if field != "status"
     ]
+
+    if include_status:
+        fieldnames.append(header_mapping["status"])
 
     csv_writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
     csv_writer.writeheader()
@@ -387,6 +407,9 @@ def downloadEventsData(
         event_data = {}
         for field in details.fields:
             mapped_field = header_mapping.get(field, field)
+            if mapped_field not in fieldnames:
+                continue
+
             value = event.get(field)
 
             if field in ["datetimeperiod.0", "datetimeperiod.1"]:
@@ -396,10 +419,8 @@ def downloadEventsData(
                     if field == "datetimeperiod.0"
                     else value[1].split("T")[0]
                 )
-            if value in [None, "", []]:
-                event_data[mapped_field] = "No " + mapped_field
             elif field == "clubid":
-                event_data[mapped_field] = next(
+                value = next(
                     (
                         club["name"]
                         for club in allclubs
@@ -408,19 +429,35 @@ def downloadEventsData(
                     "",
                 )
             elif field == "location":
-                if value == []:
-                    event_data[mapped_field] = "No location"
-                else:
-                    event_data[mapped_field] = ", ".join(
+                value = event.get(field, [])
+                if len(value) >= 1:
+                    value = ", ".join(
                         getattr(Event_Full_Location, loc) for loc in value
                     )
-                    event_data[mapped_field] = f"{event_data[mapped_field]}"
-            else:
-                event_data[mapped_field] = value
+            elif field == "budget":
+                if isinstance(value, list):
+                    budget_items = [
+                        f"{item['description']} {'(Advance)' if item['advance'] else ''}: {item['amount']}"
+                        for item in value
+                    ]
+                    value = ", ".join(budget_items)
+            elif field == "status":
+                status_value = event.get(field, {})
+                value = status_value.get("state", None)
+
+                if value:
+                    value = getattr(Event_Full_State_Status, value)
+
+            if value in [None, "", []]:
+                value = "No " + mapped_field
+
+            event_data[mapped_field] = value
+
         csv_writer.writerow(event_data)
 
     csv_content = csv_output.getvalue()
     csv_output.close()
+
     return CSVResponse(
         csvFile=csv_content,
         successMessage="CSV file generated successfully",

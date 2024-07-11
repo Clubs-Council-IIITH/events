@@ -98,9 +98,10 @@ class InputEditEventDetails:
 
 @strawberry.input
 class InputDataReportDetails:
+    allEvents: bool | None
     clubid: str | None
-    fields: List[str]
     dateperiod: List[date] | None = None
+    fields: List[str]
 
 
 @strawberry.type
