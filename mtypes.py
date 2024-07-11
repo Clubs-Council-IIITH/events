@@ -39,15 +39,14 @@ class Event_State_Status(StrEnum):
     # if the event is deleted, its state is `deleted`
     deleted = auto()
 
-
-# @strawberry.enum
-# class Event_Room_Status (Enum) :
-#     unapproved = auto()
-#     approved = auto()
-# @strawberry.enum
-# class Event_Budget_Status (Enum) :
-#     unapproved = auto()
-#     approved = auto()
+# Event Full State Names
+class Event_Full_State_Status:
+    incomplete = "Incomplete"
+    pending_cc = "Pending CC Approval"
+    pending_budget = "Pending Budget Approval"
+    pending_room = "Pending Room Approval"
+    approved = "Approved"
+    deleted = "Deleted"
 
 
 @strawberry.type
@@ -104,7 +103,7 @@ class Event_Mode(StrEnum):
     offline = auto()
 
 
-# Event Full Locations
+# Event Full Location Names
 class Event_Full_Location:
     h101 = "Himalaya 101"
     h102 = "Himalaya 102"
