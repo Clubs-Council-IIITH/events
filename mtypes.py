@@ -39,6 +39,7 @@ class Event_State_Status(StrEnum):
     # if the event is deleted, its state is `deleted`
     deleted = auto()
 
+
 # Event Full State Names
 class Event_Full_State_Status:
     incomplete = "Incomplete"
