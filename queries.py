@@ -437,7 +437,7 @@ def downloadEventsData(
             elif field == "budget":
                 if isinstance(value, list):
                     budget_items = [
-                        f"{item['description']} {'(Advance)' if item['advance'] else ''}: {item['amount']}"
+                        f"{item['description']} {'(Advance)' if item['advance'] else ''}: {item['amount']}"  # noqa: E501
                         for item in value
                     ]
                     value = ", ".join(budget_items)
