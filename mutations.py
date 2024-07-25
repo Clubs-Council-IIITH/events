@@ -548,7 +548,7 @@ def progressEvent(
             mail_to = []
             for email in slc_emails:
                 if email.split("@")[0] in slc_members_for_email:
-                   mail_to.append(email)
+                    mail_to.append(email)
         else:
             mail_to = slc_emails
         mail_body = PROGRESS_EVENT_BODY_FOR_SLC.safe_substitute(
@@ -564,7 +564,9 @@ def progressEvent(
             additional=additional,
             eventlink=mail_eventlink,
         )
-    elif updated_event_instance.status.state == Event_State_Status.pending_room:
+    elif (
+        updated_event_instance.status.state == Event_State_Status.pending_room
+    ):
         cc_to = getRoleEmails("cc")
         mail_to = getRoleEmails("slo")
         mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
