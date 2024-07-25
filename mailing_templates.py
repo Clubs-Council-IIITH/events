@@ -60,6 +60,38 @@ Note: This automated email has been generated from the Clubs Council website. Fo
 """  # noqa: E501
 )
 
+PROGRESS_EVENT_BODY_FOR_SLC = Template(
+    """
+Dear Sir/Ma'am,
+
+We are writing to request for your approval for an event organized by $club. Please find the event details provided by the club below.
+
+    1. Event ID: $event_id
+    2. Title: $event
+
+    3. Event Description: $description
+
+    4. Date & Time: $start_time to $end_time
+    5. Expected Number of Students: $student_count
+
+    6. Location  : $location
+
+    7. Budget    : $budget
+
+    8. Additional Information : $additional
+
+    9. Approval/Event Link: $eventlink
+
+Should you require any further information or clarification, please do not hesitate to reach out to us.
+
+Best regards,
+Clubs Council.
+
+
+Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+"""  # noqa: E501
+)
+
 DELETE_EVENT_BODY_FOR_CC = Template(
     """
 Dear Clubs Council,
