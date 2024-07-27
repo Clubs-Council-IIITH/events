@@ -1,4 +1,6 @@
+import html
 import os
+import re
 from datetime import datetime
 from typing import List
 
@@ -273,3 +275,19 @@ def eventsWithSorting(searchspace, date_filter=False):
     events = ongoing_events + upcoming_events + past_events
 
     return events
+
+def convert_to_html(text):
+    # Escape HTML special characters
+    text = html.escape(text)
+    
+    # Replace URLs with HTML link tags
+    url_pattern = r'(http[s]?://\S+)'
+    text = re.sub(url_pattern, r'<a href="\1">\1</a>', text)
+    
+    # Replace newlines with <br> tags
+    text = re.sub(r'\n', '<br>', text)
+    
+    # Replace multiple spaces with &nbsp; (non-breaking space)
+    text = re.sub(r' {2,}', lambda m: '&nbsp;' * len(m.group(0)), text)
+    
+    return f'<pre>{text}</pre>'

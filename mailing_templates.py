@@ -26,22 +26,22 @@ Dear Sir/Ma'am,
 
 We are writing to request a venue for an event organized by $club. Please find the event details provided by the club below.
 
-    1. Event ID: $event_id
+     1. Event ID: $event_id
 
-    2. Purpose: $event
+     2. Purpose: $event
 
-    3. Event Description: $description
+     3. Event Description: $description
 
-    4. Expected Number of Students: $student_count
+     4. Expected Number of Students: $student_count
 
-    5. Start Date: $start_time
-    6. End Date  : $end_time
+     5. Start Date: $start_time
+     6. End Date  : $end_time
 
-    7. Location  : $location
+     7. Location  : $location
 
-    8. Budget    : $budget
+     8. Budget    : $budget
 
-    9. Equipment Support       : $equipment
+     9. Equipment Support       : $equipment
     10. Additional Information : $additional
 
     11. Point of Contact -

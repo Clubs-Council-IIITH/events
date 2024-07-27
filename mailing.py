@@ -2,6 +2,8 @@ import os
 
 import requests
 
+from utils import convert_to_html
+
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
 
@@ -22,11 +24,12 @@ def triggerMail(
         """  # noqa: E501
         variables = {
             "mailInput": {
-                "body": body,
+                "body": convert_to_html(body),
                 "subject": subject,
                 "uid": uid,
                 "toRecipients": toRecipients,
                 "ccRecipients": ccRecipients,
+                "htmlBody": True,
             },
             "interCommunicationSecret": inter_communication_secret,
         }
