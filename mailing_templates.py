@@ -133,13 +133,15 @@ Please be informed that your request is currently under review by our executive 
 
     6. Location  : $location
 
-    7. Point of Contact -
+    7. Budget    : $budget
+
+    8. Point of Contact -
         Name   : $poc_name
         RollNo : $poc_roll
         Email  : $poc_email
         Phone  : $poc_phone
     
-    8. Event Link: $eventlink
+    9. Event Link: $eventlink
 
 Should you have any queries or require assistance at any stage of the process, please do not hesitate to reach out to us. We are here to ensure a smooth and efficient coordination of your event.
     

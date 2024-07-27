@@ -523,6 +523,7 @@ def progressEvent(
             start_time=event_start_time,
             end_time=event_end_time,
             location=mail_location,
+            budget=budget,
             poc_name=poc_name,
             poc_roll=poc_roll,
             poc_email=poc_email,
