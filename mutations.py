@@ -307,8 +307,6 @@ def progressEvent(
             "cc_approver_time": "Not Approved",
             "slc_approver_time": "Not Approved",
             "slo_approver_time": "Not Approved",
-            "last_updated_time": event_instance.status.last_updated_time,
-            "last_updated_by": event_instance.status.last_updated_by,
         }
 
     elif event_instance.status.state == Event_State_Status.pending_cc:
@@ -326,8 +324,6 @@ def progressEvent(
             "slc_approver_time": event_instance.status.slc_approver_time,
             "slo_approver_time": event_instance.status.slo_approver_time,
             "submission_time": event_instance.status.submission_time,
-            "last_updated_time": event_instance.status.last_updated_time,
-            "last_updated_by": event_instance.status.last_updated_by,
         }
         if cc_progress_budget is not None:
             updation["budget"] = cc_progress_budget
@@ -365,8 +361,6 @@ def progressEvent(
             "slc_approver_time": time_str,
             "slo_approver_time": event_instance.status.slo_approver_time,
             "submission_time": event_instance.status.submission_time,
-            "last_updated_time": event_instance.status.last_updated_time,
-            "last_updated_by": event_instance.status.last_updated_by,
         }
 
         if not updation["room"]:
@@ -391,8 +385,6 @@ def progressEvent(
             "slc_approver_time": event_instance.status.slc_approver_time,
             "slo_approver_time": time_str,
             "submission_time": event_instance.status.submission_time,
-            "last_updated_time": event_instance.status.last_updated_time,
-            "last_updated_by": event_instance.status.last_updated_by,
         }
 
     elif event_instance.status.state == Event_State_Status.approved:
@@ -412,9 +404,13 @@ def progressEvent(
             "cc_approver_time": event_instance.status.cc_approver_time,
             "slc_approver_time": event_instance.status.slc_approver_time,
             "slo_approver_time": event_instance.status.slo_approver_time,
-            "last_updated_time": event_instance.status.last_updated_time,
-            "last_updated_by": event_instance.status.last_updated_by,
         }
+
+    # Unchanged Values
+    updation["last_updated_time"] = event_instance.status.last_updated_time
+    updation["last_updated_by"] = event_instance.status.last_updated_by
+    updation["deleted_time"] = event_instance.status.deleted_time
+    updation["deleted_by"] = event_instance.status.deleted_by
 
     poc = getUser(event_instance.poc, info.context.cookies)
     if not poc:
@@ -651,67 +647,75 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         # if user is not an admin, they can only delete their own events
         query["clubid"] = user["uid"]
 
-    updation = {
-        "$set": {
-            "status": {
-                "state": Event_State_Status.deleted.value,
-                "budget": False,
-                "room": False,
-            }
-        }
-    }
+    event_ref = eventsdb.find_one(query)
+    if event_ref is None:
+        raise Exception(
+            "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
+        )
+    event_instance = Event.parse_obj(event_ref)
 
-    old_ref = eventsdb.find_one(query)
-    upd_ref = eventsdb.update_one(query, updation)
-    if upd_ref.matched_count == 0:
+    updation = event_ref["status"]
+    updation["state"] = Event_State_Status.deleted.value
+    updation["budget"] = False
+    updation["room"] = False
+    updation["deleted_by"] = user["uid"]
+    updation["deleted_time"] = datetime.now(timezone).strftime(
+        "%d-%m-%Y %I:%M %p"
+    )
+
+    event_ref = eventsdb.update_one(query, {"$set": {"status": updation}})
+    if event_ref.matched_count == 0:
         raise Exception(
             "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
         )
 
     # Send the event deleted email.
-    old_event = Event.parse_obj(old_ref)
-    if old_event.status.state not in [
+    if event_instance.status.state not in [
         Event_State_Status.deleted,
         Event_State_Status.incomplete,
     ]:
         if user["role"] == "cc":
             mail_to = [
-                getClubNameEmail(old_event.clubid, email=True, name=False),
+                getClubNameEmail(
+                    event_instance.clubid, email=True, name=False
+                ),
             ]
             mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
-                event_id=old_event.code,
-                event=old_event.name,
+                event_id=event_instance.code,
+                event=event_instance.name,
             )
             mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
-                club=old_event.clubid,
-                event=old_event.name,
-                eventlink=getEventLink(old_event.code),
+                club=event_instance.clubid,
+                event=event_instance.name,
+                eventlink=getEventLink(event_instance.code),
                 deleted_by="Clubs Council",
             )
         if user["role"] == "slo":
             mail_to = [
-                getClubNameEmail(old_event.clubid, email=True, name=False),
+                getClubNameEmail(
+                    event_instance.clubid, email=True, name=False
+                ),
             ]
             mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
-                event_id=old_event.code,
-                event=old_event.name,
+                event_id=event_instance.code,
+                event=event_instance.name,
             )
             mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
-                club=old_event.clubid,
-                event=old_event.name,
-                eventlink=getEventLink(old_event.code),
+                club=event_instance.clubid,
+                event=event_instance.name,
+                eventlink=getEventLink(event_instance.code),
                 deleted_by="Student Life Office",
             )
 
             # Mail to CC for the deleted event
             mail_to_cc = getRoleEmails("cc")
             mail_subject_cc = PROGRESS_EVENT_SUBJECT.safe_substitute(
-                event=old_event.name,
+                event=event_instance.name,
             )
             mail_body_cc = DELETE_EVENT_BODY_FOR_CC.safe_substitute(
                 club="Student Life Office",
-                event=old_event.name,
-                eventlink=getEventLink(old_event.code),
+                event=event_instance.name,
+                eventlink=getEventLink(event_instance.code),
             )
 
             triggerMail(
@@ -725,12 +729,12 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         elif user["role"] == "club":
             mail_to = getRoleEmails("cc")
             mail_subject = PROGRESS_EVENT_SUBJECT.safe_substitute(
-                event=old_event.name,
+                event=event_instance.name,
             )
             mail_body = DELETE_EVENT_BODY_FOR_CC.safe_substitute(
-                club=old_event.clubid,
-                event=old_event.name,
-                eventlink=getEventLink(old_event.code),
+                club=event_instance.clubid,
+                event=event_instance.name,
+                eventlink=getEventLink(event_instance.code),
             )
 
         triggerMail(
@@ -741,8 +745,8 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
             cookies=info.context.cookies,
         )
 
-    upd_ref = eventsdb.find_one({"_id": eventid})
-    return EventType.from_pydantic(Event.parse_obj(upd_ref))
+    event_ref = eventsdb.find_one({"_id": eventid})
+    return EventType.from_pydantic(Event.parse_obj(event_ref))
 
 
 @strawberry.mutation

@@ -70,6 +70,9 @@ class Event_Status:
     last_updated_by: str | None = None
     last_updated_time: str | None = None
 
+    deleted_by: str | None = None
+    deleted_time: str | None = None
+
     def __init__(
         self,
         state: Event_State_Status = Event_State_Status.incomplete,  # type: ignore
@@ -84,6 +87,8 @@ class Event_Status:
         slc_approver_time: str | None = None,
         last_updated_by: str | None = None,
         last_updated_time: str | None = None,
+        deleted_by: str | None = None,
+        deleted_time: str | None = None
     ):
         self.state = state
         self.room = room
@@ -102,6 +107,9 @@ class Event_Status:
 
         self.last_updated_by = last_updated_by
         self.last_updated_time = last_updated_time
+
+        self.deleted_by = deleted_by
+        self.deleted_time = deleted_time
 
 
 # Event Modes
