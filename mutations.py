@@ -184,7 +184,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         "status.last_updated_time": datetime.now(timezone).strftime(
             "%d-%m-%Y %I:%M %p"
         ),
-        "status.last_updated_by": user["uid"]
+        "status.last_updated_by": user["uid"],
     }
 
     updatable = user["role"] in allowed_roles or (
@@ -308,7 +308,7 @@ def progressEvent(
             "slc_approver_time": "Not Approved",
             "slo_approver_time": "Not Approved",
             "last_updated_time": event_instance.status.last_updated_time,
-            "last_updated_by": event_instance.status.last_updated_by
+            "last_updated_by": event_instance.status.last_updated_by,
         }
 
     elif event_instance.status.state == Event_State_Status.pending_cc:
@@ -327,7 +327,7 @@ def progressEvent(
             "slo_approver_time": event_instance.status.slo_approver_time,
             "submission_time": event_instance.status.submission_time,
             "last_updated_time": event_instance.status.last_updated_time,
-            "last_updated_by": event_instance.status.last_updated_by
+            "last_updated_by": event_instance.status.last_updated_by,
         }
         if cc_progress_budget is not None:
             updation["budget"] = cc_progress_budget
@@ -366,7 +366,7 @@ def progressEvent(
             "slo_approver_time": event_instance.status.slo_approver_time,
             "submission_time": event_instance.status.submission_time,
             "last_updated_time": event_instance.status.last_updated_time,
-            "last_updated_by": event_instance.status.last_updated_by
+            "last_updated_by": event_instance.status.last_updated_by,
         }
 
         if not updation["room"]:
@@ -392,7 +392,7 @@ def progressEvent(
             "slo_approver_time": time_str,
             "submission_time": event_instance.status.submission_time,
             "last_updated_time": event_instance.status.last_updated_time,
-            "last_updated_by": event_instance.status.last_updated_by
+            "last_updated_by": event_instance.status.last_updated_by,
         }
 
     elif event_instance.status.state == Event_State_Status.approved:
@@ -413,7 +413,7 @@ def progressEvent(
             "slc_approver_time": event_instance.status.slc_approver_time,
             "slo_approver_time": event_instance.status.slo_approver_time,
             "last_updated_time": event_instance.status.last_updated_time,
-            "last_updated_by": event_instance.status.last_updated_by
+            "last_updated_by": event_instance.status.last_updated_by,
         }
 
     poc = getUser(event_instance.poc, info.context.cookies)
