@@ -41,7 +41,7 @@ We are writing to request a venue for an event organized by $club. Please find t
 
      8. Budget    : $budget
 
-     9. Equipment Support       : $equipment
+     9. Equipment Support      : $equipment
     10. Additional Information : $additional
 
     11. Point of Contact -
