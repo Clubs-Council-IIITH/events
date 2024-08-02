@@ -88,7 +88,7 @@ class Event_Status:
         last_updated_by: str | None = None,
         last_updated_time: str | None = None,
         deleted_by: str | None = None,
-        deleted_time: str | None = None
+        deleted_time: str | None = None,
     ):
         self.state = state
         self.room = room
