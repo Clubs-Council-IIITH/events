@@ -1,6 +1,6 @@
 import csv
 import io
-from typing import List
+from typing import List, Any
 
 import dateutil.parser as dp
 import strawberry
@@ -56,7 +56,11 @@ def event(eventid: str, info: Info) -> EventType:
                     user["role"] not in {"cc", "slc", "slo"}
                     and (
                         user["role"] != "club"
-                        or user["uid"] != event["clubid"]
+                        or (user["uid"] != event["clubid"]
+                        and (
+                            event["collabclubs"]
+                            and user["uid"] not in event["collabclubs"])
+                        )
                     )
                 )
             )
@@ -120,9 +124,12 @@ def events(
         restrictAccess and not restrictCCAccess
     ), "restrictAccess and not restrictCCAccess can not be True at the same time."  # noqa: E501
 
-    searchspace = dict()
+    searchspace: dict[str, Any] = {}
     if clubid is not None:
-        searchspace["clubid"] = clubid
+        searchspace["$or"] = [
+            {"clubid": clubid},
+            {"collabclubs": {"$in": [clubid]}},
+        ]
     else:
         allclubs = getClubs(info.context.cookies)
         list_allclubs = list()
@@ -174,7 +181,7 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
 
     events = eventsdb.find(
         {
-            "clubid": clubid,
+            "$or": [{"clubid": clubid}, {"collabclubs": {"$in": [clubid]}}],
             "status.state": Event_State_Status.incomplete.value,
         }
     )
@@ -205,7 +212,10 @@ def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
         "status.state": requested_state,
     }
     if clubid is not None:
-        searchspace["clubid"] = clubid
+        searchspace["$or"] = [
+            {"clubid": clubid},
+            {"collabclubs": {"$in": [clubid]}},
+        ]
     else:
         allclubs = getClubs(info.context.cookies)
         list_allclubs = list()
@@ -239,8 +249,8 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     """
     user = info.context.user
 
-    requested_states = set()
-    searchspace = dict()
+    requested_states: set[str] = set()
+    searchspace: dict[str, Any] = {}
     if user is not None:
         if "cc" == user["role"]:
             requested_states |= {Event_State_Status.pending_cc.value}
@@ -265,7 +275,10 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
         "$in": requested_states,
     }
     if clubid is not None:
-        searchspace["clubid"] = clubid
+        searchspace["$or"] = [
+            {"clubid": clubid},
+            {"collabclubs": {"$in": [clubid]}},
+        ]
 
     events = eventsdb.find(searchspace)
 
@@ -331,7 +344,7 @@ def downloadEventsData(
 
     all_events = list()
     allclubs = getClubs(info.context.cookies)
-    searchspace = dict()
+    searchspace: dict[str, Any] = {}
 
     if details.clubid:
         clubid = details.clubid
@@ -339,7 +352,10 @@ def downloadEventsData(
             clubid = None
         if user is not None:
             if clubid is not None:
-                searchspace["clubid"] = clubid
+                searchspace["$or"] = [
+                            {"clubid": clubid},
+                            {"collabclubs": {"$in": [clubid]}},
+                        ]
             else:
                 list_allclubs = [club["cid"] for club in allclubs]
                 searchspace["clubid"] = {"$in": list_allclubs}

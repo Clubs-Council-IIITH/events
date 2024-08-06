@@ -106,6 +106,8 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
                 details.budget,
             )
         )
+    if details.collabclubs and details.collabclubs != []:
+        event_instance.collabclubs = details.collabclubs
 
     # Check POC Details Exist or not
     if not getMember(
@@ -201,6 +203,8 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.location is not None and updatable:
         # updates["status.room"] = False or user["role"] == "cc"
         updates["location"] = [Event_Location(loc) for loc in details.location]
+    if details.collabclubs is not None and updatable:
+        details["collabclubs"] = details.collabclubs
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
         updates["poc"] = details.poc
         # Check POC Details Exist or not
@@ -243,6 +247,9 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         if (user["role"] in allowed_roles)
         else None,
     }
+
+    if user and user["uid"] not in query["clubid"]:
+        query["collabclubs"] = {"$in": [user["uid"]]}
 
     updation = {"$set": jsonable_encoder(updates)}
 
