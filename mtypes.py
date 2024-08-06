@@ -39,7 +39,7 @@ class Bills_Full_State_Status:
     not_submitted = "Not Submitted"
     incomplete = "Incomplete"
     submitted = "Submitted"
-    slo_processed = "SLO Processed"
+    slo_processed = "Processed by SLO"
 
 # Event Bills Status
 @strawberry.type
