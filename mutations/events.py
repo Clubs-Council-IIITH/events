@@ -32,9 +32,6 @@ from mtypes import (
     timezone,
 )
 
-# import mutations of holidays and finances
-from mutations_finances import mutations as finances_mutations
-from mutations_holidays import mutations as holidays_mutations
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
     getClubNameEmail,
@@ -779,14 +776,10 @@ def updateEventsCid(
 
 
 # register all mutations
-mutations = (
-    [
-        createEvent,
-        editEvent,
-        progressEvent,
-        deleteEvent,
-        updateEventsCid,
-    ]
-    + holidays_mutations
-    + finances_mutations
-)
+mutations = [
+    createEvent,
+    editEvent,
+    progressEvent,
+    deleteEvent,
+    updateEventsCid,
+]

@@ -10,7 +10,15 @@ from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
 
 from models import Event, Holiday
-from mtypes import Audience, Bills_State_Status, Bills_Status, BudgetType, Event_Location, Event_Mode, PyObjectId
+from mtypes import (
+    Audience,
+    Bills_State_Status,
+    Bills_Status,
+    BudgetType,
+    Event_Location,
+    Event_Mode,
+    PyObjectId,
+)
 
 
 # custom context class
@@ -53,11 +61,13 @@ class RoomList(BaseModel):
 class RoomListType:
     pass
 
+
 @strawberry.type
 class BillsStatusType:
     eventid: str
     eventname: str
     bills_status: Bills_Status
+
 
 @strawberry.input
 class InputBillsStatus:

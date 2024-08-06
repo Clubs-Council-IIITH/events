@@ -24,10 +24,6 @@ from otypes import (
     RoomListType,
     timelot_type,
 )
-
-# import queries of holidays and finances
-from queries_finances import queries as finances_queries
-from queries_holidays import queries as holiday_queries
 from utils import eventsWithSorting, getClubs, trim_public_events
 
 
@@ -486,17 +482,13 @@ def downloadEventsData(
 
 
 # register all queries
-queries = (
-    [
-        event,
-        events,
-        eventid,
-        incompleteEvents,
-        # approvedEvents,
-        pendingEvents,
-        availableRooms,
-        downloadEventsData,
-    ]
-    + holiday_queries
-    + finances_queries
-)
+queries = [
+    event,
+    events,
+    eventid,
+    incompleteEvents,
+    # approvedEvents,
+    pendingEvents,
+    availableRooms,
+    downloadEventsData,
+]
