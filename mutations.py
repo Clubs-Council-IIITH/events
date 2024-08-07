@@ -204,7 +204,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         # updates["status.room"] = False or user["role"] == "cc"
         updates["location"] = [Event_Location(loc) for loc in details.location]
     if details.collabclubs is not None and updatable:
-        details["collabclubs"] = details.collabclubs
+        updates["collabclubs"] = details.collabclubs
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
         updates["poc"] = details.poc
         # Check POC Details Exist or not
