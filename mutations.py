@@ -248,9 +248,6 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         else None,
     }
 
-    if user and user["uid"] not in query["clubid"]:
-        query["collabclubs"] = {"$in": [user["uid"]]}
-
     updation = {"$set": jsonable_encoder(updates)}
 
     upd_ref = eventsdb.update_one(query, updation)
