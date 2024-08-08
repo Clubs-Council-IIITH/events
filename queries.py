@@ -1,6 +1,6 @@
 import csv
 import io
-from typing import List, Any
+from typing import Any, List
 
 import dateutil.parser as dp
 import strawberry
@@ -56,10 +56,12 @@ def event(eventid: str, info: Info) -> EventType:
                     user["role"] not in {"cc", "slc", "slo"}
                     and (
                         user["role"] != "club"
-                        or (user["uid"] != event["clubid"]
-                        and (
-                            event["collabclubs"]
-                            and user["uid"] not in event["collabclubs"])
+                        or (
+                            user["uid"] != event["clubid"]
+                            and (
+                                event["collabclubs"]
+                                and user["uid"] not in event["collabclubs"]
+                            )
                         )
                     )
                 )
@@ -353,9 +355,9 @@ def downloadEventsData(
         if user is not None:
             if clubid is not None:
                 searchspace["$or"] = [
-                            {"clubid": clubid},
-                            {"collabclubs": {"$in": [clubid]}},
-                        ]
+                    {"clubid": clubid},
+                    {"collabclubs": {"$in": [clubid]}},
+                ]
             else:
                 list_allclubs = [club["cid"] for club in allclubs]
                 searchspace["clubid"] = {"$in": list_allclubs}
