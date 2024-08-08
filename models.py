@@ -31,6 +31,7 @@ class Event(BaseModel):
     code: str | None = None
     name: event_name_type
     clubid: str
+    collabclubs: List[str] = []
     datetimeperiod: Tuple[datetime, datetime]
     status: Event_Status = Event_Status()
     location: List[Event_Location] = []
