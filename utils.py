@@ -238,8 +238,8 @@ def eventsWithSorting(searchspace, date_filter=False):
     and then
     past events in descending order of end time
     """
-    ist = pytz.timezone("Asia/Kolkata")
-    current_datetime = datetime.now(ist).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    utc = pytz.timezone("UTC")
+    current_datetime = datetime.now(utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
     if date_filter:
         required_events_query = {
             **searchspace,
