@@ -31,8 +31,10 @@ class Event(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     code: str | None = None
     clubid: str
+    collabclubs: List[str] = []
 
     name: event_name_type
+
     description: event_desc_type | None = "No description available."
     datetimeperiod: Tuple[datetime, datetime]
     poster: str | None = None

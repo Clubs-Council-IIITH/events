@@ -87,6 +87,7 @@ class InputEventDetails:
     location: List[Event_Location] | None = None
     description: str | None = None
     clubid: str
+    collabclubs: List[str] | None = None
     mode: Event_Mode | None = Event_Mode.hybrid
     poster: str | None = None
     datetimeperiod: List[datetime]
@@ -103,6 +104,7 @@ class InputEventDetails:
 class InputEditEventDetails:
     name: str | None = None
     eventid: str
+    collabclubs: List[str] | None = None
     location: List[Event_Location] | None = None
     description: str | None = None
     clubid: str | None  # not editable
