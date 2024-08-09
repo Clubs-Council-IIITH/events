@@ -276,6 +276,29 @@ def eventsWithSorting(searchspace, date_filter=False):
 
     return events
 
+def trim_public_events(event: dict):
+    delete_keys = [
+        "equipment",
+        "additional",
+        "population",
+        "poc",
+        "budget",
+        "bills_status",
+    ]
+    for key in delete_keys:
+        if key in event:
+            del event[key]
+
+    status = event["status"]
+    del event["status"]
+
+    event["status"] = {
+        "state": status["state"],
+    }
+
+    return event
+
+
 
 def convert_to_html(text):
     # Escape HTML special characters
