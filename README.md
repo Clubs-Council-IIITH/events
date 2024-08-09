@@ -1,8 +1,17 @@
-# service-template
+# _EVENTS_ MICRO-SERVICE
 
-Template repository for a microservice using FastAPI + Strawberry + MongoDB.  
-Contains example code for queries, mutations, types and models. Remove all `Sample` entities before pushing to production.
+This is a microservice using FastAPI + Strawberry + MongoDB.  
+Contains code for queries, mutations, types and models for the events data and services specifically.
 
 ## How to use
-1. Click the green 'Use this template' button on the top right to create a new repository in the org for the service.
-2. Clone the newly created repository to make changes and push.
+1. Go to [https://github.com/Clubs-Council-IIITH/services](https://github.com/Clubs-Council-IIITH/services)
+2. Follow the steps given in the README.md file at that page.
+
+---
+
+## FOR DEVELOPERS
+_URL_ -> http://events/graphql (For using in single gateway)
+
+> ### QUERIES
+
+> ### MUTATIONS
