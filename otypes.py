@@ -66,6 +66,7 @@ class RoomListType:
 class BillsStatusType:
     eventid: str
     eventname: str
+    clubid: str
     bills_status: Bills_Status
 
 

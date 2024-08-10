@@ -25,8 +25,8 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
     if not event:
         raise ValueError("Event not found")
 
-    if user_role not in ["cc", "slo"] or (
-        user_role == "club" and user["clubid"] != event["clubid"]
+    if user_role not in ["cc", "slo", "club"] or (
+        user_role == "club" and user["uid"] != event["clubid"]
     ):
         raise ValueError("User not authorized")
 
@@ -56,11 +56,11 @@ def allEventsBills(info: Info) -> List[BillsStatusType]:
         "datetimeperiod.1": {
             "$lt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         },
+        "budget": {"$exists": True, "$ne": []}  # Ensure the budget array exists and is not empty
     }
 
     if user_role == "club":
-        searchspace = {"clubid": user["clubid"]}
-
+        searchspace.update({"clubid": user["uid"]})
     events = list(eventsdb.find(searchspace))
 
     if not events or len(events) == 0:
@@ -70,6 +70,7 @@ def allEventsBills(info: Info) -> List[BillsStatusType]:
         BillsStatusType(
             eventid=event["_id"],
             eventname=event["name"],
+            clubid=event["clubid"],
             bills_status=Bills_Status(**event["bills_status"]),
         )
         for event in events
