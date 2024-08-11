@@ -332,7 +332,7 @@ def availableRooms(
         },
     )
 
-    free_rooms = set(Event_Location())
+    free_rooms = set(Event_Location)
     for approved_event in approved_events:
         start_time = dp.parse(approved_event["datetimeperiod"][0])
         end_time = dp.parse(approved_event["datetimeperiod"][1])

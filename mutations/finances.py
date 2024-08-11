@@ -3,24 +3,20 @@ from datetime import datetime
 import strawberry
 
 from db import eventsdb
-from mtypes import (
-    Bills_Status,
-    Bills_Full_State_Status,
-    Event_State_Status,
-    timezone,
-)
-from otypes import Info, InputBillsStatus
-
 from mailing import triggerMail
 from mailing_templates import (
     EVENT_BILL_STATUS_BODY_FOR_CLUB,
     EVENT_BILL_STATUS_SUBJECT,
 )
-from utils import (
-    getClubNameEmail,
-    getRoleEmails,
-    getEventLink
+from mtypes import (
+    Bills_Full_State_Status,
+    Bills_Status,
+    Event_State_Status,
+    timezone,
 )
+from otypes import Info, InputBillsStatus
+from utils import getClubNameEmail, getEventLink, getRoleEmails
+
 
 @strawberry.mutation
 def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
@@ -42,6 +38,10 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
             "datetimeperiod.1": {
                 "$lt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
             },
+            "budget": {
+                "$exists": True,
+                "$ne": [],
+            },  # Ensure the budget array exists and is not empty
         }
     )
     if event is None:
@@ -71,20 +71,18 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
     if not event:
         raise ValueError("Event not found")
 
-    mail_to = [getClubNameEmail(
-        event["clubid"], email=True, name=False
-    )]
+    mail_to = [getClubNameEmail(event["clubid"], email=True, name=False)]
     cc_to = getRoleEmails("cc")
 
     mail_uid = user["uid"]
     mail_subject = EVENT_BILL_STATUS_SUBJECT.safe_substitute(
-            event=event["name"],
-        )
+        event=event["name"],
+    )
     mail_body = EVENT_BILL_STATUS_BODY_FOR_CLUB.safe_substitute(
-            event=event["name"],
-            bill_status=getattr(Bills_Full_State_Status, details.state),
-            comment=details.slo_comment,
-            eventlink=getEventLink(event["code"])
+        event=event["name"],
+        bill_status=getattr(Bills_Full_State_Status, details.state),
+        comment=details.slo_comment,
+        eventlink=getEventLink(event["code"]),
     )
 
     # Send email to club
@@ -99,6 +97,7 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
         )
 
     return Bills_Status(**event["bills_status"])
+
 
 # register all mutations
 mutations = [updateBillsStatus]

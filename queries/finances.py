@@ -18,20 +18,33 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
     user = info.context.user
     if not user:
         raise ValueError("User not authenticated")
-
+    
     user_role = user["role"]
-    event = eventsdb.find_one({"_id": eventid})
+    if user_role not in ["cc", "slo", "club"]:
+        raise ValueError("User not authorized")
+    
+    searchspace = {
+        "_id": eventid,
+        "status.state": Event_State_Status.approved.value,  # type: ignore
+        "datetimeperiod.1": {
+            "$lt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        },
+        "budget": {
+            "$exists": True,
+            "$ne": [],
+        },  # Ensure the budget array exists and is not empty
+    }
+
+    if user_role == "club":
+        searchspace.update({"clubid": user["uid"]})
+
+    event = eventsdb.find_one(searchspace)
 
     if not event:
         raise ValueError("Event not found")
 
-    if user_role not in ["cc", "slo", "club"] or (
-        user_role == "club" and user["uid"] != event["clubid"]
-    ):
-        raise ValueError("User not authorized")
-
     if "bills_status" not in event:
-        raise ValueError("Bills status not found")
+        return Bills_Status()
 
     return Bills_Status(**event["bills_status"])
 
@@ -52,16 +65,20 @@ def allEventsBills(info: Info) -> List[BillsStatusType]:
         raise ValueError("User not authorized")
 
     searchspace = {
-        "status.state": Event_State_Status.approved.value, # type: ignore
+        "status.state": Event_State_Status.approved.value,  # type: ignore
         "datetimeperiod.1": {
             "$lt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         },
-        "budget": {"$exists": True, "$ne": []}  # Ensure the budget array exists and is not empty
+        "bills_status": {"$exists": True},
+        "budget": {
+            "$exists": True,
+            "$ne": [],
+        },  # Ensure the budget array exists and is not empty
     }
 
     if user_role == "club":
         searchspace.update({"clubid": user["uid"]})
-    events = list(eventsdb.find(searchspace))
+    events = list(eventsdb.find(searchspace).sort("datetimeperiod.1", -1))
 
     if not events or len(events) == 0:
         raise ValueError("No events found")
@@ -74,7 +91,6 @@ def allEventsBills(info: Info) -> List[BillsStatusType]:
             bills_status=Bills_Status(**event["bills_status"]),
         )
         for event in events
-        if "bills_status" in event
     ]
 
 
