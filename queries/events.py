@@ -24,10 +24,7 @@ from otypes import (
     RoomListType,
     timelot_type,
 )
-
-# import queries of holidays
-from queries_holidays import queries as holiday_queries
-from utils import eventsWithSorting, getClubs
+from utils import eventsWithSorting, getClubs, trim_public_events
 
 
 @strawberry.field
@@ -73,6 +70,13 @@ def event(eventid: str, info: Info) -> EventType:
             "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
         )
 
+    if (
+        user is None
+        or user["role"] not in ["club", "cc", "slc", "slo"]
+        or (user["role"] == "club" and user["uid"] != event["clubid"])
+    ):
+        trim_public_events(event)
+
     return EventType.from_pydantic(Event.parse_obj(event))
 
 
@@ -107,24 +111,24 @@ def events(
 
     restrictAccess = True
     clubAccess = False
-    restrictCCAccess = True
+    restrictFullAccess = True
     if user is not None and (public is None or public is False):
         if user["role"] in ["cc", "slc", "slo"]:
             restrictAccess = False
             if user["role"] in [
                 "cc",
             ]:
-                restrictCCAccess = False
+                restrictFullAccess = False
 
         if user["role"] == "club":
             clubAccess = True
             restrictAccess = False
             if user["uid"] == clubid:
-                restrictCCAccess = False
+                restrictFullAccess = False
 
     assert not (
-        restrictAccess and not restrictCCAccess
-    ), "restrictAccess and not restrictCCAccess can not be True at the same time."  # noqa: E501
+        restrictAccess and not restrictFullAccess
+    ), "restrictAccess and not restrictFullAccess can not be True at the same time."  # noqa: E501
 
     searchspace: dict[str, Any] = {}
     if clubid is not None:
@@ -138,6 +142,7 @@ def events(
         for club in allclubs:
             list_allclubs.append(club["cid"])
         searchspace["clubid"] = {"$in": list_allclubs}
+
     if restrictAccess:
         searchspace["status.state"] = {
             "$in": [
@@ -145,7 +150,7 @@ def events(
             ]
         }
         searchspace["audience"] = {"$nin": ["internal"]}
-    elif restrictCCAccess:
+    elif restrictFullAccess:
         statuses = [
             Event_State_Status.approved.value,
             Event_State_Status.pending_budget.value,
@@ -164,6 +169,10 @@ def events(
 
     if limit is not None:
         events = events[:limit]
+
+    if restrictAccess or public:
+        for event in events:
+            trim_public_events(event)
 
     return [
         EventType.from_pydantic(Event.parse_obj(event)) for event in events
@@ -200,45 +209,47 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     ]
 
 
-@strawberry.field
-def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
-    """
-    if clubid is set, return approved events of that club.
-    else return approved events of every club.
-    NOTE: this is a public query, accessible to all.
-    """
+# @strawberry.field
+# def approvedEvents(clubid: str | None, info: Info) -> List[EventType]:
+#     """
+#     if clubid is set, return approved events of that club.
+#     else return approved events of every club.
+#     NOTE: this is a public query, accessible to all.
+#     """
 
-    requested_state = Event_State_Status.approved.value
+#     requested_state = Event_State_Status.approved.value
 
-    searchspace = {
-        "status.state": requested_state,
-    }
-    if clubid is not None:
-        searchspace["$or"] = [
-            {"clubid": clubid},
-            {"collabclubs": {"$in": [clubid]}},
-        ]
-    else:
-        allclubs = getClubs(info.context.cookies)
-        list_allclubs = list()
-        for club in allclubs:
-            list_allclubs.append(club["cid"])
-        searchspace["clubid"] = {"$in": list_allclubs}
+#     searchspace = {
+#         "status.state": requested_state,
+#     }
+#     if clubid is not None:
+#         searchspace["$or"] = [
+#             {"clubid": clubid},
+#             {"collabclubs": {"$in": [clubid]}},
+#         ]
+#     else:
+#         allclubs = getClubs(info.context.cookies)
+#         list_allclubs = list()
+#         for club in allclubs:
+#             list_allclubs.append(club["cid"])
+#         searchspace["clubid"] = {"$in": list_allclubs}
 
-    searchspace["audience"] = {"$nin": ["internal"]}
+#     searchspace["audience"] = {"$nin": ["internal"]}
 
-    events = eventsdb.find(searchspace)
+#     events = eventsdb.find(searchspace)
 
-    # sort events in descending order of time
-    events = sorted(
-        events,
-        key=lambda event: event["datetimeperiod"][0],
-        reverse=True,
-    )
+#     # sort events in descending order of time
+#     events = sorted(
+#         events,
+#         key=lambda event: event["datetimeperiod"][0],
+#         reverse=True,
+#     )
 
-    return [
-        EventType.from_pydantic(Event.parse_obj(event)) for event in events
-    ]
+#     TODO: Add trimming of events as public events
+
+#     return [
+#         EventType.from_pydantic(Event.parse_obj(event)) for event in events
+#     ]
 
 
 @strawberry.field
@@ -304,6 +315,11 @@ def availableRooms(
     return a list of all rooms that are available in the given timeslot
     NOTE: this is a public query, accessible to all.
     """
+    user = info.context.user
+
+    if user is None or user["role"] not in ["club", "cc", "slo"]:
+        raise Exception("You do not have permission to access this resource.")
+
     assert timeslot[0] < timeslot[1], "Invalid timeslot"
 
     approved_events = eventsdb.find(
@@ -489,8 +505,8 @@ queries = [
     events,
     eventid,
     incompleteEvents,
-    approvedEvents,
+    # approvedEvents,
     pendingEvents,
     availableRooms,
     downloadEventsData,
-] + holiday_queries
+]

@@ -13,6 +13,7 @@ from pydantic import (
 
 from mtypes import (
     Audience,
+    Bills_Status,
     BudgetType,
     Event_Location,
     Event_Mode,
@@ -29,22 +30,27 @@ from mtypes import (
 class Event(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     code: str | None = None
-    name: event_name_type
     clubid: str
     collabclubs: List[str] = []
-    datetimeperiod: Tuple[datetime, datetime]
-    status: Event_Status = Event_Status()
-    location: List[Event_Location] = []
+
+    name: event_name_type
+
     description: event_desc_type | None = "No description available."
-    mode: Event_Mode = Event_Mode.hybrid
+    datetimeperiod: Tuple[datetime, datetime]
     poster: str | None = None
     audience: List[Audience] = []
     link: HttpUrl | None = None
+    
+    mode: Event_Mode = Event_Mode.hybrid
+    location: List[Event_Location] = []
     equipment: event_othr_type | None = None
     additional: event_othr_type | None = None
     population: event_popu_type | None = None
-    budget: List[BudgetType] = []
     poc: str | None = None
+
+    status: Event_Status = Event_Status()
+    budget: List[BudgetType] = []
+    bills_status: Bills_Status = Bills_Status()
 
     @field_validator("datetimeperiod")
     def check_end_year(cls, value, info: ValidationInfo):

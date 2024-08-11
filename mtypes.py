@@ -20,6 +20,44 @@ class Audience(StrEnum):
     fac = auto()
     internal = auto()
 
+# Event Bills States
+@strawberry.enum
+class Bills_State_Status(StrEnum):
+    # initially, the bills are `not_submitted`
+    not_submitted = auto()
+    # after the club submits the bills, but they are incomplete, 
+    # the state is `incomplete`
+    incomplete = auto()
+    # after the club submits the bills, and they are complete, 
+    # the state is `submitted`
+    submitted = auto()
+    # SLO have processed the bills, the state is `slo_processed`
+    slo_processed = auto()
+
+# Event Bills State Full Names
+class Bills_Full_State_Status:
+    not_submitted = "Not Submitted"
+    incomplete = "Incomplete"
+    submitted = "Submitted"
+    slo_processed = "Processed by SLO"
+
+# Event Bills Status
+@strawberry.type
+class Bills_Status:
+    state: Bills_State_Status = Bills_State_Status.not_submitted # type: ignore
+    updated_time: str | None = None
+    slo_comment: str | None = None
+
+    def __init__(
+        self,
+        state: Bills_State_Status = Bills_State_Status.not_submitted, # type: ignore
+        updated_time: str | None = None,
+        slo_comment: str | None = None,
+    ):
+        self.state = state
+        self.updated_time = updated_time
+        self.slo_comment = slo_comment
+
 
 # Event States
 @strawberry.enum
@@ -50,6 +88,7 @@ class Event_Full_State_Status:
     deleted = "Deleted"
 
 
+# Event Status
 @strawberry.type
 class Event_Status:
     state: Event_State_Status = Event_State_Status.incomplete  # type: ignore

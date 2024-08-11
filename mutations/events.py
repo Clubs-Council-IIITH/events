@@ -32,8 +32,6 @@ from mtypes import (
     timezone,
 )
 
-# import mutations of holidays
-from mutations_holidays import mutations as holidays_mutations
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
     getClubNameEmail,
@@ -788,4 +786,4 @@ mutations = [
     progressEvent,
     deleteEvent,
     updateEventsCid,
-] + holidays_mutations
+]

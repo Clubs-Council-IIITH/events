@@ -180,3 +180,29 @@ $eventlink
 Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
 """  # noqa: E501
 )
+
+EVENT_BILL_STATUS_SUBJECT = Template(
+    """
+Update on Bill Status for $event
+"""
+)
+
+EVENT_BILL_STATUS_BODY_FOR_CLUB = Template(
+    """
+Dear Club,
+
+SLO have updated the status for the bills for the event, $event
+
+Updated Status: $bill_status
+Comment: $comment
+Event Link: $eventlink
+
+Should you have any queries or require assistance at any stage of the process, please do not hesitate to reach out to us. We are here to ensure a smooth and efficient coordination of your event.
+
+Best regards,
+Clubs Council.
+
+
+Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+"""  # noqa: E501
+)
