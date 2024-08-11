@@ -40,7 +40,7 @@ class Event(BaseModel):
     poster: str | None = None
     audience: List[Audience] = []
     link: HttpUrl | None = None
-    
+
     mode: Event_Mode = Event_Mode.hybrid
     location: List[Event_Location] = []
     equipment: event_othr_type | None = None

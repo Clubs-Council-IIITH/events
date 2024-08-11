@@ -276,6 +276,7 @@ def eventsWithSorting(searchspace, date_filter=False):
 
     return events
 
+
 def trim_public_events(event: dict):
     delete_keys = [
         "equipment",
@@ -297,7 +298,6 @@ def trim_public_events(event: dict):
     }
 
     return event
-
 
 
 def convert_to_html(text):
