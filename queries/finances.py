@@ -44,7 +44,7 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
         raise ValueError("Event not found")
 
     if "bills_status" not in event:
-        return Bills_Status()
+        raise ValueError("Bills status not found")
 
     return Bills_Status(**event["bills_status"])
 
