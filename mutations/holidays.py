@@ -12,11 +12,11 @@ def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
     Create a new holiday
     returns the created holiday
 
-    Allowed Roles: ["slo"]
+    Allowed Roles: ["slo", "cc"]
     """
     user = info.context.user
 
-    if user is None or user.get("role") not in ["slo"]:
+    if user is None or user.get("role") not in ["slo", "cc"]:
         raise ValueError("You do not have permission to access this resource.")
 
     holiday = Holiday(
@@ -43,11 +43,11 @@ def editHoliday(
     Edit an existing holiday
     returns the edited holiday
 
-    Allowed Roles: ["slo"]
+    Allowed Roles: ["slo", "cc"]
     """
     user = info.context.user
 
-    if user is None or user.get("role") not in ["slo"]:
+    if user is None or user.get("role") not in ["slo", "cc"]:
         raise ValueError("You do not have permission to access this resource.")
 
     holiday = holidaysdb.find_one({"_id": id})
@@ -76,7 +76,7 @@ def deleteHoliday(id: str, info: Info) -> bool:
     """
     user = info.context.user
 
-    if user is None or user.get("role") not in ["slo"]:
+    if user is None or user.get("role") not in ["slo", "cc"]:
         raise ValueError("You do not have permission to access this resource.")
 
     holiday = holidaysdb.find_one({"_id": id})
