@@ -92,6 +92,12 @@ Note: This automated email has been generated from the Clubs Council website. Fo
 """  # noqa: E501
 )
 
+DELETE_EVENT_SUBJECT = Template(
+    """
+[Events] $event_id: Deletion of $event
+"""
+)
+
 DELETE_EVENT_BODY_FOR_CC = Template(
     """
 Dear Clubs Council,

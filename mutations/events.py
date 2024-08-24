@@ -11,6 +11,7 @@ from mailing import triggerMail
 from mailing_templates import (
     APPROVED_EVENT_BODY_FOR_CLUB,
     CLUB_EVENT_SUBJECT,
+    DELETE_EVENT_SUBJECT,
     DELETE_EVENT_BODY_FOR_CC,
     DELETE_EVENT_BODY_FOR_CLUB,
     PROGRESS_EVENT_BODY,
@@ -676,34 +677,37 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         Event_State_Status.deleted,
         Event_State_Status.incomplete,
     ]:
+        mail_club = getClubNameEmail(
+            event_instance.clubid, email=True, name=True
+        )
+        if mail_club is None:
+            raise Exception("Club does not exist.")
+        else:
+            clubname, mail_club = mail_club
         if user["role"] == "cc":
             mail_to = [
-                getClubNameEmail(
-                    event_instance.clubid, email=True, name=False
-                ),
+                mail_club,
             ]
-            mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
+            mail_subject = DELETE_EVENT_SUBJECT.safe_substitute(
                 event_id=event_instance.code,
                 event=event_instance.name,
             )
             mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
-                club=event_instance.clubid,
+                club=clubname,
                 event=event_instance.name,
                 eventlink=getEventLink(event_instance.code),
                 deleted_by="Clubs Council",
             )
         if user["role"] == "slo":
             mail_to = [
-                getClubNameEmail(
-                    event_instance.clubid, email=True, name=False
-                ),
+                mail_club,
             ]
-            mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
+            mail_subject = DELETE_EVENT_SUBJECT.safe_substitute(
                 event_id=event_instance.code,
                 event=event_instance.name,
             )
             mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
-                club=event_instance.clubid,
+                club=clubname,
                 event=event_instance.name,
                 eventlink=getEventLink(event_instance.code),
                 deleted_by="Student Life Office",
@@ -711,7 +715,8 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
 
             # Mail to CC for the deleted event
             mail_to_cc = getRoleEmails("cc")
-            mail_subject_cc = PROGRESS_EVENT_SUBJECT.safe_substitute(
+            mail_subject_cc = DELETE_EVENT_SUBJECT.safe_substitute(
+                event_id=event_instance.code,
                 event=event_instance.name,
             )
             mail_body_cc = DELETE_EVENT_BODY_FOR_CC.safe_substitute(
@@ -730,11 +735,12 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
 
         elif user["role"] == "club":
             mail_to = getRoleEmails("cc")
-            mail_subject = PROGRESS_EVENT_SUBJECT.safe_substitute(
+            mail_subject = DELETE_EVENT_SUBJECT.safe_substitute(
+                event_id=event_instance.code,
                 event=event_instance.name,
             )
             mail_body = DELETE_EVENT_BODY_FOR_CC.safe_substitute(
-                club=event_instance.clubid,
+                club=clubname,
                 event=event_instance.name,
                 eventlink=getEventLink(event_instance.code),
             )
