@@ -24,7 +24,7 @@ PROGRESS_EVENT_BODY_FOR_SLO = Template(
     """
 Dear Sir/Ma'am,
 
-We are writing to request a venue for an event organized by $club. Please find the event details provided by the club below.
+We are writing to request a venue & approval for an event organized by $club. Please find the event details provided by the club below.
 
      1. Event ID: $event_id
 
