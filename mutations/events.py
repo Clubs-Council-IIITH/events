@@ -11,9 +11,9 @@ from mailing import triggerMail
 from mailing_templates import (
     APPROVED_EVENT_BODY_FOR_CLUB,
     CLUB_EVENT_SUBJECT,
-    DELETE_EVENT_SUBJECT,
     DELETE_EVENT_BODY_FOR_CC,
     DELETE_EVENT_BODY_FOR_CLUB,
+    DELETE_EVENT_SUBJECT,
     PROGRESS_EVENT_BODY,
     PROGRESS_EVENT_BODY_FOR_SLC,
     PROGRESS_EVENT_BODY_FOR_SLO,
@@ -32,10 +32,9 @@ from mtypes import (
     Event_State_Status,
     timezone,
 )
-
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
-    getClubNameEmail,
+    getClubDetails,
     getEventCode,
     getEventLink,
     getMember,
@@ -67,6 +66,10 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     # Check if the start time is before the end time
     if details.datetimeperiod[0] >= details.datetimeperiod[1]:
         raise Exception("Start time cannot be after end time.")
+
+    # Check if the club exists
+    if len(getClubDetails(details.clubid, info.context.cookies).keys()) == 0:
+        raise Exception("Club does not exist.")
 
     event_instance = Event(
         name=details.name,
@@ -290,6 +293,14 @@ def progressEvent(
         raise noaccess_error
     event_instance = Event.parse_obj(event_ref)
 
+    mail_uid = user["uid"]
+    clubDetails = getClubDetails(event_instance.clubid, info.context.cookies)
+    if len(clubDetails.keys()) == 0:
+        raise Exception("Club does not exist.")
+    else:
+        mail_club = clubDetails["email"]
+        clubname = clubDetails["name"]
+
     # get current time
     current_time = datetime.now(timezone)
     time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
@@ -297,12 +308,15 @@ def progressEvent(
     if event_instance.status.state == Event_State_Status.incomplete:
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
+        new_state = Event_State_Status.pending_cc.value
+        if clubDetails["studentBody"]:
+            new_state = Event_State_Status.pending_room.value
         updation = {
             "budget": False,
             # or sum([b.amount for b in event_instance.budget]) == 0,
             "room": False,
             #   or len(event_instance.location) == 0,
-            "state": Event_State_Status.pending_cc.value,
+            "state": new_state,
             "cc_approver": None,
             "slc_approver": None,
             "slo_approver": None,
@@ -428,19 +442,8 @@ def progressEvent(
     event_ref = eventsdb.find_one({"_id": eventid})
     updated_event_instance = Event.parse_obj(event_ref)
 
-    # trigger mail notification
-
+    ## trigger mail notification
     # Data Preparation for the mailing
-    mail_uid = user["uid"]
-    mail_club = getClubNameEmail(
-        updated_event_instance.clubid, email=True, name=True
-    )
-
-    if mail_club is None:
-        raise Exception("Club does not exist.")
-    else:
-        clubname, mail_club = mail_club
-
     mail_event_title = updated_event_instance.name
     mail_eventlink = getEventLink(updated_event_instance.code)
     mail_description = updated_event_instance.description
@@ -586,7 +589,9 @@ def progressEvent(
     elif (
         updated_event_instance.status.state == Event_State_Status.pending_room
     ):
-        cc_to = getRoleEmails("cc")
+        cc_to = getRoleEmails("cc") + (
+            [mail_club,] if clubDetails["studentBody"] else []
+        )
         mail_to = getRoleEmails("slo")
         mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
             event_id=updated_event_instance.code,
@@ -666,6 +671,13 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         "%d-%m-%Y %I:%M %p"
     )
 
+    clubDetails = getClubDetails(event_instance.clubid, info.context.cookies)
+    if len(clubDetails.keys()) == 0:
+        raise Exception("Club does not exist.")
+    else:
+        mail_club = clubDetails["email"]
+        clubname = clubDetails["name"]
+
     event_ref = eventsdb.update_one(query, {"$set": {"status": updation}})
     if event_ref.matched_count == 0:
         raise Exception(
@@ -677,13 +689,6 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         Event_State_Status.deleted,
         Event_State_Status.incomplete,
     ]:
-        mail_club = getClubNameEmail(
-            event_instance.clubid, email=True, name=True
-        )
-        if mail_club is None:
-            raise Exception("Club does not exist.")
-        else:
-            clubname, mail_club = mail_club
         if user["role"] == "cc":
             mail_to = [
                 mail_club,

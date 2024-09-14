@@ -130,19 +130,31 @@ def getClubCode(clubid: str) -> str | None:
 
 
 # get club name from club id
-def getClubNameEmail(
-    clubid: str, email=False, name=True
-) -> str | tuple[str, str] | None:
-    allclubs = getClubs()
-    for club in allclubs:
-        if club["cid"] == clubid:
-            if email and name:
-                return club["name"], club["email"]
-            elif email:
-                return club["email"]
-            else:
-                return club["name"]
-    return None
+def getClubDetails(
+    clubid: str,
+    cookies,
+) -> dict:
+    try:
+        query = """
+                    query Club($clubInput: ClubInput!) {
+                        club(clubInput: $clubInput) {
+                            cid
+                            name
+                            email
+                            studentBody
+                            category
+                        }
+                    }
+                """
+        variable = {"clubInput": {"cid": clubid}}
+        request = requests.post(
+            "http://gateway/graphql",
+            json={"query": query, "variables": variable},
+            cookies=cookies,
+        )
+        return request.json()["data"]["club"]
+    except Exception:
+        return {}
 
 
 # generate event code based on time and club
