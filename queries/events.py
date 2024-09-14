@@ -279,13 +279,12 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
                 Event_State_Status.pending_budget.value,
                 Event_State_Status.pending_room.value,
             }
-    requested_states = list(requested_states)
 
     if user is None or len(requested_states) == 0:
         raise Exception("You do not have permission to access this resource.")
 
     searchspace["status.state"] = {
-        "$in": requested_states,
+        "$in": list(requested_states),
     }
     if clubid is not None:
         searchspace["$or"] = [
@@ -332,7 +331,7 @@ def availableRooms(
         },
     )
 
-    free_rooms = set(Event_Location)
+    free_rooms = set(Event_Location.__members__.values())
     for approved_event in approved_events:
         start_time = dp.parse(approved_event["datetimeperiod"][0])
         end_time = dp.parse(approved_event["datetimeperiod"][1])
@@ -358,6 +357,9 @@ def downloadEventsData(
     given details in the given date period.
     """
     user = info.context.user
+    if user is None:
+        raise Exception("You do not have permission to access this resource.")
+    
     include_status = user["role"] in ["cc", "slo"] and details.allEvents
 
     all_events = list()
