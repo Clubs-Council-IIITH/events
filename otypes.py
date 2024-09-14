@@ -1,7 +1,7 @@
 import json
 from datetime import date, datetime
 from functools import cached_property
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, TypeAlias
 
 import strawberry
 from pydantic import BaseModel
@@ -40,7 +40,7 @@ class Context(BaseContext):
 
 
 # custom info type
-Info = _Info[Context, RootValueType]
+Info: TypeAlias = _Info[Context, RootValueType]
 
 # serialize PyObjectId as a scalar type
 PyObjectIdType = strawberry.scalar(

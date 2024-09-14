@@ -11,9 +11,9 @@ from mailing import triggerMail
 from mailing_templates import (
     APPROVED_EVENT_BODY_FOR_CLUB,
     CLUB_EVENT_SUBJECT,
-    DELETE_EVENT_SUBJECT,
     DELETE_EVENT_BODY_FOR_CC,
     DELETE_EVENT_BODY_FOR_CLUB,
+    DELETE_EVENT_SUBJECT,
     PROGRESS_EVENT_BODY,
     PROGRESS_EVENT_BODY_FOR_SLC,
     PROGRESS_EVENT_BODY_FOR_SLO,
@@ -32,7 +32,6 @@ from mtypes import (
     Event_State_Status,
     timezone,
 )
-
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
     getClubNameEmail,
