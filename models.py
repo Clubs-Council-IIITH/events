@@ -58,12 +58,9 @@ class Event(BaseModel):
             raise ValueError("Start date cannot be same/after end date")
         return value
 
-    # TODO[pydantic]: The following keys were removed: `json_encoders`.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.  # noqa: E501
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
-        json_encoders={ObjectId: str},
     )
 
 
@@ -76,12 +73,9 @@ class Holiday(BaseModel):
         default_factory=lambda: datetime.now(timezone), frozen=True
     )
 
-    # TODO[pydantic]: The following keys were removed: `json_encoders`.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.  # noqa: E501
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
-        json_encoders={ObjectId: str},
         str_max_length=5000,
         extra="forbid",
         str_strip_whitespace=True,

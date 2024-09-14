@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import strawberry
 from fastapi.encoders import jsonable_encoder
 from prettytable import PrettyTable
-from pydantic import HttpUrl, parse_obj_as
+from pydantic import HttpUrl, TypeAdapter
 
 from db import eventsdb
 from mailing import triggerMail
@@ -86,7 +86,9 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if details.audience is not None:
         event_instance.audience = [Audience(aud) for aud in details.audience]
     if details.link is not None:
-        event_instance.link = parse_obj_as(HttpUrl, details.link)
+        event_instance.link = TypeAdapter(HttpUrl).validate_python(
+            details.link
+        )
     if details.equipment is not None:
         event_instance.equipment = details.equipment
     if details.additional is not None:
@@ -136,7 +138,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     created_id = eventsdb.insert_one(
         jsonable_encoder(event_instance)
     ).inserted_id
-    created_event = Event.parse_obj(eventsdb.find_one({"_id": created_id}))
+    created_event = Event.model_validate(eventsdb.find_one({"_id": created_id}))
 
     return EventType.from_pydantic(created_event)
 
@@ -253,7 +255,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         raise Exception("You do not have permission to access this resource.")
 
     event_ref = eventsdb.find_one({"_id": details.eventid})
-    return EventType.from_pydantic(Event.parse_obj(event_ref))
+    return EventType.from_pydantic(Event.model_validate(event_ref))
 
 
 @strawberry.mutation
@@ -287,7 +289,7 @@ def progressEvent(
     event_ref = eventsdb.find_one({"_id": eventid})
     if event_ref is None or user is None:
         raise noaccess_error
-    event_instance = Event.parse_obj(event_ref)
+    event_instance = Event.model_validate(event_ref)
 
     # get current time
     current_time = datetime.now(timezone)
@@ -425,7 +427,7 @@ def progressEvent(
         raise noaccess_error
 
     event_ref = eventsdb.find_one({"_id": eventid})
-    updated_event_instance = Event.parse_obj(event_ref)
+    updated_event_instance = Event.model_validate(event_ref)
 
     # trigger mail notification
 
@@ -654,7 +656,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         raise Exception(
             "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
         )
-    event_instance = Event.parse_obj(event_ref)
+    event_instance = Event.model_validate(event_ref)
 
     updation = event_ref["status"]
     updation["state"] = Event_State_Status.deleted.value
@@ -753,7 +755,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         )
 
     event_ref = eventsdb.find_one({"_id": eventid})
-    return EventType.from_pydantic(Event.parse_obj(event_ref))
+    return EventType.from_pydantic(Event.model_validate(event_ref))
 
 
 @strawberry.mutation

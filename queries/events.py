@@ -77,7 +77,7 @@ def event(eventid: str, info: Info) -> EventType:
     ):
         trim_public_events(event)
 
-    return EventType.from_pydantic(Event.parse_obj(event))
+    return EventType.from_pydantic(Event.model_validate(event))
 
 
 @strawberry.field
@@ -175,7 +175,7 @@ def events(
             trim_public_events(event)
 
     return [
-        EventType.from_pydantic(Event.parse_obj(event)) for event in events
+        EventType.from_pydantic(Event.model_validate(event)) for event in events
     ]
 
 
@@ -205,7 +205,7 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     )
 
     return [
-        EventType.from_pydantic(Event.parse_obj(event)) for event in events
+        EventType.from_pydantic(Event.model_validate(event)) for event in events
     ]
 
 
@@ -248,7 +248,7 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
 #     TODO: Add trimming of events as public events
 
 #     return [
-#         EventType.from_pydantic(Event.parse_obj(event)) for event in events
+#         EventType.from_pydantic(Event.model_validate(event)) for event in events
 #     ]
 
 
@@ -303,7 +303,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     )
 
     return [
-        EventType.from_pydantic(Event.parse_obj(event)) for event in events
+        EventType.from_pydantic(Event.model_validate(event)) for event in events
     ]
 
 
@@ -345,7 +345,7 @@ def availableRooms(
             free_rooms.update(event["location"])
 
     return RoomListType.from_pydantic(
-        RoomList.parse_obj({"locations": free_rooms})
+        RoomList.model_validate({"locations": free_rooms})
     )
 
 

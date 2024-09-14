@@ -30,7 +30,7 @@ def holidays(
     holidays = holidaysdb.find(query)
 
     return [
-        HolidayType.from_pydantic(Holiday.parse_obj(holiday))
+        HolidayType.from_pydantic(Holiday.model_validate(holiday))
         for holiday in holidays
     ]
 
@@ -44,7 +44,7 @@ def holiday(id: str) -> HolidayType:
 
     holiday = holidaysdb.find_one({"_id": id})
 
-    return HolidayType.from_pydantic(Holiday.parse_obj(holiday))
+    return HolidayType.from_pydantic(Holiday.model_validate(holiday))
 
 
 # register all queries of holidays

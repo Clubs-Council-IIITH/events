@@ -32,7 +32,7 @@ def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
     created_id = holidaysdb.insert_one(jsonable_encoder(holiday)).inserted_id
     created_holiday = holidaysdb.find_one({"_id": created_id})
 
-    return HolidayType.from_pydantic(Holiday.parse_obj(created_holiday))
+    return HolidayType.from_pydantic(Holiday.model_validate(created_holiday))
 
 
 @strawberry.mutation
@@ -63,7 +63,7 @@ def editHoliday(
     )
     updated_holiday = holidaysdb.find_one({"_id": id})
 
-    return HolidayType.from_pydantic(Holiday.parse_obj(updated_holiday))
+    return HolidayType.from_pydantic(Holiday.model_validate(updated_holiday))
 
 
 @strawberry.mutation
