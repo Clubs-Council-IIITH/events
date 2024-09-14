@@ -1,7 +1,6 @@
 from datetime import date, datetime
 from typing import List, Tuple
 
-from bson import ObjectId
 from pydantic import (
     BaseModel,
     ConfigDict,
