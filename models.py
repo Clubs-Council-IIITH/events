@@ -32,6 +32,7 @@ class Event(BaseModel):
     code: str | None = None
     clubid: str
     collabclubs: List[str] = []
+    studentBodyEvent: bool = False
 
     name: event_name_type
 

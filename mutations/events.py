@@ -68,7 +68,8 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         raise Exception("Start time cannot be after end time.")
 
     # Check if the club exists
-    if len(getClubDetails(details.clubid, info.context.cookies).keys()) == 0:
+    club_details = getClubDetails(details.clubid, info.context.cookies)
+    if len(club_details.keys()) == 0:
         raise Exception("Club does not exist.")
 
     event_instance = Event(
@@ -136,6 +137,9 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     event_instance.code = getEventCode(
         details.clubid, details.datetimeperiod[0]
     )
+
+    # Set studentBodyEvent to True if the event is a student body event
+    event_instance.studentBodyEvent = club_details["studentBody"]
 
     created_id = eventsdb.insert_one(
         jsonable_encoder(event_instance)
@@ -309,7 +313,7 @@ def progressEvent(
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
         new_state = Event_State_Status.pending_cc.value
-        if clubDetails["studentBody"]:
+        if event_instance.studentBodyEvent:
             new_state = Event_State_Status.pending_room.value
         updation = {
             "budget": False,
@@ -389,15 +393,15 @@ def progressEvent(
     elif event_instance.status.state == Event_State_Status.pending_room:
         if user["role"] != "slo":
             raise noaccess_error
-        assert event_instance.status.budget or clubDetails["studentBody"]
+        assert event_instance.status.budget or event_instance.studentBodyEvent
         assert event_instance.status.room is False
         updation = {
-            "budget": event_instance.status.budget,
+            "budget": event_instance.status.budget
+            or event_instance.studentBodyEvent,
             "room": True,
             "state": Event_State_Status.approved.value,
             "slo_approver": user["uid"],
-            "slc_approver": event_instance.status.slc_approver
-            or clubDetails["studentBody"],
+            "slc_approver": event_instance.status.slc_approver,
             "cc_approver": event_instance.status.cc_approver,
             "cc_approver_time": event_instance.status.cc_approver_time,
             "slc_approver_time": event_instance.status.slc_approver_time,
@@ -594,7 +598,7 @@ def progressEvent(
             [
                 mail_club,
             ]
-            if clubDetails["studentBody"]
+            if updated_event_instance.studentBodyEvent
             else []
         )
         mail_to = getRoleEmails("slo")
