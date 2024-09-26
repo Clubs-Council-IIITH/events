@@ -136,7 +136,7 @@ def getClubDetails(
 ) -> dict:
     try:
         query = """
-                    query Club($clubInput: ClubInput!) {
+                    query Club($clubInput: SimpleClubInput!) {
                         club(clubInput: $clubInput) {
                             cid
                             name
