@@ -181,7 +181,14 @@ def getEventCode(clubid, starttime) -> str:
         }
     )
 
-    event_count = len(list(club_events)) + 1
+    max_code = 0
+    for i in list(club_events):
+        code = i["code"]
+        code = int(code[-3:])
+        if code > max_code:
+            max_code = code
+
+    event_count = max_code + 1
     code_year = str(year.fiscal_year - 1)[-2:] + str(year.fiscal_year)[-2:]
 
     return f"{club_code}{code_year}{event_count:03d}"  # format: CODE20XX00Y
