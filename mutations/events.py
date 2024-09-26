@@ -389,14 +389,15 @@ def progressEvent(
     elif event_instance.status.state == Event_State_Status.pending_room:
         if user["role"] != "slo":
             raise noaccess_error
-        assert event_instance.status.budget is True
+        assert event_instance.status.budget or clubDetails["studentBody"]
         assert event_instance.status.room is False
         updation = {
             "budget": event_instance.status.budget,
             "room": True,
             "state": Event_State_Status.approved.value,
             "slo_approver": user["uid"],
-            "slc_approver": event_instance.status.slc_approver,
+            "slc_approver": event_instance.status.slc_approver
+            or clubDetails["studentBody"],
             "cc_approver": event_instance.status.cc_approver,
             "cc_approver_time": event_instance.status.cc_approver_time,
             "slc_approver_time": event_instance.status.slc_approver_time,
@@ -590,7 +591,11 @@ def progressEvent(
         updated_event_instance.status.state == Event_State_Status.pending_room
     ):
         cc_to = getRoleEmails("cc") + (
-            [mail_club,] if clubDetails["studentBody"] else []
+            [
+                mail_club,
+            ]
+            if clubDetails["studentBody"]
+            else []
         )
         mail_to = getRoleEmails("slo")
         mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
