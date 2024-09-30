@@ -271,7 +271,10 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
             requested_states |= {Event_State_Status.pending_budget.value}
         if "slo" == user["role"]:
             requested_states |= {Event_State_Status.pending_room.value}
-            searchspace["status.budget"] = True
+            searchspace["$or"] = [
+                {"status.budget": True},
+                {"studentBodyEvent": True},
+            ]
         if "club" == user["role"] and user["uid"] == clubid:
             requested_states |= {
                 Event_State_Status.incomplete.value,
@@ -287,10 +290,23 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
         "$in": list(requested_states),
     }
     if clubid is not None:
-        searchspace["$or"] = [
-            {"clubid": clubid},
-            {"collabclubs": {"$in": [clubid]}},
-        ]
+        if "$or" not in searchspace:
+            searchspace["$or"] = [
+                {"clubid": clubid},
+                {"collabclubs": {"$in": [clubid]}},
+            ]
+        else:
+            old_or = searchspace["$or"]
+            del searchspace["$or"]
+            searchspace["$and"] = [
+                {"$or": old_or},
+                {
+                    "$or": [
+                        {"clubid": clubid},
+                        {"collabclubs": {"$in": [clubid]}},
+                    ]
+                },
+            ]
 
     events = eventsdb.find(searchspace)
 

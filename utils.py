@@ -130,19 +130,31 @@ def getClubCode(clubid: str) -> str | None:
 
 
 # get club name from club id
-def getClubNameEmail(
-    clubid: str, email=False, name=True
-) -> str | tuple[str, str] | None:
-    allclubs = getClubs()
-    for club in allclubs:
-        if club["cid"] == clubid:
-            if email and name:
-                return club["name"], club["email"]
-            elif email:
-                return club["email"]
-            else:
-                return club["name"]
-    return None
+def getClubDetails(
+    clubid: str,
+    cookies,
+) -> dict:
+    try:
+        query = """
+                    query Club($clubInput: SimpleClubInput!) {
+                        club(clubInput: $clubInput) {
+                            cid
+                            name
+                            email
+                            studentBody
+                            category
+                        }
+                    }
+                """
+        variable = {"clubInput": {"cid": clubid}}
+        request = requests.post(
+            "http://gateway/graphql",
+            json={"query": query, "variables": variable},
+            cookies=cookies,
+        )
+        return request.json()["data"]["club"]
+    except Exception:
+        return {}
 
 
 # generate event code based on time and club
@@ -169,7 +181,14 @@ def getEventCode(clubid, starttime) -> str:
         }
     )
 
-    event_count = len(list(club_events)) + 1
+    max_code = 0
+    for i in list(club_events):
+        code = i["code"]
+        code = int(code[-3:])
+        if code > max_code:
+            max_code = code
+
+    event_count = max_code + 1
     code_year = str(year.fiscal_year - 1)[-2:] + str(year.fiscal_year)[-2:]
 
     return f"{club_code}{code_year}{event_count:03d}"  # format: CODE20XX00Y

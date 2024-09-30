@@ -15,7 +15,7 @@ from mtypes import (
     timezone,
 )
 from otypes import Info, InputBillsStatus
-from utils import getClubNameEmail, getEventLink, getRoleEmails
+from utils import getClubDetails, getEventLink, getRoleEmails
 
 
 @strawberry.mutation
@@ -47,6 +47,12 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
     if event is None:
         raise ValueError("Event not found.")
 
+    mail_to = getClubDetails(event["clubid"], info.context.cookies).get(
+        "email", None
+    )
+    if not mail_to:
+        raise ValueError("Club email not found")
+
     # Get current time
     current_time = datetime.now(timezone)
     time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
@@ -67,11 +73,9 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
         raise ValueError("Bills status not updated")
 
     event = eventsdb.find_one({"_id": details.eventid})
-
     if not event:
         raise ValueError("Event not found")
 
-    mail_to = [getClubNameEmail(event["clubid"], email=True, name=False)]
     cc_to = getRoleEmails("cc")
 
     mail_uid = user["uid"]
@@ -85,16 +89,16 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
         eventlink=getEventLink(event["code"]),
     )
 
-    # Send email to club
-    if len(mail_to):
-        triggerMail(
-            mail_uid,
-            mail_subject,
-            mail_body,
-            toRecipients=mail_to,
-            ccRecipients=cc_to,
-            cookies=info.context.cookies,
-        )
+    triggerMail(
+        mail_uid,
+        mail_subject,
+        mail_body,
+        toRecipients=[
+            mail_to,
+        ],
+        ccRecipients=cc_to,
+        cookies=info.context.cookies,
+    )
 
     return Bills_Status(**event["bills_status"])
 
