@@ -18,6 +18,8 @@ from mailing_templates import (
     PROGRESS_EVENT_BODY_FOR_SLC,
     PROGRESS_EVENT_BODY_FOR_SLO,
     PROGRESS_EVENT_SUBJECT,
+    REJECT_EVENT_BODY_FOR_CLUB,
+    REJECT_EVENT_SUBJECT,
     SUBMIT_EVENT_BODY_FOR_CLUB,
 )
 
@@ -43,6 +45,9 @@ from utils import (
 )
 
 inter_communication_secret_global = os.getenv("INTER_COMMUNICATION_SECRET")
+noaccess_error = Exception(
+    "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
+)
 
 
 @strawberry.mutation
@@ -146,7 +151,9 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     created_id = eventsdb.insert_one(
         jsonable_encoder(event_instance)
     ).inserted_id
-    created_event = Event.model_validate(eventsdb.find_one({"_id": created_id}))
+    created_event = Event.model_validate(
+        eventsdb.find_one({"_id": created_id})
+    )
 
     return EventType.from_pydantic(created_event)
 
@@ -288,9 +295,6 @@ def progressEvent(
     after room is approved (through any track), the event is `approved`
     once the event is over, the club or cc can change the state to `completed`
     """  # noqa: E501
-    noaccess_error = Exception(
-        "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
-    )
 
     user = info.context.user
 
@@ -668,9 +672,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
 
     event_ref = eventsdb.find_one(query)
     if event_ref is None:
-        raise Exception(
-            "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
-        )
+        raise noaccess_error
     event_instance = Event.model_validate(event_ref)
 
     updation = event_ref["status"]
@@ -691,9 +693,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
 
     event_ref = eventsdb.update_one(query, {"$set": {"status": updation}})
     if event_ref.matched_count == 0:
-        raise Exception(
-            "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
-        )
+        raise noaccess_error
 
     # Send the event deleted email.
     if event_instance.status.state not in [
@@ -774,6 +774,75 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
 
 
 @strawberry.mutation
+def rejectEvent(
+    eventid: str,
+    reason: str,
+    info: Info,
+) -> EventType:
+    """Reject Event by CC and reset the state to incomplete"""
+    user = info.context.user
+
+    if user is None or user["role"] != "cc":
+        raise Exception("Not Authenticated!")
+
+    query = {
+        "_id": eventid,
+    }
+
+    event_ref = eventsdb.find_one(query)
+    if event_ref is None:
+        raise noaccess_error
+
+    event_instance = Event.model_validate(event_ref)
+
+    clubDetails = getClubDetails(event_instance.clubid, info.context.cookies)
+    if len(clubDetails.keys()) == 0:
+        raise Exception("Club does not exist.")
+    else:
+        mail_club = clubDetails["email"]
+        clubname = clubDetails["name"]
+
+    if event_instance.status.state != Event_State_Status.pending_cc:
+        raise Exception("Cannot reset event that has progressed beyond CC.")
+    
+    status = event_instance.model_dump()["status"]
+    status["state"] = Event_State_Status.incomplete.value
+    status["budget"] = False
+    status["room"] = False
+    status["submission_time"] = None
+
+    upd_ref = eventsdb.update_one(
+        {"_id": eventid}, {"$set": {"status": status}}
+    )
+    if upd_ref.matched_count == 0:
+        raise noaccess_error
+
+    # Send email to Club for allowing edits
+    mail_to = [mail_club]
+    mail_subject = REJECT_EVENT_SUBJECT.safe_substitute(
+        event_id=event_instance.code,
+        event=event_instance.name,
+    )
+    mail_body = REJECT_EVENT_BODY_FOR_CLUB.safe_substitute(
+        club=clubname,
+        event=event_instance.name,
+        eventlink=getEventLink(event_instance.code),
+        reason=reason,
+        deleted_by="Clubs Council",
+    )
+
+    triggerMail(
+        user["uid"],
+        mail_subject,
+        mail_body,
+        toRecipients=mail_to,
+        cookies=info.context.cookies,
+    )
+
+    return EventType.from_pydantic(Event.model_validate(event_ref))
+
+
+@strawberry.mutation
 def updateEventsCid(
     info: Info,
     old_cid: str,
@@ -807,5 +876,6 @@ mutations = [
     editEvent,
     progressEvent,
     deleteEvent,
+    rejectEvent,
     updateEventsCid,
 ]
