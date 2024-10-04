@@ -99,6 +99,8 @@ def events(
     info: Info,
     clubid: str | None = None,
     public: bool | None = None,
+    paginationOn: bool = True,
+    skip: int = 0,
     limit: int | None = None,
 ) -> List[EventType]:
     """
@@ -130,6 +132,8 @@ def events(
         restrictAccess and not restrictFullAccess
     ), "restrictAccess and not restrictFullAccess can not be True at the same time."  # noqa: E501
 
+    if limit == 0 and skip == 0:
+        paginationOn = False
     searchspace: dict[str, Any] = {}
     if clubid is not None:
         searchspace["$or"] = [
@@ -165,7 +169,7 @@ def events(
             "$in": statuses,
         }
 
-    events = eventsWithSorting(searchspace, date_filter=False)
+    events = eventsWithSorting(searchspace, date_filter=False, pagination=paginationOn, skip=skip)
 
     if limit is not None:
         events = events[:limit]
