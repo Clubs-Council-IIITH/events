@@ -19,6 +19,8 @@ from mailing_templates import (
     PROGRESS_EVENT_BODY_FOR_SLO,
     PROGRESS_EVENT_SUBJECT,
     SUBMIT_EVENT_BODY_FOR_CLUB,
+    REJECT_EVENT_SUBJECT,
+    REJECT_EVENT_BODY_FOR_CLUB
 )
 
 # import all models and types
@@ -774,6 +776,74 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
 
 
 @strawberry.mutation
+def rejectEvent(
+    eventid: str,
+    reason: str,
+    info: Info,
+) -> EventType:
+    """ Reject Event by CC and reset the state to incomplete """
+    user = info.context.user
+
+    if user is None or user["role"] not in ["cc"]:
+        raise Exception("Not Authenticated!")
+
+    query = {
+        "_id": eventid,
+    }
+    event_ref = eventsdb.find_one(query)
+    if event_ref is None:
+        raise Exception(
+            "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
+        )
+    event_instance = Event.model_validate(event_ref)
+
+    mail_uid = user["uid"]
+    clubDetails = getClubDetails(event_instance.clubid, info.context.cookies)
+    if len(clubDetails.keys()) == 0:
+        raise Exception("Club does not exist.")
+    else:
+        mail_club = clubDetails["email"]
+        clubname = clubDetails["name"]
+
+    if event_instance.status.state != Event_State_Status.pending_cc:
+        raise Exception("Cannot reset event that has progressed beyond CC.")
+
+    updation = {
+        "state": Event_State_Status.incomplete.value,
+    }
+
+    upd_ref = eventsdb.update_one(
+        {"_id": eventid}, {"$set": {"status": updation}}
+    )
+    if upd_ref.matched_count == 0:
+        raise noaccess_error
+
+    # Send email to Club for allowing edits
+    mail_to = [mail_club]
+    mail_subject = REJECT_EVENT_SUBJECT.safe_substitute(
+        event_id=event_instance.code,
+        event=event_instance.name,
+    )
+    mail_body = REJECT_EVENT_BODY_FOR_CLUB.safe_substitute(
+        club=clubname,
+        event=event_instance.name,
+        eventlink=getEventLink(event_instance.code),
+        reason=reason,
+        deleted_by="Clubs Council",
+    )
+
+    triggerMail(
+        user["uid"],
+        mail_subject,
+        mail_body,
+        toRecipients=mail_to,
+        cookies=info.context.cookies,
+    )
+
+    return EventType.from_pydantic(Event.model_validate(event_ref))
+
+
+@strawberry.mutation
 def updateEventsCid(
     info: Info,
     old_cid: str,
@@ -807,5 +877,6 @@ mutations = [
     editEvent,
     progressEvent,
     deleteEvent,
+    rejectEvent,
     updateEventsCid,
 ]

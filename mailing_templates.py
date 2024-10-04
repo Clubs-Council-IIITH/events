@@ -212,3 +212,33 @@ Clubs Council.
 Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
 """  # noqa: E501
 )
+
+REJECT_EVENT_SUBJECT = Template(
+    """
+[Events] $event_id: Rejection of $event
+"""
+)
+
+REJECT_EVENT_BODY_FOR_CLUB = Template(
+    """
+Dear $club,
+
+Your event, $event, has been rejected from the system, from the side of
+$deleted_by has been sent back for edits.
+
+The Reason Specified is:
+$reason
+
+To edit the details, visit the link below:
+$eventlink
+
+Best regards,
+Clubs Council.
+
+
+Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+"""  # noqa: E501
+)
+
+
+
