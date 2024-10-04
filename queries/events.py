@@ -99,9 +99,9 @@ def events(
     info: Info,
     clubid: str | None = None,
     public: bool | None = None,
-    paginationOn: bool = True,
-    skip: int = 0,
+    paginationOn: bool = False,
     limit: int | None = None,
+    skip: int = 0,
 ) -> List[EventType]:
     """
     if public is set, then return only public/approved events
@@ -132,8 +132,9 @@ def events(
         restrictAccess and not restrictFullAccess
     ), "restrictAccess and not restrictFullAccess can not be True at the same time."  # noqa: E501
 
-    if limit == 0 and skip == 0:
-        paginationOn = False
+    if not limit and paginationOn:
+        raise Exception("Pagination limit is required.")
+
     searchspace: dict[str, Any] = {}
     if clubid is not None:
         searchspace["$or"] = [
@@ -169,17 +170,21 @@ def events(
             "$in": statuses,
         }
 
-    events = eventsWithSorting(searchspace, date_filter=False, pagination=paginationOn, skip=skip)
-
-    if limit is not None:
-        events = events[:limit]
+    events = eventsWithSorting(
+        searchspace,
+        date_filter=False,
+        pagination=paginationOn,
+        skip=skip,
+        limit=limit,
+    )
 
     if restrictAccess or public:
         for event in events:
             trim_public_events(event)
 
     return [
-        EventType.from_pydantic(Event.model_validate(event)) for event in events
+        EventType.from_pydantic(Event.model_validate(event))
+        for event in events
     ]
 
 
@@ -209,7 +214,8 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     )
 
     return [
-        EventType.from_pydantic(Event.model_validate(event)) for event in events
+        EventType.from_pydantic(Event.model_validate(event))
+        for event in events
     ]
 
 
@@ -306,7 +312,8 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     )
 
     return [
-        EventType.from_pydantic(Event.model_validate(event)) for event in events
+        EventType.from_pydantic(Event.model_validate(event))
+        for event in events
     ]
 
 
@@ -363,7 +370,7 @@ def downloadEventsData(
     user = info.context.user
     if user is None:
         raise Exception("You do not have permission to access this resource.")
-    
+
     include_status = user["role"] in ["cc", "slo"] and details.allEvents
 
     all_events = list()
