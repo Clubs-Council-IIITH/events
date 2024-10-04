@@ -804,14 +804,15 @@ def rejectEvent(
 
     if event_instance.status.state != Event_State_Status.pending_cc:
         raise Exception("Cannot reset event that has progressed beyond CC.")
-
-    updation = {
-        "state": Event_State_Status.incomplete.value,
-        "submission_time": None,
-    }
+    
+    status = event_instance.model_dump()["status"]
+    status["state"] = Event_State_Status.incomplete.value
+    status["budget"] = False
+    status["room"] = False
+    status["submission_time"] = None
 
     upd_ref = eventsdb.update_one(
-        {"_id": eventid}, {"$set": {"status": updation}}
+        {"_id": eventid}, {"$set": {"status": status}}
     )
     if upd_ref.matched_count == 0:
         raise noaccess_error
