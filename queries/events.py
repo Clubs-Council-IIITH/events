@@ -451,6 +451,8 @@ def downloadEventsData(
         "budget": "Budget",
         "poster": "Poster URL",
         "status": "Status",
+        "equipment": "Equipment",
+        "additional": "Additional Requests",
     }
 
     # Prepare CSV content
