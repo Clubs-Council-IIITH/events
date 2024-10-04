@@ -20,7 +20,7 @@ holidaysdb = db.holidays
 
 try:
     # check if the holidays index exists
-    if not "one_holiday_on_day" in holidaysdb.index_information():
+    if "one_holiday_on_day" not in holidaysdb.index_information():
         # create the index
         holidaysdb.create_index(
             [("date", 1)], unique=True, name="one_holiday_on_day"
