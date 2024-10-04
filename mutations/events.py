@@ -18,9 +18,9 @@ from mailing_templates import (
     PROGRESS_EVENT_BODY_FOR_SLC,
     PROGRESS_EVENT_BODY_FOR_SLO,
     PROGRESS_EVENT_SUBJECT,
-    SUBMIT_EVENT_BODY_FOR_CLUB,
+    REJECT_EVENT_BODY_FOR_CLUB,
     REJECT_EVENT_SUBJECT,
-    REJECT_EVENT_BODY_FOR_CLUB
+    SUBMIT_EVENT_BODY_FOR_CLUB,
 )
 
 # import all models and types
@@ -45,6 +45,9 @@ from utils import (
 )
 
 inter_communication_secret_global = os.getenv("INTER_COMMUNICATION_SECRET")
+noaccess_error = Exception(
+    "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
+)
 
 
 @strawberry.mutation
@@ -148,7 +151,9 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     created_id = eventsdb.insert_one(
         jsonable_encoder(event_instance)
     ).inserted_id
-    created_event = Event.model_validate(eventsdb.find_one({"_id": created_id}))
+    created_event = Event.model_validate(
+        eventsdb.find_one({"_id": created_id})
+    )
 
     return EventType.from_pydantic(created_event)
 
@@ -290,9 +295,6 @@ def progressEvent(
     after room is approved (through any track), the event is `approved`
     once the event is over, the club or cc can change the state to `completed`
     """  # noqa: E501
-    noaccess_error = Exception(
-        "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
-    )
 
     user = info.context.user
 
@@ -670,9 +672,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
 
     event_ref = eventsdb.find_one(query)
     if event_ref is None:
-        raise Exception(
-            "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
-        )
+        raise noaccess_error
     event_instance = Event.model_validate(event_ref)
 
     updation = event_ref["status"]
@@ -693,9 +693,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
 
     event_ref = eventsdb.update_one(query, {"$set": {"status": updation}})
     if event_ref.matched_count == 0:
-        raise Exception(
-            "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
-        )
+        raise noaccess_error
 
     # Send the event deleted email.
     if event_instance.status.state not in [
@@ -781,23 +779,22 @@ def rejectEvent(
     reason: str,
     info: Info,
 ) -> EventType:
-    """ Reject Event by CC and reset the state to incomplete """
+    """Reject Event by CC and reset the state to incomplete"""
     user = info.context.user
 
-    if user is None or user["role"] not in ["cc"]:
+    if user is None or user["role"] != "cc":
         raise Exception("Not Authenticated!")
 
     query = {
         "_id": eventid,
     }
+
     event_ref = eventsdb.find_one(query)
     if event_ref is None:
-        raise Exception(
-            "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
-        )
+        raise noaccess_error
+
     event_instance = Event.model_validate(event_ref)
 
-    mail_uid = user["uid"]
     clubDetails = getClubDetails(event_instance.clubid, info.context.cookies)
     if len(clubDetails.keys()) == 0:
         raise Exception("Club does not exist.")
@@ -810,6 +807,7 @@ def rejectEvent(
 
     updation = {
         "state": Event_State_Status.incomplete.value,
+        "submission_time": None,
     }
 
     upd_ref = eventsdb.update_one(
