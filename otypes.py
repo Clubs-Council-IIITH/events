@@ -120,6 +120,7 @@ class InputEditEventDetails:
     budget: List[BudgetInput] | None = None
     poc: str | None = None
 
+
 @strawberry.input
 class InputDataReportDetails:
     clubid: str | None
