@@ -120,13 +120,12 @@ class InputEditEventDetails:
     budget: List[BudgetInput] | None = None
     poc: str | None = None
 
-
 @strawberry.input
 class InputDataReportDetails:
-    allEvents: bool | None
     clubid: str | None
     dateperiod: List[date] | None = None
     fields: List[str]
+    status: str
 
 
 @strawberry.type

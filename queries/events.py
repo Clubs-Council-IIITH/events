@@ -175,7 +175,8 @@ def events(
             trim_public_events(event)
 
     return [
-        EventType.from_pydantic(Event.model_validate(event)) for event in events
+        EventType.from_pydantic(Event.model_validate(event))
+        for event in events
     ]
 
 
@@ -205,7 +206,8 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     )
 
     return [
-        EventType.from_pydantic(Event.model_validate(event)) for event in events
+        EventType.from_pydantic(Event.model_validate(event))
+        for event in events
     ]
 
 
@@ -318,7 +320,8 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     )
 
     return [
-        EventType.from_pydantic(Event.model_validate(event)) for event in events
+        EventType.from_pydantic(Event.model_validate(event))
+        for event in events
     ]
 
 
@@ -375,8 +378,9 @@ def downloadEventsData(
     user = info.context.user
     if user is None:
         raise Exception("You do not have permission to access this resource.")
-    
-    include_status = user["role"] in ["cc", "slo"] and details.allEvents
+
+    if details.status not in ["pending", "approved", "all"]:
+        raise Exception("Invalid status")
 
     all_events = list()
     allclubs = getClubs(info.context.cookies)
@@ -409,18 +413,26 @@ def downloadEventsData(
                     "$lte": datetime_end,
                 }
 
-            if not include_status:
-                # include only approved events
+            if (
+                user["role"] not in ["cc", "slo"]
+                or details.status == "approved"
+            ):
                 searchspace["status.state"] = {
                     "$in": [
                         Event_State_Status.approved.value,
                     ]
                 }
             else:
+                to_exclude = [
+                    Event_State_Status.deleted.value,
+                    Event_State_Status.incomplete.value,
+                ]
+                if details.status == "pending":
+                    to_exclude.append(Event_State_Status.approved.value)
+                if user["role"] == "slo":
+                    to_exclude.append(Event_State_Status.pending_cc.value)
                 searchspace["status.state"] = {
-                    "$nin": [
-                        Event_State_Status.deleted.value,
-                    ]
+                    "$nin": to_exclude,
                 }
 
             all_events = eventsWithSorting(searchspace, date_filter=True)
@@ -439,6 +451,8 @@ def downloadEventsData(
         "budget": "Budget",
         "poster": "Poster URL",
         "status": "Status",
+        "equipment": "Equipment",
+        "additional": "Additional Requests",
     }
 
     # Prepare CSV content
@@ -449,7 +463,7 @@ def downloadEventsData(
         if field != "status"
     ]
 
-    if include_status:
+    if details.status != "approved":
         fieldnames.append(header_mapping["status"])
 
     csv_writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
