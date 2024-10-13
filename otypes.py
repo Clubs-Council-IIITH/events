@@ -123,10 +123,10 @@ class InputEditEventDetails:
 
 @strawberry.input
 class InputDataReportDetails:
-    allEvents: bool | None
     clubid: str | None
     dateperiod: List[date] | None = None
     fields: List[str]
+    status: str
 
 
 @strawberry.type

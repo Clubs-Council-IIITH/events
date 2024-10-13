@@ -281,7 +281,10 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
             requested_states |= {Event_State_Status.pending_budget.value}
         if "slo" == user["role"]:
             requested_states |= {Event_State_Status.pending_room.value}
-            searchspace["status.budget"] = True
+            searchspace["$or"] = [
+                {"status.budget": True},
+                {"studentBodyEvent": True},
+            ]
         if "club" == user["role"] and user["uid"] == clubid:
             requested_states |= {
                 Event_State_Status.incomplete.value,
@@ -297,10 +300,23 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
         "$in": list(requested_states),
     }
     if clubid is not None:
-        searchspace["$or"] = [
-            {"clubid": clubid},
-            {"collabclubs": {"$in": [clubid]}},
-        ]
+        if "$or" not in searchspace:
+            searchspace["$or"] = [
+                {"clubid": clubid},
+                {"collabclubs": {"$in": [clubid]}},
+            ]
+        else:
+            old_or = searchspace["$or"]
+            del searchspace["$or"]
+            searchspace["$and"] = [
+                {"$or": old_or},
+                {
+                    "$or": [
+                        {"clubid": clubid},
+                        {"collabclubs": {"$in": [clubid]}},
+                    ]
+                },
+            ]
 
     events = eventsdb.find(searchspace)
 
@@ -371,7 +387,8 @@ def downloadEventsData(
     if user is None:
         raise Exception("You do not have permission to access this resource.")
 
-    include_status = user["role"] in ["cc", "slo"] and details.allEvents
+    if details.status not in ["pending", "approved", "all"]:
+        raise Exception("Invalid status")
 
     all_events = list()
     allclubs = getClubs(info.context.cookies)
@@ -404,18 +421,26 @@ def downloadEventsData(
                     "$lte": datetime_end,
                 }
 
-            if not include_status:
-                # include only approved events
+            if (
+                user["role"] not in ["cc", "slo"]
+                or details.status == "approved"
+            ):
                 searchspace["status.state"] = {
                     "$in": [
                         Event_State_Status.approved.value,
                     ]
                 }
             else:
+                to_exclude = [
+                    Event_State_Status.deleted.value,
+                    Event_State_Status.incomplete.value,
+                ]
+                if details.status == "pending":
+                    to_exclude.append(Event_State_Status.approved.value)
+                if user["role"] == "slo":
+                    to_exclude.append(Event_State_Status.pending_cc.value)
                 searchspace["status.state"] = {
-                    "$nin": [
-                        Event_State_Status.deleted.value,
-                    ]
+                    "$nin": to_exclude,
                 }
 
             all_events = eventsWithSorting(searchspace, date_filter=True)
@@ -434,6 +459,8 @@ def downloadEventsData(
         "budget": "Budget",
         "poster": "Poster URL",
         "status": "Status",
+        "equipment": "Equipment",
+        "additional": "Additional Requests",
     }
 
     # Prepare CSV content
@@ -444,7 +471,7 @@ def downloadEventsData(
         if field != "status"
     ]
 
-    if include_status:
+    if details.status != "approved":
         fieldnames.append(header_mapping["status"])
 
     csv_writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
