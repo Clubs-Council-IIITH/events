@@ -25,5 +25,9 @@ try:
         holidaysdb.create_index(
             [("date", 1)], unique=True, name="one_holiday_on_day"
         )
+    if "unique_event_code" not in eventsdb.index_information():
+        eventsdb.create_index(
+            [("code", 1)], unique=True, name="unique_event_code"
+        )
 except Exception:
     pass
