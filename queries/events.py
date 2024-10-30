@@ -98,6 +98,7 @@ def eventid(code: str, info: Info) -> str:
 def events(
     info: Info,
     clubid: str | None = None,
+    name: str | None = None,
     public: bool | None = None,
     paginationOn: bool = False,
     limit: int | None = None,
@@ -174,6 +175,7 @@ def events(
         searchspace,
         date_filter=False,
         pagination=paginationOn,
+        name=name,
         skip=skip,
         limit=limit,
     )
