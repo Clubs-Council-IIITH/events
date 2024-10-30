@@ -17,6 +17,7 @@ client = MongoClient(MONGO_URI)
 db = client[MONGO_DATABASE]
 eventsdb = db.events
 holidaysdb = db.holidays
+event_reportsdb = db.event_reports
 
 try:
     # check if the holidays index exists
@@ -28,6 +29,10 @@ try:
     if "unique_event_code" not in eventsdb.index_information():
         eventsdb.create_index(
             [("code", 1)], unique=True, name="unique_event_code"
+        )
+    if "unique_event_id" not in event_reportsdb.index_information():
+        event_reportsdb.create_index(
+            [("event_id", 1)], unique=True, name="unique_event_id"
         )
 except Exception:
     pass

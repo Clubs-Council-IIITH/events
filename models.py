@@ -5,6 +5,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    HttpUrl,
     ValidationInfo,
     field_validator,
 )
@@ -17,6 +18,7 @@ from mtypes import (
     Event_Mode,
     Event_Status,
     HttpUrlString,
+    PrizesType,
     PyObjectId,
     event_popu_type,
     long_str_type,
@@ -26,6 +28,21 @@ from mtypes import (
     very_short_str_type,
 )
 
+
+class EventReport(BaseModel):
+    eventid: str
+    summary: medium_str_type
+    attendance: event_popu_type
+    prizes: List[PrizesType] = []
+    prizes_breakdown: long_str_type
+    winners: long_str_type
+    photos_link: HttpUrl
+    feedback_cc: medium_str_type
+    feedback_college: medium_str_type
+    submitted_by: str
+    submitted_time: datetime = Field(
+        default_factory=lambda: datetime.now(timezone), frozen=True
+    )
 
 
 class Event(BaseModel):
@@ -53,6 +70,7 @@ class Event(BaseModel):
     status: Event_Status = Event_Status()
     budget: List[BudgetType] = []
     bills_status: Bills_Status = Bills_Status()
+    event_report_submitted: bool = False
 
     @field_validator("datetimeperiod")
     def check_end_year(cls, value, info: ValidationInfo):
