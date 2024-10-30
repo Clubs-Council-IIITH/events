@@ -18,12 +18,14 @@ from mtypes import (
     Event_Status,
     HttpUrlString,
     PyObjectId,
-    event_desc_type,
-    event_name_type,
-    event_othr_type,
     event_popu_type,
+    long_str_type,
+    medium_str_type,
+    short_str_type,
     timezone,
+    very_short_str_type,
 )
+
 
 
 class Event(BaseModel):
@@ -33,9 +35,9 @@ class Event(BaseModel):
     collabclubs: List[str] = []
     studentBodyEvent: bool = False
 
-    name: event_name_type
+    name: very_short_str_type
 
-    description: event_desc_type | None = "No description available."
+    description: medium_str_type | None = "No description available."
     datetimeperiod: Tuple[datetime, datetime]
     poster: str | None = None
     audience: List[Audience] = []
@@ -43,8 +45,8 @@ class Event(BaseModel):
 
     mode: Event_Mode = Event_Mode.hybrid
     location: List[Event_Location] = []
-    equipment: event_othr_type | None = None
-    additional: event_othr_type | None = None
+    equipment: short_str_type | None = None
+    additional: short_str_type | None = None
     population: event_popu_type | None = None
     poc: str | None = None
 
@@ -61,14 +63,16 @@ class Event(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
+        extra="forbid",
+        str_strip_whitespace=True,
     )
 
 
 class Holiday(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    name: str
+    name: very_short_str_type
     date: date
-    description: str | None = None
+    description: medium_str_type | None = None
     created_time: datetime = Field(
         default_factory=lambda: datetime.now(timezone), frozen=True
     )
