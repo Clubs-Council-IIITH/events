@@ -277,7 +277,7 @@ def eventsWithSorting(
 
     if name is not None and pagination:
         searchspace["name"] = {"$regex": name, "$options": "i"}
-    
+
     ongoing_events_query = {
         **searchspace,
         "datetimeperiod.0": {"$lte": current_datetime},
