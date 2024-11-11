@@ -247,7 +247,14 @@ def getRoleEmails(role: str) -> List[str]:
         return []
 
 
-def eventsWithSorting(searchspace, date_filter=False):
+def eventsWithSorting(
+    searchspace,
+    name: str | None = None,
+    date_filter=False,
+    pagination=False,
+    skip=0,
+    limit: int | None = None,
+):
     """
     Custom sorting of events based on
     datetimeperiod with
@@ -268,6 +275,9 @@ def eventsWithSorting(searchspace, date_filter=False):
         )
         return events
 
+    if name is not None and pagination:
+        searchspace["name"] = {"$regex": name, "$options": "i"}
+    
     ongoing_events_query = {
         **searchspace,
         "datetimeperiod.0": {"$lte": current_datetime},
@@ -282,16 +292,42 @@ def eventsWithSorting(searchspace, date_filter=False):
         "datetimeperiod.1": {"$lt": current_datetime},
     }
 
-    ongoing_events = list(
-        eventsdb.find(ongoing_events_query).sort("datetimeperiod.1", 1)
-    )
-    upcoming_events = list(
-        eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1)
-    )
-    past_events = list(
-        eventsdb.find(past_events_query).sort("datetimeperiod.1", -1)
-    )
-    events = ongoing_events + upcoming_events + past_events
+    if pagination:
+        if skip < 0:
+            ongoing_events = list(
+                eventsdb.find(ongoing_events_query).sort(
+                    "datetimeperiod.0", -1
+                )
+            )
+            upcoming_events = list(
+                eventsdb.find(upcoming_events_query).sort(
+                    "datetimeperiod.0", 1
+                )
+            )
+
+            events = ongoing_events + upcoming_events
+        else:
+            past_events = list(
+                eventsdb.find(past_events_query)
+                .sort("datetimeperiod.1", -1)
+                .skip(skip)
+                .limit(limit)
+            )
+            events = past_events
+    else:
+        ongoing_events = list(
+            eventsdb.find(ongoing_events_query).sort("datetimeperiod.0", -1)
+        )
+        upcoming_events = list(
+            eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1)
+        )
+        past_events = list(
+            eventsdb.find(past_events_query).sort("datetimeperiod.1", -1)
+        )
+
+        events = ongoing_events + upcoming_events + past_events
+        if limit:
+            events = events[:limit]
 
     return events
 

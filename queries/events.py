@@ -98,8 +98,11 @@ def eventid(code: str, info: Info) -> str:
 def events(
     info: Info,
     clubid: str | None = None,
+    name: str | None = None,
     public: bool | None = None,
+    paginationOn: bool = False,
     limit: int | None = None,
+    skip: int = 0,
 ) -> List[EventType]:
     """
     if public is set, then return only public/approved events
@@ -129,6 +132,9 @@ def events(
     assert not (
         restrictAccess and not restrictFullAccess
     ), "restrictAccess and not restrictFullAccess can not be True at the same time."  # noqa: E501
+
+    if not limit and paginationOn:
+        raise Exception("Pagination limit is required.")
 
     searchspace: dict[str, Any] = {}
     if clubid is not None:
@@ -165,10 +171,14 @@ def events(
             "$in": statuses,
         }
 
-    events = eventsWithSorting(searchspace, date_filter=False)
-
-    if limit is not None:
-        events = events[:limit]
+    events = eventsWithSorting(
+        searchspace,
+        date_filter=False,
+        pagination=paginationOn,
+        name=name,
+        skip=skip,
+        limit=limit,
+    )
 
     if restrictAccess or public:
         for event in events:
