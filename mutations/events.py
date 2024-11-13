@@ -36,6 +36,7 @@ from mtypes import (
 )
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
+    delete_file,
     getClubDetails,
     getEventCode,
     getEventLink,
@@ -229,8 +230,6 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
             raise Exception("Member Details for POC does not exist")
     if details.description is not None:
         updates["description"] = details.description
-    if details.poster is not None:
-        updates["poster"] = details.poster
     if details.audience is not None:
         updates["audience"] = [Audience(aud) for aud in details.audience]
     if details.link is not None:
@@ -254,6 +253,12 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
             )
         )
 
+    old_poster_file = event_ref.get("poster", None)
+    if details.poster is not None:
+        updates["poster"] = details.poster
+        if old_poster_file and old_poster_file == details.poster:
+            old_poster_file = None
+
     query = {
         "_id": details.eventid,
         "clubid": user["uid"]
@@ -268,6 +273,12 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     upd_ref = eventsdb.update_one(query, updation)
     if upd_ref.matched_count == 0:
         raise Exception("You do not have permission to access this resource.")
+
+    if old_poster_file:
+        try:
+            delete_file(old_poster_file)
+        except Exception as e:
+            print(f"Error deleting poster file {old_poster_file}\nError: {e}")
 
     event_ref = eventsdb.find_one({"_id": details.eventid})
     return EventType.from_pydantic(Event.model_validate(event_ref))
@@ -804,7 +815,7 @@ def rejectEvent(
 
     if event_instance.status.state != Event_State_Status.pending_cc:
         raise Exception("Cannot reset event that has progressed beyond CC.")
-    
+
     status = event_instance.model_dump()["status"]
     status["state"] = Event_State_Status.incomplete.value
     status["budget"] = False

@@ -370,3 +370,18 @@ def convert_to_html(text):
     text = re.sub(r" {2,}", lambda m: "&nbsp;" * len(m.group(0)), text)
 
     return f"<pre>{text}</pre>"
+
+
+def delete_file(filename):
+    response = requests.post(
+        "http://files//delete-file",
+        params={
+            "filename": filename,
+            "inter_communication_secret": inter_communication_secret,
+        },
+    )
+
+    if response.status_code != 200:
+        raise Exception(response.text)
+
+    return response.text
