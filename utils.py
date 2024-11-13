@@ -374,7 +374,7 @@ def convert_to_html(text):
 
 def delete_file(filename):
     response = requests.post(
-        "http://files//delete-file",
+        "http://files/delete-file",
         params={
             "filename": filename,
             "inter_communication_secret": inter_communication_secret,
