@@ -17,6 +17,7 @@ from mtypes import (
     Event_Location,
     Event_Mode,
     Event_Status,
+    HttpUrlString,
     PyObjectId,
     event_desc_type,
     event_name_type,
@@ -39,7 +40,7 @@ class Event(BaseModel):
     datetimeperiod: Tuple[datetime, datetime]
     poster: str | None = None
     audience: List[Audience] = []
-    link: HttpUrl | None = None
+    link: HttpUrlString | None = None
 
     mode: Event_Mode = Event_Mode.hybrid
     location: List[Event_Location] = []

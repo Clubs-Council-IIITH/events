@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import strawberry
 from fastapi.encoders import jsonable_encoder
 from prettytable import PrettyTable
-from pydantic import HttpUrl, TypeAdapter
 
 from db import eventsdb
 from mailing import triggerMail
@@ -97,9 +96,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if details.audience is not None:
         event_instance.audience = [Audience(aud) for aud in details.audience]
     if details.link is not None:
-        event_instance.link = TypeAdapter(HttpUrl).validate_python(
-            details.link
-        )
+        event_instance.link = details.link
     if details.equipment is not None:
         event_instance.equipment = details.equipment
     if details.additional is not None:

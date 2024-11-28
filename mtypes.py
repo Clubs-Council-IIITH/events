@@ -3,7 +3,14 @@ from enum import StrEnum, auto
 import pytz
 import strawberry
 from bson import ObjectId
-from pydantic import Field, StringConstraints, field_validator
+from pydantic import (
+    BeforeValidator,
+    Field,
+    HttpUrl,
+    StringConstraints,
+    TypeAdapter,
+    field_validator,
+)
 from pydantic_core import core_schema
 from typing_extensions import Annotated, Any
 
@@ -286,5 +293,13 @@ class PyObjectId(ObjectId):
     def __get_pydantic_json_schema__(cls, field_schema):
         field_schema.update(type="string")
 
+
+http_url_adapter = TypeAdapter(HttpUrl)
+HttpUrlString = Annotated[
+    str,
+    BeforeValidator(
+        lambda value: str(http_url_adapter.validate_python(value))
+    ),
+]
 
 timezone = pytz.timezone("Asia/Kolkata")
