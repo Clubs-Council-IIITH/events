@@ -28,7 +28,7 @@ def eventReport(eventid: str, info: Info) -> EventReportType:
 
     event_report = event_reportsdb.find_one(
         {
-            "eventid": eventid,
+            "event_id": eventid,
         }
     )
 

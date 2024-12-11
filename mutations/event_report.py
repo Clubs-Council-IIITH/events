@@ -26,7 +26,8 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
         raise ValueError("User not authorized")
 
     eventid = details.eventid
-
+    if not eventid:
+        raise ValueError("Event ID is required")
     event = eventsdb.find_one(
         {
             "_id": eventid,
@@ -57,6 +58,7 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
         raise ValueError("Submitted by is not a valid member")
 
     report_dict = jsonable_encoder(details.to_pydantic())
+    report_dict["event_id"] = details.eventid
     event_report_id = event_reportsdb.insert_one(report_dict).inserted_id
     event_report = event_reportsdb.find_one({"_id": event_report_id})
 
