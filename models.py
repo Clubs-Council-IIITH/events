@@ -36,7 +36,7 @@ class EventReport(BaseModel):
     prizes: List[PrizesType] = []
     prizes_breakdown: long_str_type
     winners: long_str_type
-    photos_link: HttpUrl
+    photos_link: HttpUrlString
     feedback_cc: medium_str_type
     feedback_college: medium_str_type
     submitted_by: str
