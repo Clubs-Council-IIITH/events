@@ -78,7 +78,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         raise Exception("Club does not exist.")
 
     event_instance = Event(
-        name=details.name,
+        name=details.name.strip(),
         clubid=details.clubid,
         datetimeperiod=tuple(details.datetimeperiod),
         poc=details.poc,
@@ -90,7 +90,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
             Event_Location(loc) for loc in details.location
         ]
     if details.description is not None:
-        event_instance.description = details.description
+        event_instance.description = details.description.strip()
     if details.poster is not None:
         event_instance.poster = details.poster
     if details.audience is not None:
@@ -208,7 +208,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     )
 
     if details.name is not None and updatable:
-        updates["name"] = details.name
+        updates["name"] = details.name.strip()
     if details.datetimeperiod is not None and updatable:
         updates["datetimeperiod"] = details.datetimeperiod
     if details.mode is not None and updatable:
@@ -226,7 +226,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         ):
             raise Exception("Member Details for POC does not exist")
     if details.description is not None:
-        updates["description"] = details.description
+        updates["description"] = details.description.strip()
     if details.audience is not None:
         updates["audience"] = [Audience(aud) for aud in details.audience]
     if details.link is not None:
