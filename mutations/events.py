@@ -180,8 +180,9 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         details.clubid, details.datetimeperiod[0]
     )
 
+    # TODO: Rather than storing if it is a student body event, just store the category itself
     # Set studentBodyEvent to True if the event is a student body event
-    event_instance.studentBodyEvent = club_details["studentBody"]
+    event_instance.studentBodyEvent = club_details["category"] == "body"
 
     created_id = eventsdb.insert_one(
         jsonable_encoder(event_instance)
