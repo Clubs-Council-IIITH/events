@@ -141,7 +141,6 @@ def getClubDetails(
                             cid
                             name
                             email
-                            studentBody
                             category
                         }
                     }
