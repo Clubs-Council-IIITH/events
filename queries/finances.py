@@ -18,11 +18,11 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
     user = info.context.user
     if not user:
         raise ValueError("User not authenticated")
-    
+
     user_role = user["role"]
     if user_role not in ["cc", "slo", "club"]:
         raise ValueError("User not authorized")
-    
+
     searchspace = {
         "_id": eventid,
         "status.state": Event_State_Status.approved.value,  # type: ignore
@@ -36,7 +36,14 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
     }
 
     if user_role == "club":
-        searchspace.update({"clubid": user["uid"]})
+        searchspace.update(
+            {
+                "$or": [
+                    {"clubid": user["uid"]},
+                    {"collabclubs": {"$in": [user["uid"]]}},
+                ]
+            }
+        )
 
     event = eventsdb.find_one(searchspace)
 
@@ -77,7 +84,14 @@ def allEventsBills(info: Info) -> List[BillsStatusType]:
     }
 
     if user_role == "club":
-        searchspace.update({"clubid": user["uid"]})
+        searchspace.update(
+            {
+                "$or": [
+                    {"clubid": user["uid"]},
+                    {"collabclubs": {"$in": [user["uid"]]}},
+                ]
+            }
+        )
     events = list(eventsdb.find(searchspace).sort("datetimeperiod.1", -1))
 
     if not events or len(events) == 0:
