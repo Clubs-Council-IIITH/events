@@ -23,7 +23,10 @@ def eventReport(eventid: str, info: Info) -> EventReportType:
     event = eventsdb.find_one({"_id": eventid, "event_report_submitted": True})
     if not event:
         raise ValueError("Event not found")
-    if user_role == "club" and event["clubid"] != user["uid"]:
+    if user_role == "club" and event["clubid"] != user["uid"] and (
+                event["collabclubs"] is None
+                or user["uid"] not in event["collabclubs"]
+            ):
         raise ValueError("User not authorized")
 
     event_report = event_reportsdb.find_one(
