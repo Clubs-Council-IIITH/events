@@ -269,6 +269,11 @@ class BudgetType:
             raise ValueError("Amount must be positive")
         return value
 
+@strawberry.enum
+class ClubBodyCategoryType(StrEnum):
+    club = auto()
+    body = auto()
+    admin = auto()
 
 # for handling mongo ObjectIds
 class PyObjectId(ObjectId):

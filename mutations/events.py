@@ -27,6 +27,7 @@ from models import Event
 from mtypes import (
     Audience,
     BudgetType,
+    ClubBodyCategoryType,
     Event_Full_Location,
     Event_Location,
     Event_Mode,
@@ -143,9 +144,12 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         details.clubid, details.datetimeperiod[0]
     )
 
-    # TODO: Rather than storing if it is a student body event, just store the category itself
-    # Set studentBodyEvent to True if the event is a student body event
-    event_instance.studentBodyEvent = club_details["category"] == "body"
+    if club_details["category"] == "body":
+        event_instance.club_category = ClubBodyCategoryType.body
+    elif club_details["category"] == "admin":
+        event_instance.club_category = ClubBodyCategoryType.admin
+    else:
+        event_instance.club_category = ClubBodyCategoryType.club
 
     created_id = eventsdb.insert_one(
         jsonable_encoder(event_instance)
@@ -324,25 +328,33 @@ def progressEvent(
     current_time = datetime.now(timezone)
     time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
 
+    is_admin = event_instance.club_category == ClubBodyCategoryType.admin
+    is_body = event_instance.club_category == ClubBodyCategoryType.body
+
     if event_instance.status.state == Event_State_Status.incomplete:
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
         new_state = Event_State_Status.pending_cc.value
-        if event_instance.studentBodyEvent:
+        if is_body:
             new_state = Event_State_Status.pending_room.value
+        elif is_admin:
+            new_state = Event_State_Status.approved.value
+
         updation = {
-            "budget": False,
+            "budget": is_admin,
             # or sum([b.amount for b in event_instance.budget]) == 0,
-            "room": False,
+            "room": is_admin,
             #   or len(event_instance.location) == 0,
             "state": new_state,
             "cc_approver": None,
             "slc_approver": None,
-            "slo_approver": None,
+            "slo_approver": time_str if is_admin else None,
             "submission_time": time_str,
             "cc_approver_time": "Not Approved",
             "slc_approver_time": "Not Approved",
-            "slo_approver_time": "Not Approved",
+            "slo_approver_time": "Self Approved"
+            if is_admin
+            else "Not Approved",
         }
 
     elif event_instance.status.state == Event_State_Status.pending_cc:
@@ -408,11 +420,10 @@ def progressEvent(
     elif event_instance.status.state == Event_State_Status.pending_room:
         if user["role"] != "slo":
             raise noaccess_error
-        assert event_instance.status.budget or event_instance.studentBodyEvent
+        assert event_instance.status.budget or is_body
         assert event_instance.status.room is False
         updation = {
-            "budget": event_instance.status.budget
-            or event_instance.studentBodyEvent,
+            "budget": event_instance.status.budget or is_body,
             "room": True,
             "state": Event_State_Status.approved.value,
             "slo_approver": user["uid"],
@@ -613,7 +624,7 @@ def progressEvent(
             [
                 mail_club,
             ]
-            if updated_event_instance.studentBodyEvent
+            if is_body
             else []
         )
         mail_to = getRoleEmails("slo")
