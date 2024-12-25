@@ -47,12 +47,8 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
 
     event = eventsdb.find_one(searchspace)
 
-    if not event:
-        raise ValueError("Event not found")
-
-    if "bills_status" not in event:
-        raise ValueError("Bills status not found")
-
+    if not event or "bills_status" not in event:
+            return Bills_Status()
     return Bills_Status(**event["bills_status"])
 
 
