@@ -25,30 +25,37 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
 
     searchspace = {
         "_id": eventid,
-        "status.state": Event_State_Status.approved.value,  # type: ignore
-        "datetimeperiod.1": {
-            "$lt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        },
-        "budget": {
-            "$exists": True,
-            "$ne": [],
-        },  # Ensure the budget array exists and is not empty
+        "status.state": Event_State_Status.approved.value,
     }
 
     if user_role == "club":
-        searchspace.update(
-            {
-                "$or": [
-                    {"clubid": user["uid"]},
-                    {"collabclubs": {"$in": [user["uid"]]}},
-                ]
-            }
-        )
+        searchspace["$or"] = [  # type: ignore
+            {"clubid": user["uid"]},
+            {"collabclubs": {"$in": [user["uid"]]}},
+        ]
 
     event = eventsdb.find_one(searchspace)
+    if not event:
+        raise ValueError(
+            "Event not found. Either the event does not exist or you don't have\
+                  access to it or it is not approved."
+        )
 
-    if not event or "bills_status" not in event:
-            return Bills_Status()
+    if event["datetimeperiod"][1] > datetime.now().strftime(
+        "%Y-%m-%dT%H:%M:%S.%fZ"
+    ):
+        raise ValueError(f"{event["name"]} has not ended yet.")
+
+    if (
+        "budget" not in event
+        or not event["budget"]
+        or len(event["budget"]) == 0
+    ):
+        raise ValueError(f"{event["name"]} has no budget.")
+
+    if "bills_status" not in event:
+        raise ValueError(f"{event["name"]} has no bills status.")
+
     return Bills_Status(**event["bills_status"])
 
 
