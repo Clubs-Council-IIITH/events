@@ -13,6 +13,7 @@ from mtypes import (
     Audience,
     Bills_Status,
     BudgetType,
+    ClubBodyCategoryType,
     Event_Location,
     Event_Mode,
     Event_Status,
@@ -31,7 +32,7 @@ class Event(BaseModel):
     code: str | None = None
     clubid: str
     collabclubs: List[str] = []
-    studentBodyEvent: bool = False
+    club_category: ClubBodyCategoryType = ClubBodyCategoryType.club
 
     name: event_name_type
 
@@ -61,6 +62,7 @@ class Event(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
+        str_strip_whitespace=True,
     )
 
 
