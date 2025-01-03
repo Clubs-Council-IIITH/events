@@ -5,7 +5,6 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    HttpUrl,
     ValidationInfo,
     field_validator,
 )
