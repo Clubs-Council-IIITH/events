@@ -5,6 +5,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    HttpUrl,
     ValidationInfo,
     field_validator,
 )
@@ -17,13 +18,31 @@ from mtypes import (
     Event_Mode,
     Event_Status,
     HttpUrlString,
+    PrizesType,
     PyObjectId,
-    event_desc_type,
-    event_name_type,
-    event_othr_type,
     event_popu_type,
+    long_str_type,
+    medium_str_type,
+    short_str_type,
     timezone,
+    very_short_str_type,
 )
+
+
+class EventReport(BaseModel):
+    eventid: str
+    summary: medium_str_type
+    attendance: event_popu_type
+    prizes: List[PrizesType] = []
+    prizes_breakdown: long_str_type
+    winners: long_str_type
+    photos_link: HttpUrlString
+    feedback_cc: medium_str_type
+    feedback_college: medium_str_type
+    submitted_by: str
+    submitted_time: datetime = Field(
+        default_factory=lambda: datetime.now(timezone), frozen=True
+    )
 
 
 class Event(BaseModel):
@@ -33,9 +52,9 @@ class Event(BaseModel):
     collabclubs: List[str] = []
     studentBodyEvent: bool = False
 
-    name: event_name_type
+    name: very_short_str_type
 
-    description: event_desc_type | None = "No description available."
+    description: medium_str_type | None = "No description available."
     datetimeperiod: Tuple[datetime, datetime]
     poster: str | None = None
     audience: List[Audience] = []
@@ -43,14 +62,15 @@ class Event(BaseModel):
 
     mode: Event_Mode = Event_Mode.hybrid
     location: List[Event_Location] = []
-    equipment: event_othr_type | None = None
-    additional: event_othr_type | None = None
+    equipment: short_str_type | None = None
+    additional: short_str_type | None = None
     population: event_popu_type | None = None
     poc: str | None = None
 
     status: Event_Status = Event_Status()
     budget: List[BudgetType] = []
     bills_status: Bills_Status = Bills_Status()
+    event_report_submitted: bool = False
 
     @field_validator("datetimeperiod")
     def check_end_year(cls, value, info: ValidationInfo):
@@ -61,14 +81,16 @@ class Event(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
+        extra="forbid",
+        str_strip_whitespace=True,
     )
 
 
 class Holiday(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    name: str
+    name: very_short_str_type
     date: date
-    description: str | None = None
+    description: medium_str_type | None = None
     created_time: datetime = Field(
         default_factory=lambda: datetime.now(timezone), frozen=True
     )

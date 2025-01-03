@@ -247,12 +247,14 @@ class Event_Location(StrEnum):
     other = auto()
 
 
-event_name_type = Annotated[
+event_popu_type = Annotated[int, Field(ge=0)]
+
+very_short_str_type = Annotated[
     str, StringConstraints(min_length=1, max_length=200)
 ]
-event_desc_type = Annotated[str, StringConstraints(max_length=5000)]
-event_popu_type = Annotated[int, Field(ge=0)]
-event_othr_type = Annotated[str, StringConstraints(max_length=1000)]
+short_str_type = Annotated[str, StringConstraints(max_length=1000)]
+medium_str_type = Annotated[str, StringConstraints(max_length=5000)]
+long_str_type = Annotated[str, StringConstraints(max_length=10000)]
 
 
 @strawberry.type
@@ -268,6 +270,16 @@ class BudgetType:
         if value <= 0:
             raise ValueError("Amount must be positive")
         return value
+
+
+@strawberry.enum
+class PrizesType(StrEnum):
+    win_certificates = auto()
+    participation_certificates = auto()
+    cash_prizes = auto()
+    vouchers = auto()
+    medals = auto()
+    others = auto()
 
 
 # for handling mongo ObjectIds

@@ -73,7 +73,14 @@ def event(eventid: str, info: Info) -> EventType:
     if (
         user is None
         or user["role"] not in ["club", "cc", "slc", "slo"]
-        or (user["role"] == "club" and user["uid"] != event["clubid"])
+        or (
+            user["role"] == "club"
+            and user["uid"] != event["clubid"]
+            and (
+                event["collabclubs"] is None
+                or user["uid"] not in event["collabclubs"]
+            )
+        )
     ):
         trim_public_events(event)
 
