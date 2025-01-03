@@ -106,6 +106,7 @@ def allEventsBills(info: Info) -> List[BillsStatusType]:
             eventname=event["name"],
             clubid=event["clubid"],
             bills_status=Bills_Status(**event["bills_status"]),
+            eventReportSubmitted=event.get("event_report_submitted", "old"),
         )
         for event in events
     ]

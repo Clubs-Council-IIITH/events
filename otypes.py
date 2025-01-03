@@ -73,6 +73,7 @@ class BillsStatusType:
     eventname: str
     clubid: str
     bills_status: Bills_Status
+    eventReportSubmitted: str
 
 
 @strawberry.input
