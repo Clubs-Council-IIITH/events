@@ -1,3 +1,10 @@
+"""
+Query Resolvers for holidays
+
+Contains queries to fetch holidays from the database.
+Both to find a holiday, or to get list of holidays.
+"""
+
 from datetime import date
 from typing import List
 
@@ -13,8 +20,24 @@ def holidays(
     start_date: date | None = None, end_date: date | None = None
 ) -> List[HolidayType]:
     """
-    Get all holidays
-    returns all holidays
+    Get a list of holidays
+
+    This method returns a list of holidays.
+    from a start date(if provided) to an end date(if provided).
+    if no dates are provided, it returns all holidays.
+
+    Inputs:
+        start_date (date, optional): The start date of the range.
+        end_date (date, optional): The end date of the range.
+
+    Returns:
+        List[HolidayType]: A list of holidays.
+
+    Raises:
+        ValueError: If the start date is greater than the end date.
+
+    Accessibility:
+        Anyone can access this method.
     """
 
     query = {}
@@ -39,7 +62,14 @@ def holidays(
 def holiday(id: str) -> HolidayType:
     """
     Get a holiday by id
-    returns a holiday
+
+    This method searches for a holiday by its id and returns it.
+
+    Inputs:
+        id (str): The id of the holiday.
+
+    Returns:
+        HolidayType: The holiday's details.
     """
 
     holiday = holidaysdb.find_one({"_id": id})

@@ -1,3 +1,30 @@
+"""
+Classes and Enums for Models
+
+This file cotains enums and class that will be used for differnt fields in the models.
+They are used for states of events and bills, audience and location of the events.
+
+Enums:
+    Audience: Audience of Events
+    Bills_State_Status: States of Bills and a class describing the states of bills.
+    Event_State_Status: State of Events(pending, pending_cc...) and a class describing the states of events.
+    Event_Location: Location of Events(h101,h103...) and a class describing the locations of events.
+    Event_Mode: Mode of Events(online, offline...).
+
+custom data types:
+    HttpUrlString: Custom data type for URL validation.
+    event_name_type: Custom data type for event's name validation.
+    event_desc_type: Custom data type for event's description validation.
+    event_popu_type: Custom data type for event's population validation.
+    event_othr_type: Custom data type for other information validation.
+    
+
+Classes:
+    Bills_Status: Status of Bills
+    Event_Status: State of Events
+    BudgetType: Budget Type
+"""
+
 from enum import StrEnum, auto
 
 import pytz
@@ -15,7 +42,7 @@ from pydantic_core import core_schema
 from typing_extensions import Annotated, Any
 
 
-# Audience of Events
+# Audience for the Event
 @strawberry.enum
 class Audience(StrEnum):
     ug1 = auto()
@@ -54,6 +81,18 @@ class Bills_Full_State_Status:
 # Event Bills Status
 @strawberry.type
 class Bills_Status:
+    """
+    Class used for a bills status approval/rejection
+
+    It will be used to store information regarding aporoval/rejection of bills.
+    It also stores the time of approval/rejection and the comment of SLO(Student Life Office).
+
+    Attributes:
+        state (Bills_State_Status): State of the bills. Initially, the bills are `not_submitted`.
+        updated_time (str | None): Time of approval/rejection.
+        slo_comment (str | None): Comment of SLO.
+    """
+
     state: Bills_State_Status = Bills_State_Status.not_submitted  # type: ignore
     updated_time: str | None = None
     slo_comment: str | None = None
@@ -101,6 +140,34 @@ class Event_Full_State_Status:
 # Event Status
 @strawberry.type
 class Event_Status:
+    """
+    Class used for a event status
+
+    It will be used to store information regarding the status of the event.
+    An event needs to be approved by CC, SLO and SLC to be approved.
+    This class stores all approvers and approved time.
+    It stores last updated by and time to keep track of the changes.
+    It stores the deleted by and time to inform the club about the deletion.
+    It stores whether or not room and budget are approved.
+    It stores the state of the event.initially, the event is `incomplete`.
+
+    Attributes:
+        state (Event_State_Status): State of the event. Initially, the event is `incomplete`.
+        room (bool): Whether or not room is approved.
+        budget (bool): Whether or not budget is approved.
+        submission_time (str | None): Time of submission.
+        cc_approver (str | None): Approver of CC.
+        cc_approver_time (str | None): Time of approval by CC.
+        slo_approver (str | None): Approver of SLO.
+        slo_approver_time (str | None): Time of approval by SLO.
+        slc_approver (str | None): Approver of SLC.
+        slc_approver_time (str | None): Time of approval by SLC.
+        last_updated_by (str | None): Last updated by.
+        last_updated_time (str | None): Time of last update.
+        deleted_by (str | None): Deleted by.
+        deleted_time (str | None): Time of deletion.
+    """
+
     state: Event_State_Status = Event_State_Status.incomplete  # type: ignore
     room: bool = False  # room: Event_Room_Status = Event_Room_Status.unapproved # noqa: E501
     budget: bool = False  # budget: Event_Budget_Status = Event_Budget_Status.unapproved # noqa: E501
@@ -246,22 +313,39 @@ class Event_Location(StrEnum):
     # nota
     other = auto()
 
-
+# data type for event name
 event_name_type = Annotated[
     str, StringConstraints(min_length=1, max_length=200)
 ]
+
+# data type for event description
 event_desc_type = Annotated[str, StringConstraints(max_length=5000)]
+
+# data type for event's expected participants/population
 event_popu_type = Annotated[int, Field(ge=0)]
+
+# data type for other details
 event_othr_type = Annotated[str, StringConstraints(max_length=1000)]
 
 
 @strawberry.type
 class BudgetType:
+    """
+    Class for handling budget details
+
+    This class contains field for the club to submit the budget for approval
+
+    Attributes:
+        amount (float): Amount of the budget.
+        description (str | None): Description of the budget.
+        advance (bool): Whether the budget is the required advance or not.
+    """
+
     amount: float
     description: str | None = None
     advance: bool = False
 
-    # Validators
+    # Validator for amount field, amount must be positive, raises ValueError if not
     @field_validator("amount")
     @classmethod
     def positive_amount(cls, value):
@@ -272,8 +356,28 @@ class BudgetType:
 
 # for handling mongo ObjectIds
 class PyObjectId(ObjectId):
+    """
+    MongoDB ObjectId handler
+
+    This class contains clasmethods to validate and serialize ObjectIds.
+    ObjectIds of documents under the Clubs collection are stored under the 'id' field.
+    """
+
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type: Any, handler):
+        """
+        Defines custom schema for Pydantic validation
+
+        This method is used to define the schema for the Pydantic model.
+
+        Args:
+            source_type (Any): The source type.
+            handler: The handler.
+
+        Returns:
+            dict: The schema for the Pydantic model.
+        """
+
         return core_schema.union_schema(
             [
                 # check if it's an instance first before doing any further work
@@ -285,15 +389,38 @@ class PyObjectId(ObjectId):
 
     @classmethod
     def validate(cls, v):
+        """
+        Validates the given ObjectId
+
+        Args:
+            v (Any): The value to validate.
+
+        Returns:
+            ObjectId: The validated ObjectId.
+
+        Raises:
+            ValueError: If the given value is not a valid ObjectId.
+        """
+
         if not ObjectId.is_valid(v):
             raise ValueError("Invalid ObjectId")
         return ObjectId(v)
 
     @classmethod
     def __get_pydantic_json_schema__(cls, field_schema):
+        """
+        Generates JSON schema
+
+        This method is used to generate the JSON schema for the Pydantic model.
+
+        Args:
+            field_schema (dict): The field schema.
+        """
+
         field_schema.update(type="string")
 
 
+# for storing a vaildating url's
 http_url_adapter = TypeAdapter(HttpUrl)
 HttpUrlString = Annotated[
     str,
@@ -301,5 +428,5 @@ HttpUrlString = Annotated[
         lambda value: str(http_url_adapter.validate_python(value))
     ),
 ]
-
+# takes the time from IST timezone
 timezone = pytz.timezone("Asia/Kolkata")

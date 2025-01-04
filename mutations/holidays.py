@@ -1,3 +1,9 @@
+"""
+Mutation Resolvers for Holidays
+
+Contains mutation resolvers for creating, updating, and deleting holidays.
+"""
+
 import strawberry
 from fastapi.encoders import jsonable_encoder
 
@@ -10,9 +16,22 @@ from otypes import HolidayType, Info, InputHolidayDetails
 def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
     """
     Create a new holiday
-    returns the created holiday
+    
+    This method creates a new holiday in the database.
 
-    Allowed Roles: ["slo", "cc"]
+    Inputs:
+        details (InputHolidayDetails): The details of the holiday to be created.
+        info (Info): The context of the request for user info.
+
+    Returns:
+        HolidayType: The created holiday.
+
+    Accessibility:
+        Accessible to slo and cc.
+
+    Raises Exception:
+        Not Authenticated: If the user is not authenticated or if user is not logged in.
+        Holiday already exists: If a holiday already exists on the given date.
     """
     user = info.context.user
 
@@ -41,9 +60,24 @@ def editHoliday(
 ) -> HolidayType:
     """
     Edit an existing holiday
-    returns the edited holiday
+    
+    This method edits an existing holiday in the database.
 
-    Allowed Roles: ["slo", "cc"]
+    Inputs:
+        id (str): The id of the holiday to be edited.
+        details (InputHolidayDetails): The details to which the holiday is to be updated.
+        info (Info): The context of the request for user info.
+
+    Returns:
+        HolidayType: The edited holiday.
+
+    Accessibility:
+        Accessible to slo and cc.
+
+    Raises Exception:
+        Not Authenticated: If the user is not authenticated or if user is not logged in.
+        Holiday not found: If a holiday with the given id does not exist in the database.
+        Holiday already exists: If a holiday already exists on the given date to which the holiday is to be updated.
     """
     user = info.context.user
 
@@ -70,9 +104,22 @@ def editHoliday(
 def deleteHoliday(id: str, info: Info) -> bool:
     """
     Delete an existing holiday
-    returns a boolean indicating success
+    
+    This method deletes an existing holiday in the database.
 
-    Allowed Roles: ["slo"]
+    Inputs:
+        id (str): The id of the holiday to be deleted.
+        info (Info): The context of the request for user info.
+
+    Returns:
+        bool: True if the holiday was deleted successfully, False otherwise.
+
+    Accessibility:
+        Accessible to slo and cc.
+
+    Raises Exception:
+        Not Authenticated: If the user is not authenticated or if user is not logged in.
+        Holiday not found: If a holiday with the given id does not exist in the database.
     """
     user = info.context.user
 

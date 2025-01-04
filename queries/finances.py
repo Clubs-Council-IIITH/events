@@ -1,3 +1,10 @@
+"""
+Query Resolvers related to finances
+
+Contains queries to fetch bills of events from the database.
+Both to find a bill, or to get list of bills.
+"""
+
 from datetime import datetime
 from typing import List
 
@@ -12,7 +19,22 @@ from otypes import BillsStatusType, Info
 def eventBills(eventid: str, info: Info) -> Bills_Status:
     """
     Get the bills status of an event
-    returns the bills status
+    
+    This method is used to fetch the bills status of an event.
+    It takes the eventid as a parameter and returns the bills status of that event.
+
+    Inputs:
+        eventid (str): The id of the event
+        info (Info): The user details
+
+    Returns:
+        Bills_Status: The bills status of the event
+
+    Accessibility:
+        cc,slo and the club itself.
+
+    Raises:
+        ValueError: If the event is not found, the user is not authorized or not logged in, or if the event is not found.
     """
 
     user = info.context.user
@@ -52,8 +74,15 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
 @strawberry.field
 def allEventsBills(info: Info) -> List[BillsStatusType]:
     """
-    Get the bills status of an event
-    returns the bills status
+    Get the bills status of all events
+    
+    This method is used to fetch the list of bills status of all past approved events that have a budget and bills status.
+
+    Inputs:
+        info (Info): The user details
+
+    Returns:
+        List[BillsStatusType]: The list of bills status of all past approved events
     """
 
     user = info.context.user

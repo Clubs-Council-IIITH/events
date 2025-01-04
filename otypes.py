@@ -1,3 +1,28 @@
+"""
+Types and Inputs
+
+This file coniains all the types and inputs that we will be using in the events module.
+It also contais a model RoomList which is used to store the list of rooms.
+Even holidays are also stored as events.
+
+Types:
+    Info: used to return user and cookes details.
+    PyObjectIdType : used to return the ObjectId as a string.
+    EventType : used to return all the details regarding an event.
+    RoomListType : used to return a list of location(RoomList).
+    BillsStatusType : used to return event id, event name, club id and bills status of the club.
+    CSVResponse : used to return a csvFile and its success and error messages.
+    HolidayType : used to return all the fields within the Holiday class.
+
+Inputs:
+    InputBillsStatus : used to input event id, state of the bill and slo comment during the approval of bills.
+    BudgetInput : used to input all fields of the BudgetType class.
+    InputEventDetails : used to input all fields of the InputEventDetails class that should be filled by the organizing club.
+    InputEventEditDetails : used to input all fields of the InputEventDetails along with the event id.
+    InputDataReportDetails : used in the CSVResponse method to bring to bring in all the list of events accroding to the fields within this Input class.
+    InputHolidayDetails : used to input name, date and description of a holiday.
+"""
+
 import json
 from datetime import date, datetime
 from functools import cached_property
@@ -135,7 +160,7 @@ class CSVResponse:
     successMessage: str
     errorMessage: str
 
-
+# custom data type for start and end of event
 timelot_type = Tuple[datetime, datetime]
 
 # Holidays Types

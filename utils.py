@@ -21,8 +21,15 @@ fiscalyear.START_MONTH = FISCAL_START_MONTH
 
 def getMember(cid, uid, cookies=None):
     """
-    Function to call the member query
+    This function makes a query to the members service which is resolved by the member method.
+    It fetches info about a member.
+
+    Inputs:
+        cid: club id
+        uid: user id
+        cookies: cookies
     """
+
     try:
         query = """
             query Member($memberInput: SimpleMemberInput!) {
@@ -54,8 +61,14 @@ def getMember(cid, uid, cookies=None):
 
 def getUser(uid, cookies=None):
     """
-    Function to get a particular user details
+    Function makes a query to the users service which is resolved by the userProfile method.
+    It fetches info about a user.
+
+    Inputs:
+        uid: user id
+        cookies: cookies
     """
+
     try:
         query = """
             query GetUserProfile($userInput: UserInput!) {
@@ -92,8 +105,13 @@ def getUser(uid, cookies=None):
 
 def getClubs(cookies=None):
     """
-    Function to call the all clubs query
+    Function to call a query which is resolved by the allClubs method.
+    It fetches info about all clubs.
+
+    Inputs:
+        cookies: cookies
     """
+
     try:
         query = """
                     query AllClubs {
@@ -120,7 +138,7 @@ def getClubs(cookies=None):
         return []
 
 
-# get club code from club id
+# method gets club code from club id
 def getClubCode(clubid: str) -> str | None:
     allclubs = getClubs()
     for club in allclubs:
@@ -129,11 +147,23 @@ def getClubCode(clubid: str) -> str | None:
     return None
 
 
-# get club name from club id
+
 def getClubDetails(
     clubid: str,
     cookies,
 ) -> dict:
+    """
+    This method is used to get a clubs name from its club id.
+    It makes a query to the clubs service which is resolved by the club method.
+
+    Inputs:
+        clubid: club id
+        cookies: cookies
+
+    Returns:
+        dict : contains club details
+    """
+
     try:
         query = """
                     query Club($clubInput: SimpleClubInput!) {
@@ -157,8 +187,24 @@ def getClubDetails(
         return {}
 
 
-# generate event code based on time and club
+
 def getEventCode(clubid, starttime) -> str:
+    """
+    generate event code based on time and club
+
+    This method is used to generate an event code based on the time and club of event.
+    
+    Input:
+        clubid: club id
+        starttime: start time of the event
+
+    Returns:
+        event code
+
+    Raises:
+        ValueError: if clubid is invalid
+    """
+
     club_code = getClubCode(clubid)
     if club_code is None:
         raise ValueError("Invalid clubid")
@@ -194,7 +240,8 @@ def getEventCode(clubid, starttime) -> str:
     return f"{club_code}{code_year}{event_count:03d}"  # format: CODE20XX00Y
 
 
-# get link to event (based on code)
+# method produces link to event (based on code as input)
+# It returns a link to the event page
 def getEventLink(code) -> str:
     host = os.environ.get("HOST", "http://localhost")
     return f"{host}/manage/events/code/{code}"
@@ -202,6 +249,18 @@ def getEventLink(code) -> str:
 
 # get email IDs of all members belonging to a role
 def getRoleEmails(role: str) -> List[str]:
+    """
+    Brings all the emails of members belonging to a role
+
+    This method is used to get a list of emails of members belonging to a role.
+
+    Inputs:
+        role: role of the user to be searched
+
+    Returns:
+        list of emails
+    """
+
     try:
         query = """
             query Query($role: String!, $interCommunicationSecret: String) {
@@ -263,6 +322,7 @@ def eventsWithSorting(
     upcoming events first in ascending order of start time
     and then
     past events in descending order of end time
+    It also filters events based on name if name is provided and pagination is True.
     """
     utc = pytz.timezone("UTC")
     current_datetime = datetime.now(utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
@@ -332,6 +392,7 @@ def eventsWithSorting(
     return events
 
 
+# method hides data from public viewers who view information of an event
 def trim_public_events(event: dict):
     delete_keys = [
         "equipment",
@@ -355,6 +416,7 @@ def trim_public_events(event: dict):
     return event
 
 
+# method used to convert text to html
 def convert_to_html(text):
     # Escape HTML special characters
     text = html.escape(text)
@@ -372,6 +434,7 @@ def convert_to_html(text):
     return f"<pre>{text}</pre>"
 
 
+# method used to delete a file from the file server
 def delete_file(filename):
     response = requests.post(
         "http://files/delete-file",

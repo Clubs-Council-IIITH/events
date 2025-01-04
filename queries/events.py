@@ -1,3 +1,18 @@
+"""
+Query Resolvers for Events
+
+This file contains the query resolvers for the events service.
+
+resolvers:
+    event: Fetches an event with the given id
+    events: Fetches all events
+    eventid: Fetches an event id with the given event code
+    incompleteEvents: Fetches incomplete events of clubs
+    pendingEvents: Fetches pending events of clubs
+    availableRooms: Fetches available rooms for a given date and time
+    downloadEventsData: Fetches all events as a CSVResponse
+"""
+
 import csv
 import io
 from typing import Any, List
@@ -30,7 +45,23 @@ from utils import eventsWithSorting, getClubs, trim_public_events
 @strawberry.field
 def event(eventid: str, info: Info) -> EventType:
     """
-    return event with given id if it is visible to the user
+    Fetches an event with the given id
+
+    This method is used to fetch an event with the given event id.
+
+    Inputs:
+        eventid (str): The id of the event to be fetched.
+        info (Info): The context information of user for the request.
+
+    Returns:
+        EventType: Details regarding The event with the given id.
+
+    Accessibility:
+        fully accessibile to only cc, slo and slc and also the club in question itself.
+        partial access to public as it hides few fields of information.
+
+    Raises Exception:
+        Cannot access event: If the user is not autherized to access the event.
     """
     user = info.context.user
     event = eventsdb.find_one({"_id": eventid})
@@ -83,7 +114,17 @@ def event(eventid: str, info: Info) -> EventType:
 @strawberry.field
 def eventid(code: str, info: Info) -> str:
     """
-    return eventid given event code
+    method returns eventid of the event with the given event code
+
+    Inputs:
+        code (str): The code of the event to be fetched.
+        info (Info): The context information of user for the request.
+
+    Returns:
+        str: The id of the event with the given code.
+
+    Raises Exception:
+        Event with given code does not exist : If the event with the given code does not exist.
     """
 
     event = eventsdb.find_one({"code": code})
@@ -105,11 +146,35 @@ def events(
     skip: int = 0,
 ) -> List[EventType]:
     """
-    if public is set, then return only public/approved events
-    else
-        return all events visible to the user
-        if clubid is specified, then return events of that club only
+    Returns a list of events as a search result that match the given criteria.
+
+    This method is used to fetch a list of events as a search result that match the given criteria.
+    If public is set to True, then only public/approved events are returned.
+    If clubid is set, then only events of that club are returned.
+    If clubid is not set, then all events the user is authorized to see are returned.
+    not logged in user has same visibility as public set to True.
+    If public set to True, then few fields of the evnt are hidden using the trim_public_events function.
+
+    Inputs:
+        info (Info): The context information of user for the request.
+        clubid (str | None): The id of the club whose events are to be fetched.
+        name (str | None): The name of the event to be searched according to.
+        public (bool | None): Whether to return only public events.
+        paginationOn (bool): Whether to use pagination.
+        limit (int | None): The maximum number of events to return.
+        skip (int): The number of events to skip.
+
+    Returns:
+        List[EventType]: A list of events that match the given criteria.
+
+    Accessibility:
+        fully accessibile to only cc, slo and slc and also the club in question itself.
+        partial access to public as it hides few fields of information.
+
+    Raises Exception:
+        Pagination limit is required: If paginationOn is True and limit is not provided.        
     """
+
     user = info.context.user
 
     restrictAccess = True
@@ -180,6 +245,7 @@ def events(
         limit=limit,
     )
 
+    # hides few fields from public viewers
     if restrictAccess or public:
         for event in events:
             trim_public_events(event)
@@ -193,8 +259,22 @@ def events(
 @strawberry.field
 def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     """
-    return all incomplete events of a club
-    raise Exception if user is not a member of the club
+    Return all incomplete events of a club
+    
+    This method is used to return all 'incomplete' state evts of a given club.
+    
+    Inputs:
+        clubid (str): The id of the club whose incomplete events are to be fetched.
+        info (Info): The context information of user for the request.
+
+    Returns:
+        List[EventType]: A list of events that match the given criteria.
+
+    Accessibility:
+        Only to the club itself.
+
+    Raises Exception:
+        You do not have permission to access this resource : If the user is not a club or does not have permission to access the resource.
     """
     user = info.context.user
 
@@ -267,11 +347,27 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
 @strawberry.field
 def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     """
-    if user is admin, return events pending for them
-    if InpClub is set, and current user belongs to that club,
-    return pending events of that club.
-    raise Exception if user is not adimn and user is not in that club.
+    Returns all the pending events of a give club id
+
+    This method is used to return all 'pending' state events of a given club.
+    For CC, returns events with pending approval from CC. Same for SLO and SLC.
+    For club, returns incomplete and pending approval events.
+    It sorts them on the basis of time.
+
+    Inputs:
+        clubid (str): The id of the club whose pending events are to be fetched.
+        info (Info): The context information of user for the request.
+
+    Returns:
+        List[EventType]: A list of events that match the given criteria.
+
+    Accessibility:
+        Only to the club, CC, SLO, SLC.
+
+    Raises Exception:
+            You do not have permission to access this resource : If the user is not a club or does not have permission to access the resource.
     """
+
     user = info.context.user
 
     requested_states: set[str] = set()
@@ -322,7 +418,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
 
     events = eventsdb.find(searchspace)
 
-    # sort events in ascending order of time
+    # simply sorts events in ascending order of time
     events = sorted(
         events,
         key=lambda event: event["datetimeperiod"][0],
@@ -341,7 +437,24 @@ def availableRooms(
 ) -> RoomListType:
     """
     return a list of all rooms that are available in the given timeslot
-    NOTE: this is a public query, accessible to all.
+    
+    This method is used to return all the rooms that are available in the given timeslot.
+    To the returned list it add the current location of the event whose event id is also provided.
+    A room is considered not available if an approved event has booked that room in that timeslot.
+
+    Inputs:
+        timeslot (timelot_type): The timeslot for which the rooms are to be fetched.
+        eventid (str): The id of the event whose location is to be added to the list of rooms.
+        info (Info): The context information of user for the request.
+
+    Returns:
+        RoomListType: A list of rooms that are available in the given timeslot.
+
+    Accessibility:
+        Public(The user need tobe logged in to access this resource)
+
+    Raises Exception:
+        You do not have permission to access this resource : If the user is not logged in or is SLC.
     """
     user = info.context.user
 
@@ -382,8 +495,28 @@ def downloadEventsData(
     details: InputDataReportDetails, info: Info
 ) -> CSVResponse:
     """
-    Create events data in CSV format for the events with
-    given details in the given date period.
+    Returns all the events as a CSVResponse according to the details provided.
+
+    This function is similar to the events method, but it returns all the events as a CSVResponse.
+    It sends specific set of events on the basis of the details provided.
+    If clubid is provided, it returns all the events of that club.
+    If status is provided, it returns all the events with that status.
+    If a time frame is provided, it returns all the events happening in that time frame.
+    It returns info regarding each event, which will contain the fields provided in the details.
+
+    Inputs:
+        details (InputDataReportDetails): The details of the events to be fetched.
+        info (Info): The context information of user for the request.
+
+    Returns:
+        CSVResponse: A CSVResponse containing all the events.
+
+    Accessibility:
+        CC and SLO cannot see deleted and incomplete events.Public can see only approved events.
+
+    Raises Exception:
+        You do not have permission to access this resource : If the user is not autherized to access the resource.
+        Invalid status : If the status provided is not valid.
     """
     user = info.context.user
     if user is None:

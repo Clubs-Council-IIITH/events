@@ -1,3 +1,17 @@
+""""
+Mutation Resolvers
+
+this file contains all the mutations for the events managment.
+
+resolvers:
+    createEvent : Used to create an event
+    editEvent : Used to edit an event
+    progressEvent : Used to progress the event state status by different approvers
+    deleteEvent : Used to delete a event
+    rejectEvent : Used by the approver to reject the event
+    updateEventsCid : Used to update the clubid of all the events of a club
+"""
+
 import os
 from datetime import datetime, timedelta
 
@@ -53,8 +67,31 @@ noaccess_error = Exception(
 @strawberry.mutation
 def createEvent(details: InputEventDetails, info: Info) -> EventType:
     """
-    create event with given details if user has permission
-    return the event
+    Method to create an event
+
+    This method is used to create an event.
+    It takes in the details of the event and returns the event details.
+    A club can create an event of only their own club, CC can create an event of any club.
+    It also checks if the poc(Point of Contact) is a member of the same club.
+    If CC creates the event, then the event is created and approved by cc at the same time and makes the current user the approver.
+
+    Inputs:
+        details (InputEventDetails): The details of the event to be created.
+        info (Info): The context of the request for user info.
+
+    Returns:
+        EventType : returns all details regarding the event created.
+
+    Accessibility:
+        Accessible to clubs and CC.
+
+    Raises Exception:
+        You do not have permission to access this resource : if the user is not autherized to create an event.
+        Start time cannot be after end time : if the start time is after the end time.
+        Club does not exist : if the club whose event is being made does not exist.
+        Member details of POC do not exist : If the given point of contact is not under the club.
+
+
     """
     user = info.context.user
 
@@ -138,7 +175,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     event_instance.status.last_updated_time = time_str
     event_instance.status.last_updated_by = user["uid"]
 
-    # set event code
+    # generates and sets the event's code
     event_instance.code = getEventCode(
         details.clubid, details.datetimeperiod[0]
     )
@@ -159,8 +196,29 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
 @strawberry.mutation
 def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     """
-    edit event with given details if user has permission
-    return the event
+    Method used to edit an event.
+
+    This method is used to edit an event.
+    It takes in the details of the event to be edited and the context of the request for user info.
+    It approves the event if the edit is being performed by the CC and set the approver to the user.
+    It also updates the last updated time and last updated by fields.
+    It does not remove previous approvals.
+
+    Inputs:
+        details (InputEditEventDetails): The details of the event to be edited.
+        info (Info): The context of the request for user info.
+    
+    Returns:
+        EventType: The edited event.
+
+    Accessibility:
+        Club,CC and SLO have access to this method.
+    
+    Raises Exception:
+        Not Authenticated: If the user is not authenticated and if user is not logged in.
+        Start time cannot be same/after end time: If the start time is same or after the end time.
+        Event does not exist: If the event does not according to the inputed event id.
+        Member Details for POC does not exist: If a member with the given details of POC does not exist in the club.
     """
     user = info.context.user
     allowed_roles = ["cc", "slo"]
@@ -664,7 +722,27 @@ def progressEvent(
 @strawberry.mutation
 def deleteEvent(eventid: str, info: Info) -> EventType:
     """
-    change the state of the event to `deleted` if the user has permissions
+    change the state of an event to `deleted`
+
+    This method changes the state of an event to `deleted`.
+    and sets the `deleted_by` field to the user called this mutation.
+    CC and SLO can delete events of any club.
+    A club can delete events of their own club.
+    If club or CC deletes the event then it triggers an email to the other party.
+    If SLO deletes the event then it triggers an email to both the club and CC.
+
+    Inputs:
+        eventid (str): The ID of the event to be deleted.
+        info (Info): The context of the request for user info.
+
+    Returns:
+        EventType: The state set to deleted event.
+
+    Accessibility:
+        CC, SLO and the club itself, all have full access.
+
+    Raises Exception:
+        Not Authenticated!: If the user is not authenticated or not logged in.
     """
     user = info.context.user
 
@@ -787,7 +865,28 @@ def rejectEvent(
     reason: str,
     info: Info,
 ) -> EventType:
-    """Reject Event by CC and reset the state to incomplete"""
+    """
+    Reject Event by CC and reset the state to incomplete
+
+    This method is called when the event is rejected by CC, it is returned back to the club with an incomplete state.
+    Only CC can reject the event and the event is returned back to the club with an incomplete state.
+    An email to the club regarding this is triggered.
+    CC cannot reject the event after approving it.
+    It resets any other approval given to the event.
+
+    Input:
+        eventid (str): The event id of the evnt that is being rejected.
+        reason (str): The reason for rejection.
+        info (Info): The context of the request for user info.
+
+    Returns:
+        EventType: The event that was rejected.
+
+    Raises Exception:
+        Not Authenticated!: If the user is not authenticated or not logged in.
+        Cannot reset event that has progressed beyond CC: If the event has progressed beyond CC then later on CC cannot reset the event.
+    
+    """
     user = info.context.user
 
     if user is None or user["role"] != "cc":
@@ -839,6 +938,7 @@ def rejectEvent(
         deleted_by="Clubs Council",
     )
 
+    # Mail to the club regarding the rejected event
     triggerMail(
         user["uid"],
         mail_subject,
@@ -859,6 +959,23 @@ def updateEventsCid(
 ) -> int:
     """
     update all events of old_cid to new_cid
+
+    This method is invoked when a club decides to change its old cid, then all its events are updated to new cid.
+
+    Inputs:
+        old_cid: old cid of the club
+        new_cid: new cid of the club
+        inter_communication_secret: secret for authentication
+
+    Returns:
+        int: number of events updated
+
+    Accessibility:
+        Only Clubs Council.
+
+    Raises Exception:
+        Not Authenticated: if user is not authenticated or not logged in.
+        Authentication Error: if inter_communication_secret is not valid.
     """
     user = info.context.user
 

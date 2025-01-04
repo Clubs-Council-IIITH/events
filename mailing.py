@@ -16,6 +16,25 @@ def triggerMail(
     ccRecipients=[],
     cookies=None,
 ) -> None:
+    """
+    Method to trigger an email
+
+    This method is used to trigger an email.
+    It makes a mutation request which is resolver by the sendMail resolver from mailing.py from interfaces.py.
+    It send an email with the given parameters.
+
+    Args:
+        uid : The user id.
+        subject : The subject of the email.
+        body : The body of the email.
+        to : The list of to recipients.
+        cc : The list of cc recipients.
+        cookies : The cookies.
+
+    Returns:
+        None
+    """
+
     try:
         query = """
             mutation Mutation($mailInput: MailInput!, $interCommunicationSecret: String) {
