@@ -34,7 +34,7 @@ from strawberry.fastapi import BaseContext
 from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
 
-from models import Event, Holiday
+from models import Event, EventReport, Holiday
 from mtypes import (
     Audience,
     Bills_State_Status,
@@ -73,6 +73,11 @@ PyObjectIdType = strawberry.scalar(
 )
 
 
+@strawberry.experimental.pydantic.type(model=EventReport, all_fields=True)
+class EventReportType:
+    pass
+
+
 @strawberry.experimental.pydantic.type(model=Event, all_fields=True)
 class EventType:
     pass
@@ -93,6 +98,7 @@ class BillsStatusType:
     eventname: str
     clubid: str
     bills_status: Bills_Status
+    eventReportSubmitted: str
 
 
 @strawberry.input
@@ -152,6 +158,11 @@ class InputDataReportDetails:
     dateperiod: List[date] | None = None
     fields: List[str]
     status: str
+
+
+@strawberry.experimental.pydantic.input(model=EventReport, all_fields=True)
+class InputEventReport:
+    pass
 
 
 @strawberry.type
