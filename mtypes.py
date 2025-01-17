@@ -319,7 +319,6 @@ short_str_type = Annotated[str, StringConstraints(max_length=1000)]
 medium_str_type = Annotated[str, StringConstraints(max_length=5000)]
 long_str_type = Annotated[str, StringConstraints(max_length=10000)]
 
-
 @strawberry.type
 class BudgetType:
     """
