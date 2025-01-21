@@ -21,6 +21,7 @@ class Audience(StrEnum):
     """
     Enum for catagory of audience
     """
+
     ug1 = auto()
     ug2 = auto()
     ug3 = auto()
@@ -37,6 +38,7 @@ class Bills_State_Status(StrEnum):
     """
     Enum of status of an event's bills
     """
+
     # initially, the bills are `not_submitted`
     not_submitted = auto()
     # after the club submits the bills, but they are incomplete,
@@ -54,6 +56,7 @@ class Bills_Full_State_Status:
     """
     String representation of the states in Bills_State_Status
     """
+
     not_submitted = "Not Submitted"
     incomplete = "Incomplete"
     submitted = "Submitted"
@@ -93,6 +96,7 @@ class Event_State_Status(StrEnum):
     """
     Enum for state of an event's approval
     """
+
     # initially, the event is `incomplete`
     incomplete = auto()
     # after the club fills all the details, they progress it
@@ -114,6 +118,7 @@ class Event_Full_State_Status:
     """
     String representation of the states in Event_State_Status
     """
+
     incomplete = "Incomplete"
     pending_cc = "Pending CC Approval"
     pending_budget = "Pending Budget Approval"
@@ -211,6 +216,7 @@ class Event_Mode(StrEnum):
     """
     Enum for mode of Event
     """
+
     hybrid = auto()
     online = auto()
     offline = auto()
@@ -221,6 +227,7 @@ class Event_Full_Location:
     """
     String representation of the locations in Event_Location
     """
+
     h101 = "Himalaya 101"
     h102 = "Himalaya 102"
     h103 = "Himalaya 103"
@@ -260,6 +267,7 @@ class Event_Location(StrEnum):
     """
     Enum for locations for the Event
     """
+
     # Himalaya
     h101 = auto()
     h102 = auto()
@@ -299,6 +307,7 @@ class Event_Location(StrEnum):
     # nota
     other = auto()
 
+
 event_popu_type = Annotated[int, Field(ge=0)]
 
 very_short_str_type = Annotated[
@@ -307,6 +316,7 @@ very_short_str_type = Annotated[
 short_str_type = Annotated[str, StringConstraints(max_length=1000)]
 medium_str_type = Annotated[str, StringConstraints(max_length=5000)]
 long_str_type = Annotated[str, StringConstraints(max_length=10000)]
+
 
 @strawberry.type
 class BudgetType:
@@ -340,6 +350,7 @@ class PrizesType(StrEnum):
     """
     Enum for kind of prizes given to the participants in an event
     """
+
     win_certificates = auto()
     participation_certificates = auto()
     cash_prizes = auto()

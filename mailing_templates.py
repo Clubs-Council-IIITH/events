@@ -3,6 +3,7 @@ Contains templates for emails to be sent to CC, SLO, SLC and the club regarding 
 """
 
 from string import Template
+
 # Email Templates
 
 # email template requesting approval for an event to CC(Clubs Council), SLO(Student Life Office) and SLC(Student Life Committee).

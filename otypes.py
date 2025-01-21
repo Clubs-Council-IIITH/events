@@ -26,6 +26,7 @@ class Context(BaseContext):
     """
     Class provides user metadata and cookies from request headers, has methods for doing this.
     """
+
     @cached_property
     def user(self) -> Dict | None:
         if not self.request:
@@ -56,6 +57,7 @@ class EventReportType:
     """
     Type for returning the event's report.
     """
+
     pass
 
 
@@ -64,6 +66,7 @@ class EventType:
     """
     Type for returning all the details regarding an event.
     """
+
     pass
 
 
@@ -71,6 +74,7 @@ class RoomList(BaseModel):
     """
     Model for storing the list of rooms.
     """
+
     locations: List[Event_Location]
 
 
@@ -79,6 +83,7 @@ class RoomListType:
     """
     Type for returning a list of locations.
     """
+
     pass
 
 
@@ -87,6 +92,7 @@ class BillsStatusType:
     """
     Type for returning event id, event name, club id and bills status of the event.
     """
+
     eventid: str
     eventname: str
     clubid: str
@@ -99,6 +105,7 @@ class InputBillsStatus:
     """
     Input for taking event id, state of the bill and slo comment during the approval/rejection of bills.
     """
+
     eventid: str
     state: Bills_State_Status
     slo_comment: str | None = None
@@ -109,6 +116,7 @@ class BudgetInput(BudgetType):
     """
     Input for taking all fields of the BudgetType class.
     """
+
     pass
 
 
@@ -116,7 +124,7 @@ class BudgetInput(BudgetType):
 class InputEventDetails:
     """
     Class for taking the details of an event.
-    
+
     Attributes:
         name (str): Name of the event.
         location (List[Event_Location]): List of locations of the event. Default is None.
@@ -134,6 +142,7 @@ class InputEventDetails:
         budget (List[BudgetInput]): List of budgets of the event. Default is None.
         poc (str): Point of contact for the event.
     """
+
     name: str
     location: List[Event_Location] | None = None
     description: str | None = None
@@ -156,6 +165,7 @@ class InputEditEventDetails:
     """
     Input similar to InputEventDetails but along with the event id(self-generated) attribute.
     """
+
     name: str | None = None
     eventid: str
     collabclubs: List[str] | None = None
@@ -179,6 +189,7 @@ class InputDataReportDetails:
     """
     Input used for taking info required to bring a list of events along with required fields.
     """
+
     clubid: str | None
     dateperiod: List[date] | None = None
     fields: List[str]
@@ -190,6 +201,7 @@ class InputEventReport:
     """
     Input for taking all the fields of the EventReport model.
     """
+
     pass
 
 
@@ -198,9 +210,11 @@ class CSVResponse:
     """
     Type for returning the csv file, success/error message.
     """
+
     csvFile: str
     successMessage: str
     errorMessage: str
+
 
 # custom data type for start and end of event
 timelot_type = Tuple[datetime, datetime]
@@ -213,6 +227,7 @@ class InputHolidayDetails:
     """
     Input for taking the details of a holiday.
     """
+
     date: date
     name: str
     description: str | None = None
@@ -223,4 +238,5 @@ class HolidayType:
     """
     Type for returning all the details regarding a holiday.
     """
+
     pass

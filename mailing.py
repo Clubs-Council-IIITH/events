@@ -18,7 +18,7 @@ def triggerMail(
 ) -> None:
     """
     Method triggers a mutation request, resolved by the sendMail resolver from mailing.py from interfaces microservice, it triggers a email.
-    
+
     Args:
         uid: The user id.
         subject: The subject of the email.

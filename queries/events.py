@@ -149,11 +149,11 @@ def events(
 
     Args:
         info (Info): The context information of user for the request.
-        clubid (str | None): The id of the club whose events are to be fetched.
-        name (str | None): The name of the event to be searched according to.
-        public (bool | None): Whether to return only public events.
-        paginationOn (bool): Whether to use pagination.
-        limit (int | None): The maximum number of events to return.
+        clubid (str | None): The id of the club whose events are to be fetched. Defaults to None.
+        name (str | None): The name of the event to be searched according to. Defaults to None.
+        public (bool | None): Whether to return only public events. Defaults to None.
+        paginationOn (bool): Whether to use pagination. Defaults to False.
+        limit (int | None): The maximum number of events to return. Defaults to None.
         skip (int): The number of events to skip.
 
     Returns:
@@ -338,7 +338,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     It sorts them on the basis of time.
 
     Args:
-        clubid (str): The id of the club whose pending events are to be fetched.
+        clubid (str): The id of the club whose pending events are to be fetched. Defaults to None.
         info (Info): The context information of user for the request.
 
     Returns:
@@ -420,7 +420,7 @@ def availableRooms(
     
     Args:
         timeslot (timelot_type): The timeslot for which the rooms are to be fetched.
-        eventid (str): The id of the event whose location is to be added to the list of rooms.
+        eventid (str): The id of the event whose location is to be added to the list of rooms. Defaults to None.
         info (Info): The context information of user for the request.
 
     Returns:

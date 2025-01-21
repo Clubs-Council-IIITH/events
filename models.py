@@ -31,7 +31,7 @@ from mtypes import (
 class EventReport(BaseModel):
     """
     Model for an event's report after completion.
-    
+
     Attributes:
         eventid (str): The ID of the event.
         summary (str): A summary of the event.
@@ -45,6 +45,7 @@ class EventReport(BaseModel):
         submitted_by (str): The user who submitted the report.
         submitted_time (datetime): The time the report was submitted.
     """
+
     eventid: str
     summary: medium_str_type
     attendance: event_popu_type
@@ -63,7 +64,7 @@ class EventReport(BaseModel):
 class Event(BaseModel):
     """
     Model for an event.
-    
+
     Attributes:
         id (PyObjectId): The ID of the event's document.
         code (str): The code of the event. Defaults to None.
@@ -71,7 +72,7 @@ class Event(BaseModel):
         collabclubs (List[str]): The Club IDs of the collaborating clubs.
         studentBodyEvent (bool): Whether the event is a student body event. Defaults to False.
         name (very_short_str_type): The name of the event.
-        description (medium_str_type): A description of the event. Defaults to "No description available.".
+        description (medium_str_type): A description of the event. Defaults to `No description available.`.
         datetimeperiod (Tuple[datetime, datetime]): The start and end times of the event.
         poster (str): The URL of the event's poster. Defaults to None.
         audience (List[Audience]): The list audience for the event.
@@ -87,6 +88,7 @@ class Event(BaseModel):
         budget_status (Bills_Status): The status of the budget.
         event_report_submitted (bool): Whether the event report after completion has been submitted. Defaults to False.
     """
+
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     code: str | None = None
     clubid: str
@@ -130,7 +132,7 @@ class Event(BaseModel):
 class Holiday(BaseModel):
     """
     Model for a holiday.
-    
+
     Attributes:
         id (PyObjectId): The ID of the holiday's document.
         name (very_short_str_type): The name of the holiday.
@@ -138,6 +140,7 @@ class Holiday(BaseModel):
         description (medium_str_type): A description of the holiday. Defaults to None.
         created_time (datetime): The time the holiday was created.
     """
+
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: very_short_str_type
     date: date

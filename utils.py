@@ -27,7 +27,7 @@ def getMember(cid, uid, cookies=None):
         cid: club id
         uid: user id
         cookies: cookies. Defaults to None.
-        
+
     Returns:
         response of the request
     """
@@ -68,7 +68,7 @@ def getUser(uid, cookies=None):
     Args:
         uid: user id
         cookies: cookies. Defaults to None.
-        
+
     Returns:
         response of the request
     """
@@ -113,7 +113,7 @@ def getClubs(cookies=None):
 
     Args:
         cookies: cookies. Defaults to None.
-        
+
     Returns:
         responce of the request
     """
@@ -148,10 +148,10 @@ def getClubs(cookies=None):
 def getClubCode(clubid: str) -> str | None:
     """
     Fetches the code of the club whose club id is given.
-    
+
     Args:
         clubid: club id
-        
+
     Returns:
         str|None: club code or None if club not found
     """
@@ -160,7 +160,6 @@ def getClubCode(clubid: str) -> str | None:
         if club["cid"] == clubid:
             return club["code"]
     return None
-
 
 
 def getClubDetails(
@@ -198,7 +197,6 @@ def getClubDetails(
         return request.json()["data"]["club"]
     except Exception:
         return {}
-
 
 
 def getEventCode(clubid, starttime) -> str:
@@ -256,10 +254,10 @@ def getEventCode(clubid, starttime) -> str:
 def getEventLink(code) -> str:
     """
     Produces a link to the event page based on the event code.
-    
+
     Args:
         code: event code
-        
+
     Returns:
         str: link to the event page
     """
@@ -334,7 +332,7 @@ def eventsWithSorting(
 ):
     """
     Provides a list of events based on the searchspace provided.
-    
+
     Custom sorting of events based on
     datetimeperiod with
     ongoing events first in ascending order of end time
@@ -343,14 +341,14 @@ def eventsWithSorting(
     and then
     past events in descending order of end time
     It also filters events based on name if name is provided and pagination is True.
-    
+
     Args:
         searchspace: search space for events
-        name: name of the event
-        date_filter: if True, filters events based on date
-        pagination: if True, paginates the events
+        name: name of the event. Defaults to None.
+        date_filter: if True, filters events based on date. Defaults to False.
+        pagination: if True, paginates the events. Defaults to False.
         skip: number of events to skip
-        limit: number of events to return
+        limit: number of events to return. Defaults to None.
 
     Returns:
         List[dict]: list of events
@@ -427,10 +425,10 @@ def eventsWithSorting(
 def trim_public_events(event: dict):
     """
     Hides certain data fields from public viewers who view information of an event.
-    
+
     Args:
         event: event to be trimmed of sensitive data
-        
+
     Returns:
         dict: trimmed event
     """
@@ -460,7 +458,7 @@ def trim_public_events(event: dict):
 def convert_to_html(text):
     """
     Method used to convert text to html.
-    
+
     Args:
         text: text to be converted to html.
 
@@ -487,7 +485,7 @@ def convert_to_html(text):
 def delete_file(filename):
     """
     Method used to delete a file from the file service.
-    
+
     Args:
         filename: name of the file to be deleted.
 

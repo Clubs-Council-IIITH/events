@@ -940,7 +940,7 @@ def updateEventsCid(
     Args:
         old_cid: old cid of the club
         new_cid: new cid of the club
-        inter_communication_secret: secret for authentication
+        inter_communication_secret: secret for authentication. Default is None.
 
     Returns:
         int: number of events updated
