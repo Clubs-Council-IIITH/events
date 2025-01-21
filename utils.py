@@ -21,13 +21,15 @@ fiscalyear.START_MONTH = FISCAL_START_MONTH
 
 def getMember(cid, uid, cookies=None):
     """
-    This function makes a query to the members service which is resolved by the member method.
-    It fetches info about a member.
+    This function makes a query to the Members service resolved by the member method, fetches info about a member.
 
-    Inputs:
+    Args:
         cid: club id
         uid: user id
-        cookies: cookies
+        cookies: cookies. Defaults to None.
+        
+    Returns:
+        response of the request
     """
 
     try:
@@ -61,12 +63,14 @@ def getMember(cid, uid, cookies=None):
 
 def getUser(uid, cookies=None):
     """
-    Function makes a query to the users service which is resolved by the userProfile method.
-    It fetches info about a user.
+    Function makes a query to the Users service resolved by the userProfile method, fetches info about a user.
 
-    Inputs:
+    Args:
         uid: user id
-        cookies: cookies
+        cookies: cookies. Defaults to None.
+        
+    Returns:
+        response of the request
     """
 
     try:
@@ -105,11 +109,13 @@ def getUser(uid, cookies=None):
 
 def getClubs(cookies=None):
     """
-    Function to call a query which is resolved by the allClubs method.
-    It fetches info about all clubs.
+    Function to call a query to the Clubs service resolved by the allClubs method, fetches info about all clubs.
 
-    Inputs:
-        cookies: cookies
+    Args:
+        cookies: cookies. Defaults to None.
+        
+    Returns:
+        responce of the request
     """
 
     try:
@@ -140,6 +146,15 @@ def getClubs(cookies=None):
 
 # method gets club code from club id
 def getClubCode(clubid: str) -> str | None:
+    """
+    Fetches the code of the club whose club id is given.
+    
+    Args:
+        clubid: club id
+        
+    Returns:
+        str|None: club code or None if club not found
+    """
     allclubs = getClubs()
     for club in allclubs:
         if club["cid"] == clubid:
@@ -153,15 +168,14 @@ def getClubDetails(
     cookies,
 ) -> dict:
     """
-    This method is used to get a clubs name from its club id.
-    It makes a query to the clubs service which is resolved by the club method.
+    This method makes a query to the clubs service resolved by the club method, used to get a club's name from its clubid.
 
-    Inputs:
+    Args:
         clubid: club id
         cookies: cookies
 
     Returns:
-        dict : contains club details
+        response of the request
     """
 
     try:
@@ -189,19 +203,17 @@ def getClubDetails(
 
 def getEventCode(clubid, starttime) -> str:
     """
-    generate event code based on time and club
+    generate event code based on starttime and organizing club
 
-    This method is used to generate an event code based on the time and club of event.
-    
-    Input:
+    Args:
         clubid: club id
         starttime: start time of the event
 
     Returns:
-        event code
+        str: event code
 
     Raises:
-        ValueError: if clubid is invalid
+        ValueError: Invalid clubid
     """
 
     club_code = getClubCode(clubid)
@@ -242,6 +254,15 @@ def getEventCode(clubid, starttime) -> str:
 # method produces link to event (based on code as input)
 # It returns a link to the event page
 def getEventLink(code) -> str:
+    """
+    Produces a link to the event page based on the event code.
+    
+    Args:
+        code: event code
+        
+    Returns:
+        str: link to the event page
+    """
     host = os.environ.get("HOST", "http://localhost")
     return f"{host}/manage/events/code/{code}"
 
@@ -251,13 +272,11 @@ def getRoleEmails(role: str) -> List[str]:
     """
     Brings all the emails of members belonging to a role
 
-    This method is used to get a list of emails of members belonging to a role.
-
-    Inputs:
+    Args:
         role: role of the user to be searched
 
     Returns:
-        list of emails
+        List[str]: list of emails.
     """
 
     try:
@@ -314,6 +333,8 @@ def eventsWithSorting(
     limit: int | None = None,
 ):
     """
+    Provides a list of events based on the searchspace provided.
+    
     Custom sorting of events based on
     datetimeperiod with
     ongoing events first in ascending order of end time
@@ -322,6 +343,17 @@ def eventsWithSorting(
     and then
     past events in descending order of end time
     It also filters events based on name if name is provided and pagination is True.
+    
+    Args:
+        searchspace: search space for events
+        name: name of the event
+        date_filter: if True, filters events based on date
+        pagination: if True, paginates the events
+        skip: number of events to skip
+        limit: number of events to return
+
+    Returns:
+        List[dict]: list of events
     """
     utc = pytz.timezone("UTC")
     current_datetime = datetime.now(utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
@@ -393,6 +425,15 @@ def eventsWithSorting(
 
 # method hides data from public viewers who view information of an event
 def trim_public_events(event: dict):
+    """
+    Hides certain data fields from public viewers who view information of an event.
+    
+    Args:
+        event: event to be trimmed of sensitive data
+        
+    Returns:
+        dict: trimmed event
+    """
     delete_keys = [
         "equipment",
         "additional",
@@ -417,6 +458,15 @@ def trim_public_events(event: dict):
 
 # method used to convert text to html
 def convert_to_html(text):
+    """
+    Method used to convert text to html.
+    
+    Args:
+        text: text to be converted to html.
+
+    Returns:
+        str: text in the form of html.
+    """
     # Escape HTML special characters
     text = html.escape(text)
 
@@ -435,6 +485,15 @@ def convert_to_html(text):
 
 # method used to delete a file from the file server
 def delete_file(filename):
+    """
+    Method used to delete a file from the file service.
+    
+    Args:
+        filename: name of the file to be deleted.
+
+    Returns:
+        response from the file service.
+    """
     response = requests.post(
         "http://files/delete-file",
         params={

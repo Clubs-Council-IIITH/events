@@ -1,7 +1,5 @@
 """
 Mutation Resolvers for Holidays
-
-Contains mutation resolvers for creating, updating, and deleting holidays.
 """
 
 import strawberry
@@ -15,23 +13,18 @@ from otypes import HolidayType, Info, InputHolidayDetails
 @strawberry.mutation
 def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
     """
-    Create a new holiday
+    Creates a new holiday, for SLO and CC
     
-    This method creates a new holiday in the database.
-
-    Inputs:
+    Args:
         details (InputHolidayDetails): The details of the holiday to be created.
         info (Info): The context of the request for user info.
 
     Returns:
         HolidayType: The created holiday.
 
-    Accessibility:
-        Accessible to slo and cc.
-
-    Raises Exception:
-        Not Authenticated: If the user is not authenticated or if user is not logged in.
-        Holiday already exists: If a holiday already exists on the given date.
+    Raises:
+        Exception: You do not have permission to access this resource.
+        Exception: A holiday already exists on this day.
     """
     user = info.context.user
 
@@ -59,11 +52,9 @@ def editHoliday(
     id: str, details: InputHolidayDetails, info: Info
 ) -> HolidayType:
     """
-    Edit an existing holiday
-    
-    This method edits an existing holiday in the database.
+    Edit an existing holiday, for SLO and CC
 
-    Inputs:
+    Args:
         id (str): The id of the holiday to be edited.
         details (InputHolidayDetails): The details to which the holiday is to be updated.
         info (Info): The context of the request for user info.
@@ -71,13 +62,10 @@ def editHoliday(
     Returns:
         HolidayType: The edited holiday.
 
-    Accessibility:
-        Accessible to slo and cc.
-
-    Raises Exception:
-        Not Authenticated: If the user is not authenticated or if user is not logged in.
-        Holiday not found: If a holiday with the given id does not exist in the database.
-        Holiday already exists: If a holiday already exists on the given date to which the holiday is to be updated.
+    Raises:
+        Exception: You do not have permission to access this resource.
+        Exception: Holiday not found.
+        Exception: A holiday already exists on this day.
     """
     user = info.context.user
 
@@ -103,23 +91,18 @@ def editHoliday(
 @strawberry.mutation
 def deleteHoliday(id: str, info: Info) -> bool:
     """
-    Delete an existing holiday
+    Delete an existing holiday, for SLO and CC
     
-    This method deletes an existing holiday in the database.
-
-    Inputs:
+    Args:
         id (str): The id of the holiday to be deleted.
         info (Info): The context of the request for user info.
 
     Returns:
         bool: True if the holiday was deleted successfully, False otherwise.
 
-    Accessibility:
-        Accessible to slo and cc.
-
-    Raises Exception:
-        Not Authenticated: If the user is not authenticated or if user is not logged in.
-        Holiday not found: If a holiday with the given id does not exist in the database.
+    Raises:
+        Exception: You do not have permission to access this resource.
+        Exception: Holiday not found.
     """
     user = info.context.user
 

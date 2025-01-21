@@ -1,5 +1,8 @@
-from string import Template
+"""
+Contains templates for emails to be sent to CC, SLO, SLC and the club regarding the event's approval and its status to interested parties.
+"""
 
+from string import Template
 # Email Templates
 
 # email template requesting approval for an event to CC(Clubs Council), SLO(Student Life Office) and SLC(Student Life Committee).

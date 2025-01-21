@@ -1,16 +1,5 @@
 """
 Query Resolvers for Events
-
-This file contains the query resolvers for the events service.
-
-resolvers:
-    event: Fetches an event with the given id
-    events: Fetches all events
-    eventid: Fetches an event id with the given event code
-    incompleteEvents: Fetches incomplete events of clubs
-    pendingEvents: Fetches pending events of clubs
-    availableRooms: Fetches available rooms for a given date and time
-    downloadEventsData: Fetches all events as a CSVResponse
 """
 
 import csv
@@ -47,21 +36,18 @@ def event(eventid: str, info: Info) -> EventType:
     """
     Fetches an event with the given id
 
-    This method is used to fetch an event with the given event id.
-
-    Inputs:
+    It runs the trim_public_events function to trim of sensitive information from the event if for public view.
+    
+    Args:
         eventid (str): The id of the event to be fetched.
         info (Info): The context information of user for the request.
 
     Returns:
         EventType: Details regarding The event with the given id.
-
-    Accessibility:
-        fully accessibile to only cc, slo and slc and also the club in question itself.
-        partial access to public as it hides few fields of information.
-
-    Raises Exception:
-        Cannot access event: If the user is not autherized to access the event.
+        
+    Raises:
+        Exception: Can not access event. Either it does not exist or you do not have permission to access it.
+        
     """
     user = info.context.user
     event = eventsdb.find_one({"_id": eventid})
@@ -123,15 +109,15 @@ def eventid(code: str, info: Info) -> str:
     """
     method returns eventid of the event with the given event code
 
-    Inputs:
+    Args:
         code (str): The code of the event to be fetched.
         info (Info): The context information of user for the request.
 
     Returns:
         str: The id of the event with the given code.
 
-    Raises Exception:
-        Event with given code does not exist : If the event with the given code does not exist.
+    Raises:
+        Exception: Event with given code does not exist.
     """
 
     event = eventsdb.find_one({"code": code})
@@ -155,14 +141,13 @@ def events(
     """
     Returns a list of events as a search result that match the given criteria.
 
-    This method is used to fetch a list of events as a search result that match the given criteria.
     If public is set to True, then only public/approved events are returned.
     If clubid is set, then only events of that club are returned.
     If clubid is not set, then all events the user is authorized to see are returned.
-    not logged in user has same visibility as public set to True.
-    If public set to True, then few fields of the evnt are hidden using the trim_public_events function.
+    a not logged in user has same visibility as public set to True.
+    If public set to True, then few fields of the event are hidden using the trim_public_events function.
 
-    Inputs:
+    Args:
         info (Info): The context information of user for the request.
         clubid (str | None): The id of the club whose events are to be fetched.
         name (str | None): The name of the event to be searched according to.
@@ -174,12 +159,8 @@ def events(
     Returns:
         List[EventType]: A list of events that match the given criteria.
 
-    Accessibility:
-        fully accessibile to only cc, slo and slc and also the club in question itself.
-        partial access to public as it hides few fields of information.
-
-    Raises Exception:
-        Pagination limit is required: If paginationOn is True and limit is not provided.        
+    Raises:
+        Exception: Pagination limit is required.       
     """
 
     user = info.context.user
@@ -266,22 +247,17 @@ def events(
 @strawberry.field
 def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     """
-    Return all incomplete events of a club
-    
-    This method is used to return all 'incomplete' state evts of a given club.
-    
-    Inputs:
+    Return all incomplete events of a club for the club
+        
+    Args:
         clubid (str): The id of the club whose incomplete events are to be fetched.
         info (Info): The context information of user for the request.
 
     Returns:
         List[EventType]: A list of events that match the given criteria.
 
-    Accessibility:
-        Only to the club itself.
-
-    Raises Exception:
-        You do not have permission to access this resource : If the user is not a club or does not have permission to access the resource.
+    Raises:
+        Exception: You do not have permission to access this resource.
     """
     user = info.context.user
 
@@ -361,18 +337,15 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     For club, returns incomplete and pending approval events.
     It sorts them on the basis of time.
 
-    Inputs:
+    Args:
         clubid (str): The id of the club whose pending events are to be fetched.
         info (Info): The context information of user for the request.
 
     Returns:
         List[EventType]: A list of events that match the given criteria.
 
-    Accessibility:
-        Only to the club, CC, SLO, SLC.
-
-    Raises Exception:
-            You do not have permission to access this resource : If the user is not a club or does not have permission to access the resource.
+    Raises:
+        Exception: You do not have permission to access this resource.
     """
 
     user = info.context.user
@@ -445,11 +418,7 @@ def availableRooms(
     """
     return a list of all rooms that are available in the given timeslot
     
-    This method is used to return all the rooms that are available in the given timeslot.
-    To the returned list it add the current location of the event whose event id is also provided.
-    A room is considered not available if an approved event has booked that room in that timeslot.
-
-    Inputs:
+    Args:
         timeslot (timelot_type): The timeslot for which the rooms are to be fetched.
         eventid (str): The id of the event whose location is to be added to the list of rooms.
         info (Info): The context information of user for the request.
@@ -457,11 +426,8 @@ def availableRooms(
     Returns:
         RoomListType: A list of rooms that are available in the given timeslot.
 
-    Accessibility:
-        Public(The user need tobe logged in to access this resource)
-
-    Raises Exception:
-        You do not have permission to access this resource : If the user is not logged in or is SLC.
+    Raises:
+        Exception: You do not have permission to access this resource.
     """
     user = info.context.user
 
@@ -509,21 +475,18 @@ def downloadEventsData(
     If clubid is provided, it returns all the events of that club.
     If status is provided, it returns all the events with that status.
     If a time frame is provided, it returns all the events happening in that time frame.
-    It returns info regarding each event, which will contain the fields provided in the details.
+    CC and SLO cannot see deleted and incomplete events.Public can see only approved events.    
 
-    Inputs:
+    Args:
         details (InputDataReportDetails): The details of the events to be fetched.
         info (Info): The context information of user for the request.
 
     Returns:
         CSVResponse: A CSVResponse containing all the events.
 
-    Accessibility:
-        CC and SLO cannot see deleted and incomplete events.Public can see only approved events.
-
-    Raises Exception:
-        You do not have permission to access this resource : If the user is not autherized to access the resource.
-        Invalid status : If the status provided is not valid.
+    Raises:
+        Exception: You do not have permission to access this resource.
+        Exception: Invalid status.
     """
     user = info.context.user
     if user is None:

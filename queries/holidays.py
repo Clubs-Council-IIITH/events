@@ -1,8 +1,5 @@
 """
 Query Resolvers for holidays
-
-Contains queries to fetch holidays from the database.
-Both to find a holiday, or to get list of holidays.
 """
 
 from datetime import date
@@ -20,24 +17,17 @@ def holidays(
     start_date: date | None = None, end_date: date | None = None
 ) -> List[HolidayType]:
     """
-    Get a list of holidays
+    Get a list of holidays from a start date(if provided) to an end date(if provided).
 
-    This method returns a list of holidays.
-    from a start date(if provided) to an end date(if provided).
-    if no dates are provided, it returns all holidays.
-
-    Inputs:
-        start_date (date, optional): The start date of the range.
-        end_date (date, optional): The end date of the range.
+    Args:
+        start_date (date, optional): The start date of the range. Defaults to None.
+        end_date (date, optional): The end date of the range. Defaults to None.
 
     Returns:
         List[HolidayType]: A list of holidays.
 
     Raises:
-        ValueError: If the start date is greater than the end date.
-
-    Accessibility:
-        Anyone can access this method.
+        ValueError: Start date cannot be greater than end date.
     """
 
     query = {}
@@ -61,11 +51,9 @@ def holidays(
 @strawberry.field
 def holiday(id: str) -> HolidayType:
     """
-    Get a holiday by id
-
     This method searches for a holiday by its id and returns it.
 
-    Inputs:
+    Args:
         id (str): The id of the holiday.
 
     Returns:

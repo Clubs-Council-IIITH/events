@@ -1,27 +1,3 @@
-"""
-Classes and Enums for Models
-
-This file cotains enums and class that will be used for differnt fields in the models.
-They are used for states of events and bills, audience and location of the events.
-
-Enums:
-    Audience: Audience of Events
-    Bills_State_Status: States of Bills and a class describing the states of bills.
-    Event_State_Status: State of Events(pending, pending_cc...) and a class describing the states of events.
-    Event_Location: Location of Events(h101,h103...) and a class describing the locations of events.
-    Event_Mode: Mode of Events(online, offline...).
-
-custom data types:
-    HttpUrlString: Custom data type for URL validation.
-    event_popu_type: Custom data type for event's population validation.
-    
-
-Classes:
-    Bills_Status: Status of Bills
-    Event_Status: State of Events
-    BudgetType: Budget Type
-"""
-
 from enum import StrEnum, auto
 
 import pytz
@@ -42,6 +18,9 @@ from typing_extensions import Annotated, Any
 # Audience for the Event
 @strawberry.enum
 class Audience(StrEnum):
+    """
+    Enum for catagory of audience
+    """
     ug1 = auto()
     ug2 = auto()
     ug3 = auto()
@@ -55,6 +34,9 @@ class Audience(StrEnum):
 # Event Bills States
 @strawberry.enum
 class Bills_State_Status(StrEnum):
+    """
+    Enum of status of an event's bills
+    """
     # initially, the bills are `not_submitted`
     not_submitted = auto()
     # after the club submits the bills, but they are incomplete,
@@ -69,6 +51,9 @@ class Bills_State_Status(StrEnum):
 
 # Event Bills State Full Names
 class Bills_Full_State_Status:
+    """
+    String representation of the states in Bills_State_Status
+    """
     not_submitted = "Not Submitted"
     incomplete = "Incomplete"
     submitted = "Submitted"
@@ -79,24 +64,21 @@ class Bills_Full_State_Status:
 @strawberry.type
 class Bills_Status:
     """
-    Class used for a bills status approval/rejection
-
-    It will be used to store information regarding aporoval/rejection of bills.
-    It also stores the time of approval/rejection and the comment of SLO(Student Life Office).
+    Class used for a bill's approval/rejection status along with its time and comment on approval/rejection
 
     Attributes:
         state (Bills_State_Status): State of the bills. Initially, the bills are `not_submitted`.
-        updated_time (str | None): Time of approval/rejection.
-        slo_comment (str | None): Comment of SLO.
+        updated_time (str | None): Time of approval/rejection. Defaults to None.
+        slo_comment (str | None): Comment of SLO. Defaults to None.
     """
 
-    state: Bills_State_Status = Bills_State_Status.not_submitted  # type: ignore
+    state: Bills_State_Status = Bills_State_Status.not_submitted
     updated_time: str | None = None
     slo_comment: str | None = None
 
     def __init__(
         self,
-        state: Bills_State_Status = Bills_State_Status.not_submitted,  # type: ignore
+        state: Bills_State_Status = Bills_State_Status.not_submitted,
         updated_time: str | None = None,
         slo_comment: str | None = None,
     ):
@@ -108,6 +90,9 @@ class Bills_Status:
 # Event States
 @strawberry.enum
 class Event_State_Status(StrEnum):
+    """
+    Enum for state of an event's approval
+    """
     # initially, the event is `incomplete`
     incomplete = auto()
     # after the club fills all the details, they progress it
@@ -126,6 +111,9 @@ class Event_State_Status(StrEnum):
 
 # Event Full State Names
 class Event_Full_State_Status:
+    """
+    String representation of the states in Event_State_Status
+    """
     incomplete = "Incomplete"
     pending_cc = "Pending CC Approval"
     pending_budget = "Pending Budget Approval"
@@ -138,36 +126,28 @@ class Event_Full_State_Status:
 @strawberry.type
 class Event_Status:
     """
-    Class used for a event status
-
-    It will be used to store information regarding the status of the event.
-    An event needs to be approved by CC, SLO and SLC to be approved.
-    This class stores all approvers and approved time.
-    It stores last updated by and time to keep track of the changes.
-    It stores the deleted by and time to inform the club about the deletion.
-    It stores whether or not room and budget are approved.
-    It stores the state of the event.initially, the event is `incomplete`.
+    Class used for an event's approval status and approver information
 
     Attributes:
-        state (Event_State_Status): State of the event. Initially, the event is `incomplete`.
+        state (Event_State_Status): State of the event. Default is `incomplete`.
         room (bool): Whether or not room is approved.
         budget (bool): Whether or not budget is approved.
-        submission_time (str | None): Time of submission.
-        cc_approver (str | None): Approver of CC.
-        cc_approver_time (str | None): Time of approval by CC.
-        slo_approver (str | None): Approver of SLO.
-        slo_approver_time (str | None): Time of approval by SLO.
-        slc_approver (str | None): Approver of SLC.
-        slc_approver_time (str | None): Time of approval by SLC.
-        last_updated_by (str | None): Last updated by.
-        last_updated_time (str | None): Time of last update.
-        deleted_by (str | None): Deleted by.
-        deleted_time (str | None): Time of deletion.
+        submission_time (str | None): Time of submission. Defaults to None.
+        cc_approver (str | None): Approver of CC. Defaults to None.
+        cc_approver_time (str | None): Time of approval by CC. Defaults to None.
+        slo_approver (str | None): Approver of SLO. Defaults to None.
+        slo_approver_time (str | None): Time of approval by SLO. Defaults to None.
+        slc_approver (str | None): Approver of SLC. Defaults to None.
+        slc_approver_time (str | None): Time of approval by SLC. Defaults to None.
+        last_updated_by (str | None): Last updated by. Defaults to None.
+        last_updated_time (str | None): Time of last update. Defaults to None.
+        deleted_by (str | None): Deleted by. Defaults to None.
+        deleted_time (str | None): Time of deletion. Defaults to None.
     """
 
-    state: Event_State_Status = Event_State_Status.incomplete  # type: ignore
-    room: bool = False  # room: Event_Room_Status = Event_Room_Status.unapproved # noqa: E501
-    budget: bool = False  # budget: Event_Budget_Status = Event_Budget_Status.unapproved # noqa: E501
+    state: Event_State_Status = Event_State_Status.incomplete
+    room: bool = False
+    budget: bool = False
 
     submission_time: str | None = None
 
@@ -228,6 +208,9 @@ class Event_Status:
 # Event Modes
 @strawberry.enum
 class Event_Mode(StrEnum):
+    """
+    Enum for mode of Event
+    """
     hybrid = auto()
     online = auto()
     offline = auto()
@@ -235,6 +218,9 @@ class Event_Mode(StrEnum):
 
 # Event Full Location Names
 class Event_Full_Location:
+    """
+    String representation of the locations in Event_Location
+    """
     h101 = "Himalaya 101"
     h102 = "Himalaya 102"
     h103 = "Himalaya 103"
@@ -271,6 +257,9 @@ class Event_Full_Location:
 # Event Locations
 @strawberry.enum
 class Event_Location(StrEnum):
+    """
+    Enum for locations for the Event
+    """
     # Himalaya
     h101 = auto()
     h102 = auto()
@@ -322,14 +311,12 @@ long_str_type = Annotated[str, StringConstraints(max_length=10000)]
 @strawberry.type
 class BudgetType:
     """
-    Class for handling budget details
-
-    This class contains field for the club to submit the budget for approval
+    Class for info regarding a submitted budget
 
     Attributes:
         amount (float): Amount of the budget.
-        description (str | None): Description of the budget.
-        advance (bool): Whether the budget is the required advance or not.
+        description (str | None): Description of the budget. Defaults to None.
+        advance (bool): Whether the budget is the required advance or not. Defaults to False.
     """
 
     amount: float
@@ -340,6 +327,9 @@ class BudgetType:
     @field_validator("amount")
     @classmethod
     def positive_amount(cls, value):
+        """
+        A field validator for the amount field.
+        """
         if value <= 0:
             raise ValueError("Amount must be positive")
         return value
@@ -347,6 +337,9 @@ class BudgetType:
 
 @strawberry.enum
 class PrizesType(StrEnum):
+    """
+    Enum for kind of prizes given to the participants in an event
+    """
     win_certificates = auto()
     participation_certificates = auto()
     cash_prizes = auto()
@@ -358,27 +351,11 @@ class PrizesType(StrEnum):
 # for handling mongo ObjectIds
 class PyObjectId(ObjectId):
     """
-    MongoDB ObjectId handler
-
-    This class contains clasmethods to validate and serialize ObjectIds.
-    ObjectIds of documents under the Clubs collection are stored under the 'id' field.
+    Class for handling MongoDB document ObjectIds for 'id' fields in Models.
     """
 
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type: Any, handler):
-        """
-        Defines custom schema for Pydantic validation
-
-        This method is used to define the schema for the Pydantic model.
-
-        Args:
-            source_type (Any): The source type.
-            handler: The handler.
-
-        Returns:
-            dict: The schema for the Pydantic model.
-        """
-
         return core_schema.union_schema(
             [
                 # check if it's an instance first before doing any further work
@@ -390,34 +367,12 @@ class PyObjectId(ObjectId):
 
     @classmethod
     def validate(cls, v):
-        """
-        Validates the given ObjectId
-
-        Args:
-            v (Any): The value to validate.
-
-        Returns:
-            ObjectId: The validated ObjectId.
-
-        Raises:
-            ValueError: If the given value is not a valid ObjectId.
-        """
-
         if not ObjectId.is_valid(v):
             raise ValueError("Invalid ObjectId")
         return ObjectId(v)
 
     @classmethod
     def __get_pydantic_json_schema__(cls, field_schema):
-        """
-        Generates JSON schema
-
-        This method is used to generate the JSON schema for the Pydantic model.
-
-        Args:
-            field_schema (dict): The field schema.
-        """
-
         field_schema.update(type="string")
 
 

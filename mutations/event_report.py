@@ -13,8 +13,23 @@ from utils import getMember
 @strawberry.mutation
 def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
     """
-    Add an event report
-    returns the added event report
+    Adds an event report after completion of the event
+    
+    Args:
+        details (InputEventReport): The details of the event report to be added.
+        info (Info): The context information of user for the request.
+    
+    Returns:
+        EventReportType: The details of the added event report.
+
+    Raises:
+        ValueError: User not authenticated
+        ValueError: User not authorized
+        ValueError: Event ID is required
+        ValueError: Event not found
+        ValueError: User not authorized
+        ValueError: Event report already exists
+        ValueError: Submitted by is not a valid member
     """
 
     user = info.context.user

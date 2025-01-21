@@ -1,28 +1,3 @@
-"""
-Types and Inputs
-
-This file coniains all the types and inputs that we will be using in the events module.
-It also contais a model RoomList which is used to store the list of rooms.
-Even holidays are also stored as events.
-
-Types:
-    Info: used to return user and cookes details.
-    PyObjectIdType : used to return the ObjectId as a string.
-    EventType : used to return all the details regarding an event.
-    RoomListType : used to return a list of location(RoomList).
-    BillsStatusType : used to return event id, event name, club id and bills status of the club.
-    CSVResponse : used to return a csvFile and its success and error messages.
-    HolidayType : used to return all the fields within the Holiday class.
-
-Inputs:
-    InputBillsStatus : used to input event id, state of the bill and slo comment during the approval of bills.
-    BudgetInput : used to input all fields of the BudgetType class.
-    InputEventDetails : used to input all fields of the InputEventDetails class that should be filled by the organizing club.
-    InputEventEditDetails : used to input all fields of the InputEventDetails along with the event id.
-    InputDataReportDetails : used in the CSVResponse method to bring to bring in all the list of events accroding to the fields within this Input class.
-    InputHolidayDetails : used to input name, date and description of a holiday.
-"""
-
 import json
 from datetime import date, datetime
 from functools import cached_property
@@ -48,6 +23,9 @@ from mtypes import (
 
 # custom context class
 class Context(BaseContext):
+    """
+    Class provides user metadata and cookies from request headers, has methods for doing this.
+    """
     @cached_property
     def user(self) -> Dict | None:
         if not self.request:
@@ -75,25 +53,40 @@ PyObjectIdType = strawberry.scalar(
 
 @strawberry.experimental.pydantic.type(model=EventReport, all_fields=True)
 class EventReportType:
+    """
+    Type for returning the event's report.
+    """
     pass
 
 
 @strawberry.experimental.pydantic.type(model=Event, all_fields=True)
 class EventType:
+    """
+    Type for returning all the details regarding an event.
+    """
     pass
 
 
 class RoomList(BaseModel):
+    """
+    Model for storing the list of rooms.
+    """
     locations: List[Event_Location]
 
 
 @strawberry.experimental.pydantic.type(model=RoomList, all_fields=True)
 class RoomListType:
+    """
+    Type for returning a list of locations.
+    """
     pass
 
 
 @strawberry.type
 class BillsStatusType:
+    """
+    Type for returning event id, event name, club id and bills status of the event.
+    """
     eventid: str
     eventname: str
     clubid: str
@@ -103,6 +96,9 @@ class BillsStatusType:
 
 @strawberry.input
 class InputBillsStatus:
+    """
+    Input for taking event id, state of the bill and slo comment during the approval/rejection of bills.
+    """
     eventid: str
     state: Bills_State_Status
     slo_comment: str | None = None
@@ -110,11 +106,34 @@ class InputBillsStatus:
 
 @strawberry.input
 class BudgetInput(BudgetType):
+    """
+    Input for taking all fields of the BudgetType class.
+    """
     pass
 
 
 @strawberry.input
 class InputEventDetails:
+    """
+    Class for taking the details of an event.
+    
+    Attributes:
+        name (str): Name of the event.
+        location (List[Event_Location]): List of locations of the event. Default is None.
+        description (str): Description of the event. Default is None.
+        clubid (str): clubID of the club organizing the event.
+        collabclubs (List[str]): List of clubIDs of collaborating clubs. Default is None.
+        mode (Event_Mode): Mode of the event. Default is hybrid.
+        poster (str): Poster of the event. Default is None.
+        datetimeperiod (List[datetime]): List of date and time of start and end of the event.
+        audience (List[Audience]): List of audience categories for the event. Default is None.
+        link (str): Link to the event. Default is None.
+        equipment (str): Equipment for the event. Default is None.
+        additional (str): Additional information of the event. Default is None.
+        population (int): Population expected to attend the event. Default is None.
+        budget (List[BudgetInput]): List of budgets of the event. Default is None.
+        poc (str): Point of contact for the event.
+    """
     name: str
     location: List[Event_Location] | None = None
     description: str | None = None
@@ -134,12 +153,15 @@ class InputEventDetails:
 
 @strawberry.input
 class InputEditEventDetails:
+    """
+    Input similar to InputEventDetails but along with the event id(self-generated) attribute.
+    """
     name: str | None = None
     eventid: str
     collabclubs: List[str] | None = None
     location: List[Event_Location] | None = None
     description: str | None = None
-    clubid: str | None  # not editable
+    clubid: str | None
     mode: Event_Mode | None = Event_Mode.hybrid
     poster: str | None = None
     datetimeperiod: List[datetime] | None = None
@@ -154,6 +176,9 @@ class InputEditEventDetails:
 
 @strawberry.input
 class InputDataReportDetails:
+    """
+    Input used for taking info required to bring a list of events along with required fields.
+    """
     clubid: str | None
     dateperiod: List[date] | None = None
     fields: List[str]
@@ -162,11 +187,17 @@ class InputDataReportDetails:
 
 @strawberry.experimental.pydantic.input(model=EventReport, all_fields=True)
 class InputEventReport:
+    """
+    Input for taking all the fields of the EventReport model.
+    """
     pass
 
 
 @strawberry.type
 class CSVResponse:
+    """
+    Type for returning the csv file, success/error message.
+    """
     csvFile: str
     successMessage: str
     errorMessage: str
@@ -179,6 +210,9 @@ timelot_type = Tuple[datetime, datetime]
 
 @strawberry.input
 class InputHolidayDetails:
+    """
+    Input for taking the details of a holiday.
+    """
     date: date
     name: str
     description: str | None = None
@@ -186,4 +220,7 @@ class InputHolidayDetails:
 
 @strawberry.experimental.pydantic.type(model=Holiday, all_fields=True)
 class HolidayType:
+    """
+    Type for returning all the details regarding a holiday.
+    """
     pass

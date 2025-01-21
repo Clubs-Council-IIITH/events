@@ -17,22 +17,15 @@ def triggerMail(
     cookies=None,
 ) -> None:
     """
-    Method to trigger an email
-
-    This method is used to trigger an email.
-    It makes a mutation request which is resolver by the sendMail resolver from mailing.py from interfaces.py.
-    It send an email with the given parameters.
-
+    Method triggers a mutation request, resolved by the sendMail resolver from mailing.py from interfaces microservice, it triggers a email.
+    
     Args:
-        uid : The user id.
-        subject : The subject of the email.
-        body : The body of the email.
-        to : The list of to recipients.
-        cc : The list of cc recipients.
-        cookies : The cookies.
-
-    Returns:
-        None
+        uid: The user id.
+        subject: The subject of the email.
+        body: The body of the email.
+        to: The list of to recipients.
+        cc: The list of cc recipients.
+        cookies: The cookies. Defaults to None.
     """
 
     try:

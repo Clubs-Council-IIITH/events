@@ -1,17 +1,20 @@
 """
-MongoDB Initialization Module
+MongoDB Initialization Module.
 
-This module sets up a connection to a MongoDB database and ensures that the required indexes are created.
-This module connects to the MongoDB database using environment variables for authentication.
-Ensures that a 'one_holiday_on_day' index is present on the `date` field in the Events collection.
-It specifically exports the events collection of the database.
+This module sets up the connection to the MongoDB database.
+It ensures that the required indexes are created.
 
-Environment Variables:
-    `MONGO_USERNAME` (str): MongoDB username. Defaults to "username".
-    `MONGO_PASSWORD` (str): MongoDB password. Defaults to "password".
-    `MONGO_PORT` (str): MongoDB port. Defaults to "27017".
-    `MONGO_DATABASE` (str): MongoDB database name. Defaults to "default".
-
+Attributes:
+    MONGO_USERNAME (str): An environment variable having MongoDB username. Defaults to "username".
+    MONGO_PASSWORD (str): An environment variable having MongoDB password. Defaults to "password".
+    MONGO_PORT (str): MongoDB port. Defaults to "27017".
+    MONGO_URI (str): MongoDB URI.
+    MONGO_DATABASE (str): MongoDB database name.
+    client (MongoClient): MongoDB client.
+    db (Database): MongoDB database.
+    eventsdb (Collection): MongoDB collection for events.
+    holidaysdb (Collection): MongoDB collection for holidays.
+    event_reportsdb (Collection): MongoDB collection for event reports.
 """
 
 from os import getenv
