@@ -17,11 +17,14 @@ def holidays(
     start_date: date | None = None, end_date: date | None = None
 ) -> List[HolidayType]:
     """
-    Get a list of holidays from a start date(if provided) to an end date(if provided).
+    Get a list of holidays from a start date(if provided) to an end date
+    (if provided).
 
     Args:
-        start_date (date, optional): The start date of the range. Defaults to None.
-        end_date (date, optional): The end date of the range. Defaults to None.
+        start_date (date, optional): The start date of the range. Defaults to
+                                     None.
+        end_date (date, optional): The end date of the range. 
+                                   Defaults to None.
 
     Returns:
         List[HolidayType]: A list of holidays.

@@ -70,23 +70,30 @@ class Event(BaseModel):
         code (str): The code of the event. Defaults to None.
         clubid (str): The Club ID of the club hosting the event.
         collabclubs (List[str]): The Club IDs of the collaborating clubs.
-        studentBodyEvent (bool): Whether the event is a student body event. Defaults to False.
+        studentBodyEvent (bool): Whether the event is a student body event. 
+                                 Defaults to False.
         name (very_short_str_type): The name of the event.
-        description (medium_str_type): A description of the event. Defaults to `No description available.`.
-        datetimeperiod (Tuple[datetime, datetime]): The start and end times of the event.
+        description (medium_str_type): A description of the event. 
+                                       Defaults to `No description available.`.
+        datetimeperiod (Tuple[datetime, datetime]): The start and end times 
+                                                    of the event.
         poster (str): The URL of the event's poster. Defaults to None.
         audience (List[Audience]): The list audience for the event.
         link (HttpUrlString): The link to the event's page. Defaults to None.
         mode (Event_Mode): The mode of the event. Defaults to hybrid.
         location (List[Event_Location]): The list of locations for the event.
-        equipment (short_str_type): The equipment required for the event. Defaults to None.
-        additional (short_str_type): Additional information about the event. Defaults to None.
-        population (event_popu_type): The estimated population for the event. Defaults to None.
+        equipment (short_str_type): The equipment required for the event. 
+                                    Defaults to None.
+        additional (short_str_type): Additional information about the event. 
+                                     Defaults to None.
+        population (event_popu_type): The estimated population for the event. 
+                                      Defaults to None.
         poc (str): The point of contact for the event. Defaults to None.
         status (Event_Status): The approval and approver details.
         budget (List[BudgetInput]): The list of budgets for the event.
         budget_status (Bills_Status): The status of the budget.
-        event_report_submitted (bool): Whether the event report after completion has been submitted. Defaults to False.
+        event_report_submitted (bool): Whether the event report after completion
+                                       has been submitted. Defaults to False.
     """
 
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
@@ -137,7 +144,8 @@ class Holiday(BaseModel):
         id (PyObjectId): The ID of the holiday's document.
         name (very_short_str_type): The name of the holiday.
         date (date): The date of the holiday.
-        description (medium_str_type): A description of the holiday. Defaults to None.
+        description (medium_str_type): A description of the holiday. 
+                                       Defaults to None.
         created_time (datetime): The time the holiday was created.
     """
 

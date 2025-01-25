@@ -24,7 +24,8 @@ from mtypes import (
 # custom context class
 class Context(BaseContext):
     """
-    Class provides user metadata and cookies from request headers, has methods for doing this.
+    Class provides user metadata and cookies from request headers, has
+    methods for doing this.
     """
 
     @cached_property
@@ -90,7 +91,8 @@ class RoomListType:
 @strawberry.type
 class BillsStatusType:
     """
-    Type for returning event id, event name, club id and bills status of the event.
+    Type for returning event id, event name, club id and bills status of
+    the event.
     """
 
     eventid: str
@@ -103,7 +105,8 @@ class BillsStatusType:
 @strawberry.input
 class InputBillsStatus:
     """
-    Input for taking event id, state of the bill and slo comment during the approval/rejection of bills.
+    Input for taking event id, state of the bill and slo comment during
+    the approval/rejection of bills.
     """
 
     eventid: str
@@ -127,19 +130,26 @@ class InputEventDetails:
 
     Attributes:
         name (str): Name of the event.
-        location (List[Event_Location]): List of locations of the event. Default is None.
+        location (List[Event_Location]): List of locations of the event. 
+                                         Default is None.
         description (str): Description of the event. Default is None.
         clubid (str): clubID of the club organizing the event.
-        collabclubs (List[str]): List of clubIDs of collaborating clubs. Default is None.
+        collabclubs (List[str]): List of clubIDs of collaborating clubs.
+                                 Default is None.
         mode (Event_Mode): Mode of the event. Default is hybrid.
         poster (str): Poster of the event. Default is None.
-        datetimeperiod (List[datetime]): List of date and time of start and end of the event.
-        audience (List[Audience]): List of audience categories for the event. Default is None.
+        datetimeperiod (List[datetime]): List of date and time of start and 
+                                         end of the event.
+        audience (List[Audience]): List of audience categories for the event.
+                                   Default is None.
         link (str): Link to the event. Default is None.
         equipment (str): Equipment for the event. Default is None.
-        additional (str): Additional information of the event. Default is None.
-        population (int): Population expected to attend the event. Default is None.
-        budget (List[BudgetInput]): List of budgets of the event. Default is None.
+        additional (str): Additional information of the event.
+                          Default is None.
+        population (int): Population expected to attend the event.
+                          Default is None.
+        budget (List[BudgetInput]): List of budgets of the event.
+                                    Default is None.
         poc (str): Point of contact for the event.
     """
 
@@ -163,7 +173,8 @@ class InputEventDetails:
 @strawberry.input
 class InputEditEventDetails:
     """
-    Input similar to InputEventDetails but along with the event id(self-generated) attribute.
+    Input similar to InputEventDetails but along with the event 
+    id(self-generated) attribute.
     """
 
     name: str | None = None
@@ -187,7 +198,8 @@ class InputEditEventDetails:
 @strawberry.input
 class InputDataReportDetails:
     """
-    Input used for taking info required to bring a list of events along with required fields.
+    Input used for taking info required to bring a list of events along 
+    with required fields.
     """
 
     clubid: str | None

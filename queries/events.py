@@ -36,7 +36,8 @@ def event(eventid: str, info: Info) -> EventType:
     """
     Fetches an event with the given id
 
-    It runs the trim_public_events function to trim of sensitive information from the event if for public view.
+    It runs the trim_public_events function to trim of sensitive information
+    from the event if for public view.
     
     Args:
         eventid (str): The id of the event to be fetched.
@@ -46,7 +47,8 @@ def event(eventid: str, info: Info) -> EventType:
         EventType: Details regarding The event with the given id.
         
     Raises:
-        Exception: Can not access event. Either it does not exist or you do not have permission to access it.
+        Exception: Can not access event. Either it does not exist or you do
+        not have permission to access it.
         
     """
     user = info.context.user
@@ -84,7 +86,8 @@ def event(eventid: str, info: Info) -> EventType:
         or event["clubid"] not in list_allclubs
     ):
         raise Exception(
-            "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
+            "Can not access event. Either it does not exist or user does not 
+            have perms."  # noqa: E501
         )
 
     if (
@@ -143,17 +146,23 @@ def events(
 
     If public is set to True, then only public/approved events are returned.
     If clubid is set, then only events of that club are returned.
-    If clubid is not set, then all events the user is authorized to see are returned.
+    If clubid is not set, then all events the user is authorized to see are 
+    returned.
     a not logged in user has same visibility as public set to True.
-    If public set to True, then few fields of the event are hidden using the trim_public_events function.
+    If public set to True, then few fields of the event are hidden using the
+    trim_public_events function.
 
     Args:
         info (Info): The context information of user for the request.
-        clubid (str | None): The id of the club whose events are to be fetched. Defaults to None.
-        name (str | None): The name of the event to be searched according to. Defaults to None.
-        public (bool | None): Whether to return only public events. Defaults to None.
+        clubid (str | None): The id of the club whose events are to be 
+                             fetched. Defaults to None.
+        name (str | None): The name of the event to be searched according to.
+                           Defaults to None.
+        public (bool | None): Whether to return only public events. Defaults 
+                              to None.
         paginationOn (bool): Whether to use pagination. Defaults to False.
-        limit (int | None): The maximum number of events to return. Defaults to None.
+        limit (int | None): The maximum number of events to return. Defaults
+                            to None.
         skip (int): The number of events to skip.
 
     Returns:
@@ -250,7 +259,8 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     Return all incomplete events of a club for the club
         
     Args:
-        clubid (str): The id of the club whose incomplete events are to be fetched.
+        clubid (str): The id of the club whose incomplete events are to be
+                      fetched.
         info (Info): The context information of user for the request.
 
     Returns:
@@ -333,12 +343,14 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     Returns all the pending events of a give club id
 
     This method is used to return all 'pending' state events of a given club.
-    For CC, returns events with pending approval from CC. Same for SLO and SLC.
+    For CC, returns events with pending approval from CC. Same for SLO and 
+    SLC.
     For club, returns incomplete and pending approval events.
     It sorts them on the basis of time.
 
     Args:
-        clubid (str): The id of the club whose pending events are to be fetched. Defaults to None.
+        clubid (str): The id of the club whose pending events are to be 
+                      fetched. Defaults to None.
         info (Info): The context information of user for the request.
 
     Returns:
@@ -419,12 +431,15 @@ def availableRooms(
     return a list of all rooms that are available in the given timeslot
     
     Args:
-        timeslot (timelot_type): The timeslot for which the rooms are to be fetched.
-        eventid (str): The id of the event whose location is to be added to the list of rooms. Defaults to None.
+        timeslot (timelot_type): The timeslot for which the rooms are to be 
+                                 fetched.
+        eventid (str): The id of the event whose location is to be added to 
+                       the list of rooms. Defaults to None.
         info (Info): The context information of user for the request.
 
     Returns:
-        RoomListType: A list of rooms that are available in the given timeslot.
+        RoomListType: A list of rooms that are available in the given 
+                      timeslot.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -470,15 +485,19 @@ def downloadEventsData(
     """
     Returns all the events as a CSVResponse according to the details provided.
 
-    This function is similar to the events method, but it returns all the events as a CSVResponse.
+    This function is similar to the events method, but it returns all the 
+    events as a CSVResponse.
     It sends specific set of events on the basis of the details provided.
     If clubid is provided, it returns all the events of that club.
     If status is provided, it returns all the events with that status.
-    If a time frame is provided, it returns all the events happening in that time frame.
-    CC and SLO cannot see deleted and incomplete events.Public can see only approved events.    
+    If a time frame is provided, it returns all the events happening in that 
+    time frame.
+    CC and SLO cannot see deleted and incomplete events.Public can see only 
+    approved events.    
 
     Args:
-        details (InputDataReportDetails): The details of the events to be fetched.
+        details (InputDataReportDetails): The details of the events to be 
+                                          fetched.
         info (Info): The context information of user for the request.
 
     Returns:

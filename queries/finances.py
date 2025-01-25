@@ -82,13 +82,15 @@ def allEventsBills(info: Info) -> List[BillsStatusType]:
     """
     Get the bills status of all events
     
-    This method is used to fetch the list of bills status of all past approved events that have a budget and bills status.
+    This method is used to fetch the list of bills status of all past 
+    approved events that have a budget and bills status.
 
     Args:
         info (Info): The user details
 
     Returns:
-        List[BillsStatusType]: The list of bills status of all past approved events
+        List[BillsStatusType]: The list of bills status of all past approved 
+                               events
         
     Raises:
         ValueError: User not authenticated
