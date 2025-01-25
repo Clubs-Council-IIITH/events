@@ -86,8 +86,7 @@ def event(eventid: str, info: Info) -> EventType:
         or event["clubid"] not in list_allclubs
     ):
         raise Exception(
-            "Can not access event. Either it does not exist or user does not 
-            have perms."  # noqa: E501
+            "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
         )
 
     if (
@@ -333,7 +332,8 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
 #     TODO: Add trimming of events as public events
 
 #     return [
-#         EventType.from_pydantic(Event.model_validate(event)) for event in events
+#         EventType.from_pydantic(Event.model_validate(event)) 
+#           for event in events
 #     ]
 
 
