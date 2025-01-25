@@ -75,7 +75,7 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
         raise ValueError(f"{event['name']} has no bills status.")
 
     return Bills_Status(**event["bills_status"])
-
+  
 
 @strawberry.field
 def allEventsBills(info: Info) -> List[BillsStatusType]:

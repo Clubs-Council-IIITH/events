@@ -58,7 +58,6 @@ class EventReportType:
     """
     Type for returning the event's report.
     """
-
     pass
 
 
@@ -213,7 +212,6 @@ class InputEventReport:
     """
     Input for taking all the fields of the EventReport model.
     """
-
     pass
 
 

@@ -356,7 +356,6 @@ class PrizesType(StrEnum):
     """
     Enum for kind of prizes given to the participants in an event
     """
-
     win_certificates = auto()
     participation_certificates = auto()
     cash_prizes = auto()

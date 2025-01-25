@@ -1,7 +1,6 @@
 """
 Gathers all the queries form all the files within this folder and collects them for importing into main.py.
 """
-
 from queries.event_report import queries as event_report_queries
 from queries.events import queries as events_queries
 from queries.finances import queries as finances_queries
