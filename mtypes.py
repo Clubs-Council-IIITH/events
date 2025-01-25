@@ -73,7 +73,7 @@ class Bills_Status:
     Attributes:
         state (Bills_State_Status): State of the bills. Initially, the bills
         are `not_submitted`.
-        updated_time (str | None): Time of approval/rejection. Defaults 
+        updated_time (str | None): Time of approval/rejection. Defaults
                                    to None.
         slo_comment (str | None): Comment of SLO. Defaults to None.
     """
@@ -142,13 +142,13 @@ class Event_Status:
         budget (bool): Whether or not budget is approved.
         submission_time (str | None): Time of submission. Defaults to None.
         cc_approver (str | None): Approver of CC. Defaults to None.
-        cc_approver_time (str | None): Time of approval by CC. 
+        cc_approver_time (str | None): Time of approval by CC.
                                        Defaults to None.
         slo_approver (str | None): Approver of SLO. Defaults to None.
-        slo_approver_time (str | None): Time of approval by SLO. 
+        slo_approver_time (str | None): Time of approval by SLO.
                                         Defaults to None.
         slc_approver (str | None): Approver of SLC. Defaults to None.
-        slc_approver_time (str | None): Time of approval by SLC. 
+        slc_approver_time (str | None): Time of approval by SLC.
                                         Defaults to None.
         last_updated_by (str | None): Last updated by. Defaults to None.
         last_updated_time (str | None): Time of last update. Defaults to None.
@@ -332,7 +332,7 @@ class BudgetType:
     Attributes:
         amount (float): Amount of the budget.
         description (str | None): Description of the budget. Defaults to None.
-        advance (bool): Whether the budget is the required advance or not. 
+        advance (bool): Whether the budget is the required advance or not.
                         Defaults to False.
     """
 
@@ -356,6 +356,7 @@ class PrizesType(StrEnum):
     """
     Enum for kind of prizes given to the participants in an event
     """
+
     win_certificates = auto()
     participation_certificates = auto()
     cash_prizes = auto()

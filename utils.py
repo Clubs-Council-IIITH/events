@@ -21,7 +21,7 @@ fiscalyear.START_MONTH = FISCAL_START_MONTH
 
 def getMember(cid, uid, cookies=None):
     """
-    This function makes a query to the Members service resolved by the 
+    This function makes a query to the Members service resolved by the
     member method, fetches info about a member.
 
     Args:
@@ -64,7 +64,7 @@ def getMember(cid, uid, cookies=None):
 
 def getUser(uid, cookies=None):
     """
-    Function makes a query to the Users service resolved by the userProfile 
+    Function makes a query to the Users service resolved by the userProfile
     method, fetches info about a user.
 
     Args:
@@ -111,7 +111,7 @@ def getUser(uid, cookies=None):
 
 def getClubs(cookies=None):
     """
-    Function to call a query to the Clubs service resolved by the allClubs 
+    Function to call a query to the Clubs service resolved by the allClubs
     method, fetches info about all clubs.
 
     Args:
@@ -170,7 +170,7 @@ def getClubDetails(
     cookies,
 ) -> dict:
     """
-    This method makes a query to the clubs service resolved by the club 
+    This method makes a query to the clubs service resolved by the club
     method, used to get a club's name from its clubid.
 
     Args:
@@ -344,7 +344,7 @@ def eventsWithSorting(
     upcoming events first in ascending order of start time
     and then
     past events in descending order of end time
-    It also filters events based on name if name is provided and 
+    It also filters events based on name if name is provided and
     pagination is True.
 
     Args:
@@ -429,7 +429,7 @@ def eventsWithSorting(
 # method hides data from public viewers who view information of an event
 def trim_public_events(event: dict):
     """
-    Hides certain data fields from public viewers who view information of 
+    Hides certain data fields from public viewers who view information of
     an event.
 
     Args:

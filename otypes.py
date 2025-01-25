@@ -58,6 +58,7 @@ class EventReportType:
     """
     Type for returning the event's report.
     """
+
     pass
 
 
@@ -129,7 +130,7 @@ class InputEventDetails:
 
     Attributes:
         name (str): Name of the event.
-        location (List[Event_Location]): List of locations of the event. 
+        location (List[Event_Location]): List of locations of the event.
                                          Default is None.
         description (str): Description of the event. Default is None.
         clubid (str): clubID of the club organizing the event.
@@ -137,7 +138,7 @@ class InputEventDetails:
                                  Default is None.
         mode (Event_Mode): Mode of the event. Default is hybrid.
         poster (str): Poster of the event. Default is None.
-        datetimeperiod (List[datetime]): List of date and time of start and 
+        datetimeperiod (List[datetime]): List of date and time of start and
                                          end of the event.
         audience (List[Audience]): List of audience categories for the event.
                                    Default is None.
@@ -172,7 +173,7 @@ class InputEventDetails:
 @strawberry.input
 class InputEditEventDetails:
     """
-    Input similar to InputEventDetails but along with the event 
+    Input similar to InputEventDetails but along with the event
     id(self-generated) attribute.
     """
 
@@ -197,7 +198,7 @@ class InputEditEventDetails:
 @strawberry.input
 class InputDataReportDetails:
     """
-    Input used for taking info required to bring a list of events along 
+    Input used for taking info required to bring a list of events along
     with required fields.
     """
 
@@ -212,6 +213,7 @@ class InputEventReport:
     """
     Input for taking all the fields of the EventReport model.
     """
+
     pass
 
 
