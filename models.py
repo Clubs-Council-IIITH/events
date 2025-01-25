@@ -92,8 +92,9 @@ class Event(BaseModel):
         status (Event_Status): The approval and approver details.
         budget (List[BudgetInput]): The list of budgets for the event.
         budget_status (Bills_Status): The status of the budget.
-        event_report_submitted (bool): Whether the event report after completion
-                                       has been submitted. Defaults to False.
+        event_report_submitted (bool): Whether the event report after 
+                                       completion has been submitted. 
+                                       Defaults to False.
     """
 
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")

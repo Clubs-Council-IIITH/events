@@ -137,7 +137,7 @@ class Event_Status:
     Class used for an event's approval status and approver information
 
     Attributes:
-        state (Event_State_Status): State of the event. Default is `incomplete`.
+        state (Event_State_Status): State of the event. Default is `incomplete`
         room (bool): Whether or not room is approved.
         budget (bool): Whether or not budget is approved.
         submission_time (str | None): Time of submission. Defaults to None.
