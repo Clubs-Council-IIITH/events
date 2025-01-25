@@ -16,6 +16,19 @@ def triggerMail(
     ccRecipients=[],
     cookies=None,
 ) -> None:
+    """
+    Method triggers a mutation request, resolved by the sendMail resolver from
+    mailing.py from interfaces microservice, it triggers a email.
+
+    Args:
+        uid: The user id.
+        subject: The subject of the email.
+        body: The body of the email.
+        to: The list of to recipients.
+        cc: The list of cc recipients.
+        cookies: The cookies. Defaults to None.
+    """
+
     try:
         query = """
             mutation Mutation($mailInput: MailInput!, $interCommunicationSecret: String) {

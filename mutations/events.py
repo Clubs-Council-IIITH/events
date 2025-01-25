@@ -1,3 +1,16 @@
+"""
+Mutation Resolvers
+
+initially, the event is `incomplete`
+after the club fills all the details, they progress it
+cc chooses to progress the state status, the budget status and the room status
+if budget status is unapproved, the event is `pending_budget`, else skip to next
+after budget is approved (through any track),
+if room status is unapproved, the event is `pending_room`, else skip to next
+after room is approved (through any track), the event is `approved`
+once the event is over, the club or cc can change the state to `completed`
+"""
+
 import os
 from datetime import datetime, timedelta
 
@@ -53,8 +66,20 @@ noaccess_error = Exception(
 @strawberry.mutation
 def createEvent(details: InputEventDetails, info: Info) -> EventType:
     """
-    create event with given details if user has permission
-    return the event
+    Method to create an event by a club,CC.
+
+    Args:
+        details (InputEventDetails): The details of the event to be created.
+        info (Info): The context of the request for user info.
+
+    Returns:
+        EventType : returns all details regarding the event created.
+
+    Raises:
+        Exception: You do not have permission to access this resource.
+        Exception: Start time cannot be after end time.
+        Exception: Club does not exist.
+        Exception: Member details of POC does not exist.
     """
     user = info.context.user
 
@@ -138,7 +163,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     event_instance.status.last_updated_time = time_str
     event_instance.status.last_updated_by = user["uid"]
 
-    # set event code
+    # generates and sets the event's code
     event_instance.code = getEventCode(
         details.clubid, details.datetimeperiod[0]
     )
@@ -160,8 +185,26 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
 @strawberry.mutation
 def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     """
-    edit event with given details if user has permission
-    return the event
+    Method used to edit an event by a club,CC,SLO
+
+    It approves the event if the edit is being performed by the CC and set the approver to the user.
+    It also updates the last updated time and last updated by fields.
+    It does not remove previous approvals.
+
+    Args:
+        details (InputEditEventDetails): The details of the event to be edited.
+        info (Info): The context of the request for user info.
+    
+    Returns:
+        EventType: The edited event.
+    
+    Raises:
+        Exception: Not Authenticated!
+        Exception: Not Authenticated to access this API
+        Exception: Start datetime cannot be same/after end datetime.
+        Exception: Event does not exist.
+        Exception: Member Details for POC does not exist
+        Exception: You do not have permission to access this resource.
     """
     user = info.context.user
     allowed_roles = ["cc", "slo"]
@@ -293,16 +336,22 @@ def progressEvent(
 ) -> EventType:
     """
     progress the event state status for different users
-    returns the new event details
 
-    initially, the event is `incomplete`
-    after the club fills all the details, they progress it
-    cc chooses to progress the state status, the budget status and the room status
-    if budget status is unapproved, the event is `pending_budget`, else skip to next
-    after budget is approved (through any track),
-    if room status is unapproved, the event is `pending_room`, else skip to next
-    after room is approved (through any track), the event is `approved`
-    once the event is over, the club or cc can change the state to `completed`
+    Args:
+        eventid (str): event id
+        info (Info): info object
+        cc_progress_budget (bool | None, optional): progress budget. Defaults to None.
+        cc_progress_room (bool | None, optional): progress room. Defaults to None.
+        cc_approver (str | None, optional): cc approver. Defaults to None.
+        slc_members_for_email (list[str] | None, optional): list of SLC members for email. Defaults to None.
+        
+    Returns:
+        EventType: event object
+        
+    Raises:
+        Exception: Club does not exist.
+        Exception: CC Approver is required to progress event.
+        Exception: POC does not exist.
     """  # noqa: E501
 
     user = info.context.user
@@ -665,7 +714,18 @@ def progressEvent(
 @strawberry.mutation
 def deleteEvent(eventid: str, info: Info) -> EventType:
     """
-    change the state of the event to `deleted` if the user has permissions
+    change the state of an event to `deleted` by CC, SLO or club, also triggers emails to concerned parties
+
+    Args:
+        eventid (str): The ID of the event to be deleted.
+        info (Info): The context of the request for user info.
+
+    Returns:
+        EventType: The state set to deleted event.
+
+    Raises:
+        Exception: Not Authenticated!
+        Exception: Club does not exist.
     """
     user = info.context.user
 
@@ -788,7 +848,22 @@ def rejectEvent(
     reason: str,
     info: Info,
 ) -> EventType:
-    """Reject Event by CC and reset the state to incomplete"""
+    """
+    Reject Event by CC and reset the state to incomplete, triggers emails to club and cc.
+
+    Args:
+        eventid (str): The event id of the evnt that is being rejected.
+        reason (str): The reason for rejection.
+        info (Info): The context of the request for user info.
+
+    Returns:
+        EventType: The event that was rejected.
+
+    Raises:
+        Exception: Not Authenticated!
+        Exception: Club does not exist.
+        Exception: Cannot reset event that has progressed beyond CC.
+    """
     user = info.context.user
 
     if user is None or user["role"] != "cc":
@@ -840,6 +915,7 @@ def rejectEvent(
         deleted_by="Clubs Council",
     )
 
+    # Mail to the club regarding the rejected event
     triggerMail(
         user["uid"],
         mail_subject,
@@ -859,7 +935,19 @@ def updateEventsCid(
     inter_communication_secret: str | None = None,
 ) -> int:
     """
-    update all events of old_cid to new_cid
+    update all events of old_cid to new_cid by CC.
+
+    Args:
+        old_cid: old cid of the club
+        new_cid: new cid of the club
+        inter_communication_secret: secret for authentication. Default is None.
+
+    Returns:
+        int: number of events updated
+
+    Raises:
+        Exception: Not Authenticated!
+        Exception: Authentication Error! Invalid secret!
     """
     user = info.context.user
 

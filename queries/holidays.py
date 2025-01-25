@@ -1,3 +1,7 @@
+"""
+Query Resolvers for holidays
+"""
+
 from datetime import date
 from typing import List
 
@@ -13,8 +17,20 @@ def holidays(
     start_date: date | None = None, end_date: date | None = None
 ) -> List[HolidayType]:
     """
-    Get all holidays
-    returns all holidays
+    Get a list of holidays from a start date(if provided) to an end date
+    (if provided).
+
+    Args:
+        start_date (date, optional): The start date of the range. Defaults to
+                                     None.
+        end_date (date, optional): The end date of the range. 
+                                   Defaults to None.
+
+    Returns:
+        List[HolidayType]: A list of holidays.
+
+    Raises:
+        ValueError: Start date cannot be greater than end date.
     """
 
     query = {}
@@ -38,8 +54,13 @@ def holidays(
 @strawberry.field
 def holiday(id: str) -> HolidayType:
     """
-    Get a holiday by id
-    returns a holiday
+    This method searches for a holiday by its id and returns it.
+
+    Args:
+        id (str): The id of the holiday.
+
+    Returns:
+        HolidayType: The holiday's details.
     """
 
     holiday = holidaysdb.find_one({"_id": id})

@@ -1,7 +1,13 @@
+"""
+Contains templates for emails to be sent to CC, SLO, SLC and the club regarding the event's approval and its status to interested parties.
+"""
+
 from string import Template
 
 # Email Templates
 
+# email template requesting approval for an event to CC(Clubs Council), SLO(Student Life Office) and SLC(Student Life Committee).
+# common subject but 3 different bodies
 PROGRESS_EVENT_SUBJECT = Template(
     """
 [Events] Approval request for $event
@@ -92,6 +98,7 @@ Note: This automated email has been generated from the Clubs Council website. Fo
 """  # noqa: E501
 )
 
+# email template informing the deletion of the event from the club's side and informing the CC(Clubs Council).
 DELETE_EVENT_SUBJECT = Template(
     """
 [Events] $event_id: Deletion of $event
@@ -114,6 +121,8 @@ Note: This automated email has been generated from the Clubs Council website. Fo
 
 # Email Templates For Clubs
 
+# email template informing the club regarding the status of the events approval.
+# regarding processing, approval and rejection status of the event.even if the event was deleted by the CC.
 CLUB_EVENT_SUBJECT = Template(
     """
 [Events] $event_id: $event Request Receipt
@@ -187,6 +196,7 @@ Note: This automated email has been generated from the Clubs Council website. Fo
 """  # noqa: E501
 )
 
+# email template informing the club regarding the status of the event's budget by SLO.
 EVENT_BILL_STATUS_SUBJECT = Template(
     """
 Update on Bill Status for $event
@@ -213,6 +223,7 @@ Note: This automated email has been generated from the Clubs Council website. Fo
 """  # noqa: E501
 )
 
+# email template informing the club regarding the rejection of the event.
 REJECT_EVENT_SUBJECT = Template(
     """
 [Events] $event_id: $event Rejected

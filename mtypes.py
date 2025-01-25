@@ -15,9 +15,13 @@ from pydantic_core import core_schema
 from typing_extensions import Annotated, Any
 
 
-# Audience of Events
+# Audience for the Event
 @strawberry.enum
 class Audience(StrEnum):
+    """
+    Enum for catagory of audience
+    """
+
     ug1 = auto()
     ug2 = auto()
     ug3 = auto()
@@ -31,6 +35,10 @@ class Audience(StrEnum):
 # Event Bills States
 @strawberry.enum
 class Bills_State_Status(StrEnum):
+    """
+    Enum of status of an event's bills
+    """
+
     # initially, the bills are `not_submitted`
     not_submitted = auto()
     # after the club submits the bills, but they are incomplete,
@@ -45,6 +53,10 @@ class Bills_State_Status(StrEnum):
 
 # Event Bills State Full Names
 class Bills_Full_State_Status:
+    """
+    String representation of the states in Bills_State_Status
+    """
+
     not_submitted = "Not Submitted"
     incomplete = "Incomplete"
     submitted = "Submitted"
@@ -54,13 +66,25 @@ class Bills_Full_State_Status:
 # Event Bills Status
 @strawberry.type
 class Bills_Status:
-    state: Bills_State_Status = Bills_State_Status.not_submitted  # type: ignore
+    """
+    Class used for a bill's approval/rejection status along with its time and
+    comment on approval/rejection
+
+    Attributes:
+        state (Bills_State_Status): State of the bills. Initially, the bills
+        are `not_submitted`.
+        updated_time (str | None): Time of approval/rejection. Defaults 
+                                   to None.
+        slo_comment (str | None): Comment of SLO. Defaults to None.
+    """
+
+    state: Bills_State_Status = Bills_State_Status.not_submitted
     updated_time: str | None = None
     slo_comment: str | None = None
 
     def __init__(
         self,
-        state: Bills_State_Status = Bills_State_Status.not_submitted,  # type: ignore
+        state: Bills_State_Status = Bills_State_Status.not_submitted,
         updated_time: str | None = None,
         slo_comment: str | None = None,
     ):
@@ -72,6 +96,10 @@ class Bills_Status:
 # Event States
 @strawberry.enum
 class Event_State_Status(StrEnum):
+    """
+    Enum for state of an event's approval
+    """
+
     # initially, the event is `incomplete`
     incomplete = auto()
     # after the club fills all the details, they progress it
@@ -90,6 +118,10 @@ class Event_State_Status(StrEnum):
 
 # Event Full State Names
 class Event_Full_State_Status:
+    """
+    String representation of the states in Event_State_Status
+    """
+
     incomplete = "Incomplete"
     pending_cc = "Pending CC Approval"
     pending_budget = "Pending Budget Approval"
@@ -101,9 +133,32 @@ class Event_Full_State_Status:
 # Event Status
 @strawberry.type
 class Event_Status:
-    state: Event_State_Status = Event_State_Status.incomplete  # type: ignore
-    room: bool = False  # room: Event_Room_Status = Event_Room_Status.unapproved # noqa: E501
-    budget: bool = False  # budget: Event_Budget_Status = Event_Budget_Status.unapproved # noqa: E501
+    """
+    Class used for an event's approval status and approver information
+
+    Attributes:
+        state (Event_State_Status): State of the event. Default is `incomplete`.
+        room (bool): Whether or not room is approved.
+        budget (bool): Whether or not budget is approved.
+        submission_time (str | None): Time of submission. Defaults to None.
+        cc_approver (str | None): Approver of CC. Defaults to None.
+        cc_approver_time (str | None): Time of approval by CC. 
+                                       Defaults to None.
+        slo_approver (str | None): Approver of SLO. Defaults to None.
+        slo_approver_time (str | None): Time of approval by SLO. 
+                                        Defaults to None.
+        slc_approver (str | None): Approver of SLC. Defaults to None.
+        slc_approver_time (str | None): Time of approval by SLC. 
+                                        Defaults to None.
+        last_updated_by (str | None): Last updated by. Defaults to None.
+        last_updated_time (str | None): Time of last update. Defaults to None.
+        deleted_by (str | None): Deleted by. Defaults to None.
+        deleted_time (str | None): Time of deletion. Defaults to None.
+    """
+
+    state: Event_State_Status = Event_State_Status.incomplete
+    room: bool = False
+    budget: bool = False
 
     submission_time: str | None = None
 
@@ -164,6 +219,10 @@ class Event_Status:
 # Event Modes
 @strawberry.enum
 class Event_Mode(StrEnum):
+    """
+    Enum for mode of Event
+    """
+
     hybrid = auto()
     online = auto()
     offline = auto()
@@ -171,6 +230,10 @@ class Event_Mode(StrEnum):
 
 # Event Full Location Names
 class Event_Full_Location:
+    """
+    String representation of the locations in Event_Location
+    """
+
     h101 = "Himalaya 101"
     h102 = "Himalaya 102"
     h103 = "Himalaya 103"
@@ -207,6 +270,10 @@ class Event_Full_Location:
 # Event Locations
 @strawberry.enum
 class Event_Location(StrEnum):
+    """
+    Enum for locations for the Event
+    """
+
     # Himalaya
     h101 = auto()
     h102 = auto()
@@ -259,14 +326,26 @@ long_str_type = Annotated[str, StringConstraints(max_length=10000)]
 
 @strawberry.type
 class BudgetType:
+    """
+    Class for info regarding a submitted budget
+
+    Attributes:
+        amount (float): Amount of the budget.
+        description (str | None): Description of the budget. Defaults to None.
+        advance (bool): Whether the budget is the required advance or not. 
+                        Defaults to False.
+    """
+
     amount: float
     description: str | None = None
     advance: bool = False
 
-    # Validators
     @field_validator("amount")
     @classmethod
     def positive_amount(cls, value):
+        """
+        A field validator for the amount field.
+        """
         if value <= 0:
             raise ValueError("Amount must be positive")
         return value
@@ -274,6 +353,9 @@ class BudgetType:
 
 @strawberry.enum
 class PrizesType(StrEnum):
+    """
+    Enum for kind of prizes given to the participants in an event
+    """
     win_certificates = auto()
     participation_certificates = auto()
     cash_prizes = auto()
@@ -284,6 +366,10 @@ class PrizesType(StrEnum):
 
 # for handling mongo ObjectIds
 class PyObjectId(ObjectId):
+    """
+    Class for handling MongoDB document ObjectIds for 'id' fields in Models.
+    """
+
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type: Any, handler):
         return core_schema.union_schema(
@@ -306,6 +392,7 @@ class PyObjectId(ObjectId):
         field_schema.update(type="string")
 
 
+# for storing a vaildating url's
 http_url_adapter = TypeAdapter(HttpUrl)
 HttpUrlString = Annotated[
     str,
@@ -313,5 +400,5 @@ HttpUrlString = Annotated[
         lambda value: str(http_url_adapter.validate_python(value))
     ),
 ]
-
+# takes the time from IST timezone
 timezone = pytz.timezone("Asia/Kolkata")

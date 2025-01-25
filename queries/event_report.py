@@ -8,8 +8,20 @@ from otypes import EventReportType, Info
 @strawberry.field
 def eventReport(eventid: str, info: Info) -> EventReportType:
     """
-    Get the event report of an event
-    returns the event report
+    Get the event report of an event for cc,slo and club
+    
+    Args:
+        eventid (str): The id of the event
+        info (Info): The user details
+        
+    Returns:
+        EventReportType: The event report of the event
+
+    Raises:
+        ValueError: User not authenticated
+        ValueError: User not authorized
+        ValueError: Event not found
+        ValueError: Event report not found
     """
 
     user = info.context.user

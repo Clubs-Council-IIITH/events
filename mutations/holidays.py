@@ -1,3 +1,7 @@
+"""
+Mutation Resolvers for Holidays
+"""
+
 import strawberry
 from fastapi.encoders import jsonable_encoder
 
@@ -9,10 +13,18 @@ from otypes import HolidayType, Info, InputHolidayDetails
 @strawberry.mutation
 def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
     """
-    Create a new holiday
-    returns the created holiday
+    Creates a new holiday, for SLO and CC
+    
+    Args:
+        details (InputHolidayDetails): The details of the holiday to be created.
+        info (Info): The context of the request for user info.
 
-    Allowed Roles: ["slo", "cc"]
+    Returns:
+        HolidayType: The created holiday.
+
+    Raises:
+        Exception: You do not have permission to access this resource.
+        Exception: A holiday already exists on this day.
     """
     user = info.context.user
 
@@ -40,10 +52,20 @@ def editHoliday(
     id: str, details: InputHolidayDetails, info: Info
 ) -> HolidayType:
     """
-    Edit an existing holiday
-    returns the edited holiday
+    Edit an existing holiday, for SLO and CC
 
-    Allowed Roles: ["slo", "cc"]
+    Args:
+        id (str): The id of the holiday to be edited.
+        details (InputHolidayDetails): The details to which the holiday is to be updated.
+        info (Info): The context of the request for user info.
+
+    Returns:
+        HolidayType: The edited holiday.
+
+    Raises:
+        Exception: You do not have permission to access this resource.
+        Exception: Holiday not found.
+        Exception: A holiday already exists on this day.
     """
     user = info.context.user
 
@@ -69,10 +91,18 @@ def editHoliday(
 @strawberry.mutation
 def deleteHoliday(id: str, info: Info) -> bool:
     """
-    Delete an existing holiday
-    returns a boolean indicating success
+    Delete an existing holiday, for SLO and CC
+    
+    Args:
+        id (str): The id of the holiday to be deleted.
+        info (Info): The context of the request for user info.
 
-    Allowed Roles: ["slo"]
+    Returns:
+        bool: True if the holiday was deleted successfully, False otherwise.
+
+    Raises:
+        Exception: You do not have permission to access this resource.
+        Exception: Holiday not found.
     """
     user = info.context.user
 
