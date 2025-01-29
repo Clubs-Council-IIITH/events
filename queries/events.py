@@ -48,7 +48,7 @@ def event(eventid: str, info: Info) -> EventType:
         
     Raises:
         Exception: Can not access event. Either it does not exist or you do
-        not have permission to access it.
+                   not have permission to access it.
         
     """
     user = info.context.user

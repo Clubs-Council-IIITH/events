@@ -19,18 +19,18 @@ FISCAL_START_MONTH = 4
 fiscalyear.START_MONTH = FISCAL_START_MONTH
 
 
-def getMember(cid, uid, cookies=None):
+def getMember(cid, uid, cookies=None) -> dict | None:
     """
     This function makes a query to the Members service resolved by the
     member method, fetches info about a member.
 
     Args:
-        cid: club id
-        uid: user id
-        cookies: cookies. Defaults to None.
+        cid (str): club id
+        uid (str): user id
+        cookies (dict): cookies. Defaults to None.
 
     Returns:
-        response of the request
+        dict|None: response of the request
     """
 
     try:
@@ -62,17 +62,17 @@ def getMember(cid, uid, cookies=None):
         return None
 
 
-def getUser(uid, cookies=None):
+def getUser(uid, cookies=None) -> dict | None:
     """
     Function makes a query to the Users service resolved by the userProfile
     method, fetches info about a user.
 
     Args:
-        uid: user id
-        cookies: cookies. Defaults to None.
+        uid (str): user id
+        cookies (dict): cookies. Defaults to None.
 
     Returns:
-        response of the request
+        dict: response of the request
     """
 
     try:
@@ -109,16 +109,16 @@ def getUser(uid, cookies=None):
         return None
 
 
-def getClubs(cookies=None):
+def getClubs(cookies=None) -> dict:
     """
     Function to call a query to the Clubs service resolved by the allClubs
     method, fetches info about all clubs.
 
     Args:
-        cookies: cookies. Defaults to None.
+        cookies (dict): cookies. Defaults to None.
 
     Returns:
-        responce of the request
+        dict: responce of the request
     """
 
     try:
@@ -153,7 +153,7 @@ def getClubCode(clubid: str) -> str | None:
     Fetches the code of the club whose club id is given.
 
     Args:
-        clubid: club id
+        clubid (str): club id
 
     Returns:
         str|None: club code or None if club not found
@@ -174,11 +174,11 @@ def getClubDetails(
     method, used to get a club's name from its clubid.
 
     Args:
-        clubid: club id
-        cookies: cookies
+        clubid (str): club id
+        cookies (dict): cookies
 
     Returns:
-        response of the request
+        dict: response of the request
     """
 
     try:
@@ -208,8 +208,8 @@ def getEventCode(clubid, starttime) -> str:
     generate event code based on starttime and organizing club
 
     Args:
-        clubid: club id
-        starttime: start time of the event
+        clubid (str): club id
+        starttime (datetime): start time of the event
 
     Returns:
         str: event code
@@ -260,7 +260,7 @@ def getEventLink(code) -> str:
     Produces a link to the event page based on the event code.
 
     Args:
-        code: event code
+        code (str): event code
 
     Returns:
         str: link to the event page
@@ -333,7 +333,7 @@ def eventsWithSorting(
     pagination=False,
     skip=0,
     limit: int | None = None,
-):
+) -> List[dict]:
     """
     Provides a list of events based on the searchspace provided.
 
@@ -348,12 +348,13 @@ def eventsWithSorting(
     pagination is True.
 
     Args:
-        searchspace: search space for events
-        name: name of the event. Defaults to None.
-        date_filter: if True, filters events based on date. Defaults to False.
-        pagination: if True, paginates the events. Defaults to False.
-        skip: number of events to skip
-        limit: number of events to return. Defaults to None.
+        searchspace (dict): search space for events
+        name (str): name of the event. Defaults to None.
+        date_filter (bool): if True, filters events based on date.
+                            Defaults to False.
+        pagination (bool): if True, paginates the events. Defaults to False.
+        skip (int): number of events to skip
+        limit (int): number of events to return. Defaults to None.
 
     Returns:
         List[dict]: list of events
@@ -427,13 +428,13 @@ def eventsWithSorting(
 
 
 # method hides data from public viewers who view information of an event
-def trim_public_events(event: dict):
+def trim_public_events(event: dict) -> dict:
     """
     Hides certain data fields from public viewers who view information of
     an event.
 
     Args:
-        event: event to be trimmed of sensitive data
+        event (dict): event to be trimmed of sensitive data
 
     Returns:
         dict: trimmed event
@@ -461,12 +462,12 @@ def trim_public_events(event: dict):
 
 
 # method used to convert text to html
-def convert_to_html(text):
+def convert_to_html(text) -> str:
     """
     Method used to convert text to html.
 
     Args:
-        text: text to be converted to html.
+        text (str): text to be converted to html.
 
     Returns:
         str: text in the form of html.
@@ -488,15 +489,15 @@ def convert_to_html(text):
 
 
 # method used to delete a file from the file server
-def delete_file(filename):
+def delete_file(filename) -> str:
     """
     Method used to delete a file from the file service.
 
     Args:
-        filename: name of the file to be deleted.
+        filename (str): name of the file to be deleted.
 
     Returns:
-        response from the file service.
+        str: response from the file service.
     """
     response = requests.post(
         "http://files/delete-file",

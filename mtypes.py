@@ -72,7 +72,7 @@ class Bills_Status:
 
     Attributes:
         state (Bills_State_Status): State of the bills. Initially, the bills
-        are `not_submitted`.
+                                    are `not_submitted`.
         updated_time (str | None): Time of approval/rejection. Defaults
                                    to None.
         slo_comment (str | None): Comment of SLO. Defaults to None.

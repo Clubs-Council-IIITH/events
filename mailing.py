@@ -21,12 +21,12 @@ def triggerMail(
     mailing.py from interfaces microservice, it triggers a email.
 
     Args:
-        uid: The user id.
-        subject: The subject of the email.
-        body: The body of the email.
-        to: The list of to recipients.
-        cc: The list of cc recipients.
-        cookies: The cookies. Defaults to None.
+        uid (str): The user id.
+        subject (str): The subject of the email.
+        body (str): The body of the email.
+        toRecipients (List[str]): The list of to recipients.
+        ccRecipients (List[str]): The list of cc recipients.
+        cookies (dict): The cookies. Defaults to None.
     """
 
     try:
