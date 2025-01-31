@@ -19,10 +19,20 @@ FISCAL_START_MONTH = 4
 fiscalyear.START_MONTH = FISCAL_START_MONTH
 
 
-def getMember(cid, uid, cookies=None):
+def getMember(cid, uid, cookies=None) -> dict | None:
     """
-    Function to call the member query
+    This function makes a query to the Members service resolved by the
+    member method, fetches info about a member.
+
+    Args:
+        cid (str): club id
+        uid (str): user id
+        cookies (dict): cookies. Defaults to None.
+
+    Returns:
+        dict|None: response of the request
     """
+
     try:
         query = """
             query Member($memberInput: SimpleMemberInput!) {
@@ -52,10 +62,19 @@ def getMember(cid, uid, cookies=None):
         return None
 
 
-def getUser(uid, cookies=None):
+def getUser(uid, cookies=None) -> dict | None:
     """
-    Function to get a particular user details
+    Function makes a query to the Users service resolved by the userProfile
+    method, fetches info about a user.
+
+    Args:
+        uid (str): user id
+        cookies (dict): cookies. Defaults to None.
+
+    Returns:
+        dict: response of the request
     """
+
     try:
         query = """
             query GetUserProfile($userInput: UserInput!) {
@@ -90,10 +109,18 @@ def getUser(uid, cookies=None):
         return None
 
 
-def getClubs(cookies=None):
+def getClubs(cookies=None) -> dict:
     """
-    Function to call the all clubs query
+    Function to call a query to the Clubs service resolved by the allClubs
+    method, fetches info about all clubs.
+
+    Args:
+        cookies (dict): cookies. Defaults to None.
+
+    Returns:
+        dict: responce of the request
     """
+
     try:
         query = """
                     query AllClubs {
@@ -120,8 +147,17 @@ def getClubs(cookies=None):
         return []
 
 
-# get club code from club id
+# method gets club code from club id
 def getClubCode(clubid: str) -> str | None:
+    """
+    Fetches the code of the club whose club id is given.
+
+    Args:
+        clubid (str): club id
+
+    Returns:
+        str|None: club code or None if club not found
+    """
     allclubs = getClubs()
     for club in allclubs:
         if club["cid"] == clubid:
@@ -129,11 +165,22 @@ def getClubCode(clubid: str) -> str | None:
     return None
 
 
-# get club name from club id
 def getClubDetails(
     clubid: str,
     cookies,
 ) -> dict:
+    """
+    This method makes a query to the clubs service resolved by the club
+    method, used to get a club's name from its clubid.
+
+    Args:
+        clubid (str): club id
+        cookies (dict): cookies
+
+    Returns:
+        dict: response of the request
+    """
+
     try:
         query = """
                     query Club($clubInput: SimpleClubInput!) {
@@ -156,8 +203,21 @@ def getClubDetails(
         return {}
 
 
-# generate event code based on time and club
 def getEventCode(clubid, starttime) -> str:
+    """
+    generate event code based on starttime and organizing club
+
+    Args:
+        clubid (str): club id
+        starttime (datetime): start time of the event
+
+    Returns:
+        str: event code
+
+    Raises:
+        ValueError: Invalid clubid
+    """
+
     club_code = getClubCode(clubid)
     if club_code is None:
         raise ValueError("Invalid clubid")
@@ -193,14 +253,34 @@ def getEventCode(clubid, starttime) -> str:
     return f"{club_code}{code_year}{event_count:03d}"  # format: CODE20XX00Y
 
 
-# get link to event (based on code)
+# method produces link to event (based on code as input)
+# It returns a link to the event page
 def getEventLink(code) -> str:
+    """
+    Produces a link to the event page based on the event code.
+
+    Args:
+        code (str): event code
+
+    Returns:
+        str: link to the event page
+    """
     host = os.environ.get("HOST", "http://localhost")
     return f"{host}/manage/events/code/{code}"
 
 
 # get email IDs of all members belonging to a role
 def getRoleEmails(role: str) -> List[str]:
+    """
+    Brings all the emails of members belonging to a role
+
+    Args:
+        role: role of the user to be searched
+
+    Returns:
+        List[str]: list of emails.
+    """
+
     try:
         query = """
             query Query($role: String!, $interCommunicationSecret: String) {
@@ -253,8 +333,10 @@ def eventsWithSorting(
     pagination=False,
     skip=0,
     limit: int | None = None,
-):
+) -> List[dict]:
     """
+    Provides a list of events based on the searchspace provided.
+
     Custom sorting of events based on
     datetimeperiod with
     ongoing events first in ascending order of end time
@@ -262,6 +344,20 @@ def eventsWithSorting(
     upcoming events first in ascending order of start time
     and then
     past events in descending order of end time
+    It also filters events based on name if name is provided and
+    pagination is True.
+
+    Args:
+        searchspace (dict): search space for events
+        name (str): name of the event. Defaults to None.
+        date_filter (bool): if True, filters events based on date.
+                            Defaults to False.
+        pagination (bool): if True, paginates the events. Defaults to False.
+        skip (int): number of events to skip
+        limit (int): number of events to return. Defaults to None.
+
+    Returns:
+        List[dict]: list of events
     """
     utc = pytz.timezone("UTC")
     current_datetime = datetime.now(utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
@@ -331,7 +427,18 @@ def eventsWithSorting(
     return events
 
 
-def trim_public_events(event: dict):
+# method hides data from public viewers who view information of an event
+def trim_public_events(event: dict) -> dict:
+    """
+    Hides certain data fields from public viewers who view information of
+    an event.
+
+    Args:
+        event (dict): event to be trimmed of sensitive data
+
+    Returns:
+        dict: trimmed event
+    """
     delete_keys = [
         "equipment",
         "additional",
@@ -354,7 +461,17 @@ def trim_public_events(event: dict):
     return event
 
 
-def convert_to_html(text):
+# method used to convert text to html
+def convert_to_html(text) -> str:
+    """
+    Method used to convert text to html.
+
+    Args:
+        text (str): text to be converted to html.
+
+    Returns:
+        str: text in the form of html.
+    """
     # Escape HTML special characters
     text = html.escape(text)
 
@@ -371,7 +488,17 @@ def convert_to_html(text):
     return f"<pre>{text}</pre>"
 
 
-def delete_file(filename):
+# method used to delete a file from the file server
+def delete_file(filename) -> str:
+    """
+    Method used to delete a file from the file service.
+
+    Args:
+        filename (str): name of the file to be deleted.
+
+    Returns:
+        str: response from the file service.
+    """
     response = requests.post(
         "http://files/delete-file",
         params={

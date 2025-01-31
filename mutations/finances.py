@@ -1,3 +1,7 @@
+"""
+Mutation Resolvers for the finances of an event
+"""
+
 from datetime import datetime
 
 import strawberry
@@ -21,10 +25,20 @@ from utils import getClubDetails, getEventLink, getRoleEmails
 @strawberry.mutation
 def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
     """
-    Update the bills status of an event
-    returns the updated bills status
+    Updates the bills status of an event for SLO along with triggering an email to the organizing club.
 
-    Allowed Roles: ["slo"]
+    Args:
+        details (InputBillsStatus): The details of the bills status to be updated.
+        info (Info): The info object containing the user information.
+
+    Returns:
+        Bills_Status: The updated bills status of the event.
+
+    Raises:
+        ValueError: You do not have permission to access this resource.
+        ValueError: Event not found.
+        ValueError: Club email not found.
+        ValueError: Event bill status not updated.
     """
 
     user = info.context.user
@@ -88,7 +102,7 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
         comment=details.slo_comment,
         eventlink=getEventLink(event["code"]),
     )
-
+    # email to club regarding the updation in the bills status
     triggerMail(
         mail_uid,
         mail_subject,

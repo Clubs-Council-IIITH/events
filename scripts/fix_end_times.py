@@ -1,5 +1,5 @@
 """
-script to fix the recent end timing being messed up for events older than 1 Feb
+script to fix the recent end timing being messed up for events older than 1 Feb 
 to run:
     docker exec -it services-events-1 /bin/bash
     export PYTHONPATH=`pwd`; python3 scripts/fix_end_times.py
