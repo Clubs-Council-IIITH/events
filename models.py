@@ -13,6 +13,7 @@ from mtypes import (
     Audience,
     Bills_Status,
     BudgetType,
+    ClubBodyCategoryType,
     Event_Location,
     Event_Mode,
     Event_Status,
@@ -70,8 +71,8 @@ class Event(BaseModel):
         code (str): The code of the event. Defaults to None.
         clubid (str): The Club ID of the club hosting the event.
         collabclubs (List[str]): The Club IDs of the collaborating clubs.
-        studentBodyEvent (bool): Whether the event is a student body event.
-                                 Defaults to False.
+        club_category (ClubBodyCategoryType): Category of the club for
+                       which the event is. Defaults to a club.
         name (very_short_str_type): The name of the event.
         description (medium_str_type): A description of the event.
                                        Defaults to `No description available.`.
@@ -101,7 +102,7 @@ class Event(BaseModel):
     code: str | None = None
     clubid: str
     collabclubs: List[str] = []
-    studentBodyEvent: bool = False
+    club_category: ClubBodyCategoryType = ClubBodyCategoryType.club
 
     name: very_short_str_type
 
@@ -132,7 +133,7 @@ class Event(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
-        extra="forbid",
+        # extra="forbid",
         str_strip_whitespace=True,
     )
 

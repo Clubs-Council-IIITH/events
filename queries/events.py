@@ -373,7 +373,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
             requested_states |= {Event_State_Status.pending_room.value}
             searchspace["$or"] = [
                 {"status.budget": True},
-                {"studentBodyEvent": True},
+                {"club_category": "body"},
             ]
         if "club" == user["role"] and user["uid"] == clubid:
             requested_states |= {

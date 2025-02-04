@@ -350,6 +350,11 @@ class BudgetType:
             raise ValueError("Amount must be positive")
         return value
 
+@strawberry.enum
+class ClubBodyCategoryType(StrEnum):
+    club = auto()
+    body = auto()
+    admin = auto()
 
 @strawberry.enum
 class PrizesType(StrEnum):
