@@ -96,7 +96,7 @@ def event(eventid: str, info: Info) -> EventType:
             user["role"] == "club"
             and user["uid"] != event["clubid"]
             and (
-                event["collabclubs"] is None
+                event.get("collabclubs", None) is None
                 or user["uid"] not in event["collabclubs"]
             )
         )
