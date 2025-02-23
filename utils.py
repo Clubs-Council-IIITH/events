@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List
 
 import fiscalyear
-import pytz
+from mtypes import timezone
 import requests
 
 from db import eventsdb
@@ -359,8 +359,7 @@ def eventsWithSorting(
     Returns:
         List[dict]: list of events
     """
-    utc = pytz.timezone("UTC")
-    current_datetime = datetime.now(utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    current_datetime = datetime.now(timezone).strftime("%Y-%m-%dT%H:%M:%S+00:00")
     if date_filter:
         required_events_query = {
             **searchspace,
