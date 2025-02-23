@@ -255,3 +255,89 @@ Clubs Council.
 Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
 """  # noqa: E501
 )
+
+
+# email template for reminding clubs to submit event reports or budget updates
+EVENT_REPORT_REMINDER_SUBJECT = Template(
+    """
+[Events] $event_id: Reminder to Submit Report for $event
+"""
+)
+
+EVENT_REPORT_REMINDER_BODY = Template(
+    """
+Dear $club,
+
+This is a reminder to submit the event report or budget update for your event, $event.
+
+Please ensure that the report is submitted by the specified deadline. Failure to submit the report on time may result in delays in processing future event requests or budget approvals.
+
+To submit the report or update the budget details, visit the link below:
+$eventlink
+
+Should you have any queries or require assistance at any stage of the process, please do not hesitate to reach out to us. We are here to ensure a smooth and efficient coordination of your event.
+
+Best regards,
+Clubs Council.
+
+
+Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+"""  # noqa: E501
+)
+
+
+# email template for reminding clubs about pending bills or payment updates
+EVENT_BILL_REMINDER_SUBJECT = Template(
+    """
+[Events] $event_id: Reminder to Submit Bill Details for $event
+"""
+)
+
+EVENT_BILL_REMINDER_BODY = Template(
+    """
+Dear $club,
+
+This is a reminder to submit the bill details or payment updates for your event, $event.
+
+Please ensure that the bill details are submitted by the specified deadline. Failure to submit the bill details on time may result in delays in processing reimbursements or future event approvals.
+
+Your event had a budget of $total_budget INR. All bills must be submitted for processing reimbursements.
+
+To submit the bill details or update payment information, visit the link below:
+$eventlink
+
+Should you have any queries or require assistance at any stage of the process, please do not hesitate to reach out to us. We are here to ensure a smooth and efficient coordination of your event.
+
+Best regards,
+Clubs Council.
+
+
+Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+"""  # noqa: E501
+)
+
+REMIND_SLO_APPROVAL_SUBJECT = Template(
+    """
+[Reminder] Pending Approval for Event: $event
+"""
+)
+
+REMIND_SLO_APPROVAL_BODY = Template(
+    """
+Dear SLO,
+
+This is a reminder to review and approve the event "$event" submitted by $club.
+
+Event ID: $event_id  
+Date & Time: $start_time to $end_time  
+Location: $location  
+
+Please approve or reject the event at the following link:  
+$eventlink  
+
+Best regards,  
+Clubs Council  
+
+(Note: This is an automated reminder from the Clubs Council system.)
+"""  # noqa: E501
+)

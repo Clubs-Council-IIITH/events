@@ -23,6 +23,7 @@ from strawberry.tools import create_type
 # import queries, mutations, PyObjectId and Context scalars
 from mtypes import PyObjectId
 from mutations import mutations
+from mutations.reminders import init_event_reminder_system
 from otypes import Context, PyObjectIdType
 from queries import queries
 
@@ -51,6 +52,9 @@ DEBUG = getenv("GLOBAL_DEBUG", "False").lower() in ("true", "1", "t")
 
 # serve API with FastAPI router
 gql_app = GraphQLRouter(schema, graphiql=True, context_getter=get_context)
+
+# initialize the reminder
+init_event_reminder_system()
 app = FastAPI(
     debug=DEBUG,
     title="CC Events Microservice",
