@@ -1,7 +1,3 @@
-#import logging
-#logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-#logger = logging.getLogger(__name__)
-
 import os
 
 import requests
@@ -51,11 +47,7 @@ def triggerMail(
             "interCommunicationSecret": inter_communication_secret,
         }
 
-        #logger.info(f"mailbody: {body}")
-        # logging.info(requests.post(
-        #     "http://gateway/graphql",
-        #     json={"query": query, "variables": variables},
-        # ).text)
+        # print("mailbody:", body)
 
         if cookies:
             requests.post(
