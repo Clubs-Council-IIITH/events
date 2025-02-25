@@ -12,9 +12,9 @@ def triggerMail(
     uid,
     subject,
     body,
+    cookies,
     toRecipients,
     ccRecipients=[],
-    cookies,
 ) -> None:
     """
     Method triggers a mutation request, resolved by the sendMail resolver from
@@ -56,7 +56,9 @@ def triggerMail(
                 cookies=cookies,
             )
         else:
-            raise Exception("Couldn't find cookie, cannot send email without cookies!")
+            raise Exception(
+                "Couldn't find cookie, cannot send email without cookies!"
+            )
 
     except Exception:
         return None
