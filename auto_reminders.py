@@ -22,10 +22,10 @@ def check_for_bill_status():
     # find events ended in past 4 days, that have bill status not submitted and event
     # is complete
     current_time = datetime.now(timezone)
-    four_days_ago = current_time - timedelta(days=7)
+    week_ago = current_time - timedelta(days=7)
 
     pending_bills = list(eventsdb.find({
-        "datetimeperiod.1": {"$gte": four_days_ago.isoformat(), "$lte": current_time.isoformat()},
+        "datetimeperiod.1": {"$gte": week_ago.isoformat(), "$lte": current_time.isoformat()},
         "status.state": Event_State_Status.approved.value,
         "budget": {"$exists": True, "$ne": []},
         "bills_status.state": Bills_State_Status.not_submitted.value,
