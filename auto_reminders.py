@@ -22,7 +22,7 @@ def check_for_bill_status():
     # find events ended in past 4 days, that have bill status not submitted and event
     # is complete
     current_time = datetime.now(timezone)
-    four_days_ago = current_time - timedelta(days=4)
+    four_days_ago = current_time - timedelta(days=7)
 
     pending_bills = list(eventsdb.find({
         "datetimeperiod.1": {"$gte": four_days_ago.isoformat(), "$lte": current_time.isoformat()},
@@ -156,5 +156,5 @@ def init_event_reminder_system():
     threading.Thread(target=start_scheduler_instance, args=(ended_scheduler,), daemon=True).start()
 
     bill_scheduler = Scheduler()
-    bill_scheduler.every(4).days.at("00:00").do(check_for_bill_status)
+    bill_scheduler.every().sunday.at("12:00").do(check_for_bill_status)
     threading.Thread(target=start_scheduler_instance, args=(bill_scheduler,), daemon=True).start()
