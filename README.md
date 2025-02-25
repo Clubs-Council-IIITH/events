@@ -1,17 +1,32 @@
-# _EVENTS_ MICRO-SERVICE
+# Events Microservice
 
-This is a microservice using FastAPI + Strawberry + MongoDB.  
-Contains code for queries, mutations, types and models for the events data and services specifically.
+This microservice is built using **FastAPI**, **Strawberry (GraphQL)**, and **MongoDB**. It serves as a subgraph handling **event-related data and operations**, providing queries and mutations to manage events, reminders, finances, and reports.
 
-## How to use
-1. Go to [https://github.com/Clubs-Council-IIITH/services](https://github.com/Clubs-Council-IIITH/services)
-2. Follow the steps given in the README.md file at that page.
+## Features
 
----
+- **GraphQL API**: Implements queries and mutations for event management.
+- **Event Operations**: Supports creating, updating, and retrieving events.
+- **Reminders & Notifications**: Handles automated reminders via emails.
+- **Financial Management**: Tracks and manages event-related finances.
+- **Reports & Holidays**: Supports event reports and holiday scheduling.
+- **Database Integration**: Uses MongoDB for storage.
 
-## FOR DEVELOPERS
-_URL_ -> http://events/graphql (For using in single gateway)
+## Usage
 
-> ### QUERIES
+This is a microservice and the full docker setup can be found in the [`services`](https://github.com/Clubs-Council-IIITH/services) repo. To use it
+please visit `setup` repo
 
-> ### MUTATIONS
+1. Go to [Clubs-Council-IIITH Services Repository](https://github.com/Clubs-Council-IIITH/setup).
+2. Follow the setup instructions provided there.
+
+## Developer Info
+
+- **GraphQL Endpoint**: `http://events/graphql` (Accessible via the gateway)
+
+### Available GraphQL Operations:
+
+#### Queries
+- Retrieve event details, finances, reports, and holidays.
+
+#### Mutations
+- Create, update, and manage events, reminders, finances, and reports.
