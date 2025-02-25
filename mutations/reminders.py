@@ -4,11 +4,6 @@ import time
 import threading
 from datetime import datetime, timedelta
 
-# import logging
-
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger(__name__)
-
 from mailing import triggerMail
 from mailing_templates import EVENT_REPORT_REMINDER_SUBJECT, EVENT_REPORT_REMINDER_BODY, EVENT_BILL_REMINDER_SUBJECT, \
     EVENT_BILL_REMINDER_BODY, REMIND_SLO_APPROVAL_SUBJECT, REMIND_SLO_APPROVAL_BODY
@@ -97,8 +92,6 @@ def check_for_bill_status():
         "bills_status.state": Bills_State_Status.not_submitted.value,
     }))
 
-    # logger.info(f"time: {datetime.now(timezone)} Length of pending_bills {len(pending_bills)}")
-
     for event in pending_bills:
         pass
         event_instance = Event.model_validate(event)
@@ -167,8 +160,6 @@ def check_for_ended_events():
         "status.state": Event_State_Status.approved.value,
         "event_report_submitted": {"$ne": True},
     }))
-
-    # logger.info(f"time: {datetime.now(timezone)} Length of ended_events {len(ended_events)}")
 
     for event in ended_events:
         event_instance = Event.model_validate(event)
