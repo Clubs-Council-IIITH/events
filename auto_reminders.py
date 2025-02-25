@@ -185,13 +185,17 @@ def init_event_reminder_system():
     Returns: None
     """  # noqa: E501
     ended_scheduler = Scheduler()
-    ended_scheduler.every().day.at("00:00").do(check_for_ended_events)
+    ended_scheduler.every().day.at("00:00", timezone).do(
+        check_for_ended_events
+    )
     threading.Thread(
         target=start_scheduler_instance, args=(ended_scheduler,), daemon=True
     ).start()
 
     bill_scheduler = Scheduler()
-    bill_scheduler.every().sunday.at("12:00").do(check_for_bill_status)
+    bill_scheduler.every().sunday.at("12:00", timezone).do(
+        check_for_bill_status
+    )
     threading.Thread(
         target=start_scheduler_instance, args=(bill_scheduler,), daemon=True
     ).start()
