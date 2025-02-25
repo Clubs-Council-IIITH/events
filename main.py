@@ -23,7 +23,7 @@ from strawberry.tools import create_type
 # import queries, mutations, PyObjectId and Context scalars
 from mtypes import PyObjectId
 from mutations import mutations
-from mutations.reminders import init_event_reminder_system
+from auto_reminders import init_event_reminder_system
 from otypes import Context, PyObjectIdType
 from queries import queries
 
