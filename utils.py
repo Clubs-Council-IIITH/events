@@ -5,10 +5,10 @@ from datetime import datetime
 from typing import List
 
 import fiscalyear
-from mtypes import timezone
 import requests
 
 from db import eventsdb
+from mtypes import timezone
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 

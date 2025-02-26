@@ -20,10 +20,11 @@ from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
 from strawberry.tools import create_type
 
+from auto_reminders import init_event_reminder_system
+
 # import queries, mutations, PyObjectId and Context scalars
 from mtypes import PyObjectId
 from mutations import mutations
-from auto_reminders import init_event_reminder_system
 from otypes import Context, PyObjectIdType
 from queries import queries
 
