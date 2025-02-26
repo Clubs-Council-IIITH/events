@@ -1,15 +1,18 @@
 import strawberry
 
-from mailing import triggerMail
-from mailing_templates import  REMIND_SLO_APPROVAL_SUBJECT, REMIND_SLO_APPROVAL_BODY
-from models import Event
 from db import eventsdb
+from mailing import triggerMail
+from mailing_templates import (
+    REMIND_SLO_APPROVAL_BODY,
+    REMIND_SLO_APPROVAL_SUBJECT,
+)
+from models import Event
 from otypes import Info
 from utils import getEventLink, getRoleEmails
 
 
 @strawberry.mutation
-def remindSLO(eventid: str, info: Info) -> bool:
+def remindSLO(info: Info, eventid: str) -> bool:
     """
     Sends a reminder email to the SLO to approve the event.
 
@@ -40,14 +43,18 @@ def remindSLO(eventid: str, info: Info) -> bool:
 
     # format email using the new concise template
     mail_uid = user["uid"]
-    mail_subject = REMIND_SLO_APPROVAL_SUBJECT.safe_substitute(event=event_instance.name)
+    mail_subject = REMIND_SLO_APPROVAL_SUBJECT.safe_substitute(
+        event=event_instance.name
+    )
     mail_body = REMIND_SLO_APPROVAL_BODY.safe_substitute(
         event_id=event_instance.code,
         club=event_instance.clubid,
         event=event_instance.name,
         start_time=event_instance.datetimeperiod[0].strftime("%d-%m-%Y %H:%M"),
         end_time=event_instance.datetimeperiod[1].strftime("%d-%m-%Y %H:%M"),
-        location=", ".join(event_instance.location) if event_instance.location else "N/A",
+        location=", ".join(event_instance.location)
+        if event_instance.location
+        else "N/A",
         eventlink=getEventLink(event_instance.code),
     )
 
@@ -57,11 +64,10 @@ def remindSLO(eventid: str, info: Info) -> bool:
         mail_subject,
         mail_body,
         toRecipients=slo_emails,
-        cookies=None,  # Adjust based on authentication setup
+        cookies=info.context.cookies,
     )
 
     return True
 
-mutations = [
-    remindSLO
-]
+
+mutations = [remindSLO]
