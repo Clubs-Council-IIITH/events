@@ -12,9 +12,9 @@ def triggerMail(
     uid,
     subject,
     body,
+    cookies,
     toRecipients,
     ccRecipients=[],
-    cookies=None,
 ) -> None:
     """
     Method triggers a mutation request, resolved by the sendMail resolver from
@@ -46,6 +46,9 @@ def triggerMail(
             },
             "interCommunicationSecret": inter_communication_secret,
         }
+
+        # print("mailbody:", body)
+
         if cookies:
             requests.post(
                 "http://gateway/graphql",
@@ -53,9 +56,8 @@ def triggerMail(
                 cookies=cookies,
             )
         else:
-            requests.post(
-                "http://gateway/graphql",
-                json={"query": query, "variables": variables},
+            raise Exception(
+                "Couldn't find cookie, cannot send email without cookies!"
             )
 
     except Exception:
