@@ -22,8 +22,11 @@ def check_for_bill_status():
     Checks for events that have pending bills and sends reminder emails.
     This function is meant to be run on a schedule.
 
-    Args: None
-    Returns: None
+    Args:
+    None
+
+    Returns:
+    None
     """
     # find events ended in past 4 days, that have
     # bill status not submitted and event is complete
@@ -102,8 +105,11 @@ def check_for_ended_events():
     Checks for events that have ended in the last hour and sends reminder emails.
     This function is meant to be run on a schedule.
 
-    Args: None
-    Returns: None
+    Args:
+    None
+
+    Returns:
+    None
     """  # noqa: E501
     current_time = datetime.now(timezone)
     one_day_ago = current_time - timedelta(days=1)
@@ -168,7 +174,21 @@ def check_for_ended_events():
             )
 
 
-def start_scheduler_instance(scheduler_instance):
+def start_scheduler_instance(scheduler_instance: Scheduler):
+    """
+    Continuously runs the scheduler instance to execute any pending scheduled tasks.
+
+    This function runs an infinite loop that checks for pending tasks in the provided
+    scheduler instance and executes them. It pauses for one second between each check
+    to prevent excessive CPU usage.
+
+    Args:
+        scheduler_instance (Scheduler): The scheduler object responsible for managing and running scheduled tasks.
+
+    Returns:
+    None
+    """  # noqa: E501
+
     while True:
         scheduler_instance.run_pending()
         time.sleep(1)
@@ -179,8 +199,15 @@ def init_event_reminder_system():
     """
     Initializes the event reminder system by starting the scheduler in a background thread.
 
-    Args: None
-    Returns: None
+    Schedulers:
+        * Sends reminders for events that have ended in the last day. _Runs every day at 00:00._
+        * Sends reminders for events that have pending bills in the last week. _Runs every Sunday at 12:00._
+
+    Args:
+    None
+
+    Returns:
+    None
     """  # noqa: E501
     ended_scheduler = Scheduler()
     ended_scheduler.every().day.at("00:00", timezone).do(
