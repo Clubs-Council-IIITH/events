@@ -54,7 +54,6 @@ def check_for_bill_status():
         event_instance = Event.model_validate(event)
 
         try:
-            # Note: This will need appropriate cookies to work in production
             clubDetails = getClubDetails(event_instance.clubid, None)
 
             if len(clubDetails.keys()) == 0:
@@ -133,7 +132,6 @@ def check_for_ended_events():
         event_instance = Event.model_validate(event)
 
         try:
-            # Note: This will need appropriate cookies to work in production
             clubDetails = getClubDetails(event_instance.clubid, None)
 
             if len(clubDetails.keys()) == 0:
