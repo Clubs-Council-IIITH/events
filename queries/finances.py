@@ -22,7 +22,7 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
         info (Info): The user details
 
     Returns:
-        Bills_Status: The bills status of the event
+        (Bills_Status): The bills status of the event
 
     Raises:
         ValueError: User not authenticated
@@ -89,7 +89,7 @@ def allEventsBills(info: Info) -> List[BillsStatusType]:
         info (Info): The user details
 
     Returns:
-        List[BillsStatusType]: The list of bills status of all past approved 
+        (List[BillsStatusType]): The list of bills status of all past approved 
                                events
         
     Raises:

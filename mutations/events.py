@@ -74,7 +74,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         info (Info): The context of the request for user info.
 
     Returns:
-        EventType : returns all details regarding the event created.
+        (EventType): returns all details regarding the event created.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -200,7 +200,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         info (Info): The context of the request for user info.
     
     Returns:
-        EventType: The edited event.
+        (EventType): The edited event.
     
     Raises:
         Exception: Not Authenticated!
@@ -350,7 +350,7 @@ def progressEvent(
         slc_members_for_email (list[str] | None, optional): list of SLC members for email. Defaults to None.
         
     Returns:
-        EventType: event object
+        (EventType): event object
         
     Raises:
         Exception: Club does not exist.
@@ -732,7 +732,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         info (Info): The context of the request for user info.
 
     Returns:
-        EventType: The state set to deleted event.
+        (EventType): The state set to deleted event.
 
     Raises:
         Exception: Not Authenticated!
@@ -868,7 +868,7 @@ def rejectEvent(
         info (Info): The context of the request for user info.
 
     Returns:
-        EventType: The event that was rejected.
+        (EventType): The event that was rejected.
 
     Raises:
         Exception: Not Authenticated!
@@ -954,7 +954,7 @@ def updateEventsCid(
         inter_communication_secret: secret for authentication. Default is None.
 
     Returns:
-        int: number of events updated
+        (int): number of events updated
 
     Raises:
         Exception: Not Authenticated!

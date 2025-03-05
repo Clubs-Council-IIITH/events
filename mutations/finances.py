@@ -32,7 +32,7 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
         info (Info): The info object containing the user information.
 
     Returns:
-        Bills_Status: The updated bills status of the event.
+        (Bills_Status): The updated bills status of the event.
 
     Raises:
         ValueError: You do not have permission to access this resource.
