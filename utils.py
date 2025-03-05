@@ -527,4 +527,8 @@ def get_bot_cookie():
         json={"secret": inter_communication_secret, "uid": "events"},
     )
 
-    return response.cookies
+    return_dict = {}
+    for key, value in response.cookies.items():
+        return_dict[key] = value
+
+    return return_dict
