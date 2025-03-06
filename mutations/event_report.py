@@ -20,7 +20,7 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
         info (Info): The context information of user for the request.
     
     Returns:
-        EventReportType: The details of the added event report.
+        (EventReportType): The details of the added event report.
 
     Raises:
         ValueError: User not authenticated

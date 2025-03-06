@@ -44,7 +44,7 @@ def event(eventid: str, info: Info) -> EventType:
         info (Info): The context information of user for the request.
 
     Returns:
-        EventType: Details regarding The event with the given id.
+        (EventType): Details regarding The event with the given id.
         
     Raises:
         Exception: Can not access event. Either it does not exist or you do
@@ -116,7 +116,7 @@ def eventid(code: str, info: Info) -> str:
         info (Info): The context information of user for the request.
 
     Returns:
-        str: The id of the event with the given code.
+        (str): The id of the event with the given code.
 
     Raises:
         Exception: Event with given code does not exist.
@@ -165,7 +165,7 @@ def events(
         skip (int): The number of events to skip.
 
     Returns:
-        List[EventType]: A list of events that match the given criteria.
+        (List[EventType]): A list of events that match the given criteria.
 
     Raises:
         Exception: Pagination limit is required.       
@@ -263,7 +263,7 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
         info (Info): The context information of user for the request.
 
     Returns:
-        List[EventType]: A list of events that match the given criteria.
+        (List[EventType]): A list of events that match the given criteria.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -354,7 +354,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
         info (Info): The context information of user for the request.
 
     Returns:
-        List[EventType]: A list of events that match the given criteria.
+        (List[EventType]): A list of events that match the given criteria.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -438,7 +438,7 @@ def availableRooms(
         info (Info): The context information of user for the request.
 
     Returns:
-        RoomListType: A list of rooms that are available in the given 
+        (RoomListType): A list of rooms that are available in the given 
                       timeslot.
 
     Raises:
@@ -501,7 +501,7 @@ def downloadEventsData(
         info (Info): The context information of user for the request.
 
     Returns:
-        CSVResponse: A CSVResponse containing all the events.
+        (CSVResponse): A CSVResponse containing all the events.
 
     Raises:
         Exception: You do not have permission to access this resource.

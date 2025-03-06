@@ -21,7 +21,7 @@ def remindSLO(info: Info, eventid: str) -> bool:
         info (Info): The context of the request for user info.
 
     Returns:
-        bool: Success or Failiure
+        (bool): Success or Failiure
 
     Raises:
         Exception: If the user is not authorized or the event does not exist.

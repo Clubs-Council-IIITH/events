@@ -20,7 +20,7 @@ def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
         info (Info): The context of the request for user info.
 
     Returns:
-        HolidayType: The created holiday.
+        (HolidayType): The created holiday.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -60,7 +60,7 @@ def editHoliday(
         info (Info): The context of the request for user info.
 
     Returns:
-        HolidayType: The edited holiday.
+        (HolidayType): The edited holiday.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -98,7 +98,7 @@ def deleteHoliday(id: str, info: Info) -> bool:
         info (Info): The context of the request for user info.
 
     Returns:
-        bool: True if the holiday was deleted successfully, False otherwise.
+        (bool): True if the holiday was deleted successfully, False otherwise.
 
     Raises:
         Exception: You do not have permission to access this resource.

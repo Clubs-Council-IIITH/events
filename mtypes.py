@@ -353,6 +353,10 @@ class BudgetType:
 
 @strawberry.enum
 class ClubBodyCategoryType(StrEnum):
+    """
+    Enum related to the category of the organizer for the event
+    """
+
     club = auto()
     body = auto()
     admin = auto()

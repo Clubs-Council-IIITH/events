@@ -15,7 +15,7 @@ def eventReport(eventid: str, info: Info) -> EventReportType:
         info (Info): The user details
         
     Returns:
-        EventReportType: The event report of the event
+        (EventReportType): The event report of the event
 
     Raises:
         ValueError: User not authenticated

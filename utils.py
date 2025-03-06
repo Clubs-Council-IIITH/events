@@ -30,7 +30,7 @@ def getMember(cid, uid, cookies=None) -> dict | None:
         cookies (dict): cookies. Defaults to None.
 
     Returns:
-        dict|None: response of the request
+        (dict|None): response of the request
     """
 
     try:
@@ -72,7 +72,7 @@ def getUser(uid, cookies=None) -> dict | None:
         cookies (dict): cookies. Defaults to None.
 
     Returns:
-        dict: response of the request
+        (dict | None): response of the request
     """
 
     try:
@@ -118,7 +118,7 @@ def getClubs(cookies=None) -> dict:
         cookies (dict): cookies. Defaults to None.
 
     Returns:
-        dict: responce of the request
+        (dict): responce of the request
     """
 
     try:
@@ -156,7 +156,7 @@ def getClubCode(clubid: str) -> str | None:
         clubid (str): club id
 
     Returns:
-        str|None: club code or None if club not found
+        (str | None): club code or None if club not found
     """
     allclubs = getClubs()
     for club in allclubs:
@@ -178,7 +178,7 @@ def getClubDetails(
         cookies (dict): cookies
 
     Returns:
-        dict: response of the request
+        (dict): response of the request
     """
 
     try:
@@ -212,7 +212,7 @@ def getEventCode(clubid, starttime) -> str:
         starttime (datetime): start time of the event
 
     Returns:
-        str: event code
+        (str): event code
 
     Raises:
         ValueError: Invalid clubid
@@ -263,7 +263,7 @@ def getEventLink(code) -> str:
         code (str): event code
 
     Returns:
-        str: link to the event page
+        (str): link to the event page
     """
     host = os.environ.get("HOST", "http://localhost")
     return f"{host}/manage/events/code/{code}"
@@ -278,7 +278,7 @@ def getRoleEmails(role: str) -> List[str]:
         role: role of the user to be searched
 
     Returns:
-        List[str]: list of emails.
+        (List[str]): list of emails.
     """
 
     try:
@@ -357,7 +357,7 @@ def eventsWithSorting(
         limit (int): number of events to return. Defaults to None.
 
     Returns:
-        List[dict]: list of events
+        (List[dict]): list of events
     """
     current_datetime = datetime.now(timezone).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
@@ -438,7 +438,7 @@ def trim_public_events(event: dict) -> dict:
         event (dict): event to be trimmed of sensitive data
 
     Returns:
-        dict: trimmed event
+        (dict): trimmed event
     """
     delete_keys = [
         "equipment",
@@ -471,7 +471,7 @@ def convert_to_html(text) -> str:
         text (str): text to be converted to html.
 
     Returns:
-        str: text in the form of html.
+        (str): text in the form of html.
     """
     # Escape HTML special characters
     text = html.escape(text)
@@ -498,7 +498,7 @@ def delete_file(filename) -> str:
         filename (str): name of the file to be deleted.
 
     Returns:
-        str: response from the file service.
+        (str): response from the file service.
     """
     response = requests.post(
         "http://files/delete-file",
@@ -514,12 +514,12 @@ def delete_file(filename) -> str:
     return response.text
 
 
-def get_bot_cookie():
+def get_bot_cookie() -> dict:
     """
     Method to get the bot cookie.
 
     Returns:
-        dict: cookies.
+        (dict): cookies.
     """
 
     response = requests.post(

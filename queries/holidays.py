@@ -27,7 +27,7 @@ def holidays(
                                    Defaults to None.
 
     Returns:
-        List[HolidayType]: A list of holidays.
+        (List[HolidayType]): A list of holidays.
 
     Raises:
         ValueError: Start date cannot be greater than end date.
@@ -60,7 +60,7 @@ def holiday(id: str) -> HolidayType:
         id (str): The id of the holiday.
 
     Returns:
-        HolidayType: The holiday's details.
+        (HolidayType): The holiday's details.
     """
 
     holiday = holidaysdb.find_one({"_id": id})
