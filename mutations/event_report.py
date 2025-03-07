@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 
 from db import event_reportsdb, eventsdb
 from models import EventReport
-from mtypes import Event_State_Status
+from mtypes import Event_State_Status, timezone
 from otypes import EventReportType, Info, InputEventReport
 from utils import getMember
 
@@ -47,7 +47,7 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
         {
             "_id": eventid,
             "datetimeperiod.1": {
-                "$lt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                "$lt": datetime.now(timezone).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
             },
             "status.state": Event_State_Status.approved.value,
         }
