@@ -38,17 +38,14 @@ class Bills_State_Status(StrEnum):
     """
     Enum of status of an event's bills
     """
-
-    # initially, the bills are `not_submitted`
+    # initially, the bills are `not_submitted`.
     not_submitted = auto()
-    # after the club submits the bills, but they are incomplete,
-    # the state is `incomplete`
-    incomplete = auto()
-    # after the club submits the bills, and they are complete,
-    # the state is `submitted`
+    # right after the club submits the bills, before SLO processed it.
     submitted = auto()
-    # SLO have processed the bills, the state is `slo_processed`
-    slo_processed = auto()
+    # after the club submits the bill, SLO processed it and rejected.
+    rejected = auto()
+    # after the club submits the bill, SLO processed it and accepted.
+    accepted = auto()
 
 
 # Event Bills State Full Names
@@ -58,9 +55,9 @@ class Bills_Full_State_Status:
     """
 
     not_submitted = "Not Submitted"
-    incomplete = "Incomplete"
     submitted = "Submitted"
-    slo_processed = "Processed by SLO"
+    rejected = "Rejected"
+    accepted = "Accepted"
 
 
 # Event Bills Status
@@ -80,17 +77,23 @@ class Bills_Status:
 
     state: Bills_State_Status = Bills_State_Status.not_submitted
     updated_time: str | None = None
+    submitted_time: str | None = None
+    filename: str | None = None
     slo_comment: str | None = None
 
     def __init__(
         self,
         state: Bills_State_Status = Bills_State_Status.not_submitted,
         updated_time: str | None = None,
+        submitted_time: str | None = None,
+        filename: str | None = None,
         slo_comment: str | None = None,
     ):
         self.state = state
         self.updated_time = updated_time
         self.slo_comment = slo_comment
+        self.submitted_time = submitted_time
+        self.filename = filename
 
 
 # Event States
