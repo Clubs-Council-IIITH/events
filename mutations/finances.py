@@ -14,6 +14,7 @@ from mailing_templates import (
     BILL_SUBMISSION_BODY_FOR_SLO,
 )
 from mtypes import (
+    BudgetType,
     Bills_Full_State_Status,
     Bills_State_Status,
     Bills_Status,
@@ -183,6 +184,18 @@ def addBill(details: InputBillsUpload, info: Info) -> bool:
     if not slo_emails:
         raise Exception("No SLO emails found to send a reminder.")
 
+    new_budget = [
+        {
+            "amount": item.amount,
+            "description": item.description,
+            "advance": item.advance,
+            "billno": item.billno  # Include the billno field
+        }
+        for item in details.budget
+    ]
+
+    print(new_budget)
+
     # change state to submitted and put filename
     upd_ref = eventsdb.update_one(
         {"_id": details.eventid},
@@ -193,7 +206,8 @@ def addBill(details: InputBillsUpload, info: Info) -> bool:
                     "submitted_time": time_str,
                     "updated_time": time_str,
                     "filename": details.filename,
-                }
+                },
+                "budget": new_budget
             }
         },
     )

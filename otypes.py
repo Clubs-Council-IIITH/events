@@ -263,4 +263,5 @@ class InputBillsUpload:
     """
     eventid: str
     filename: str
+    budget: List[BudgetInput]
 

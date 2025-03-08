@@ -342,6 +342,7 @@ class BudgetType:
     amount: float
     description: str | None = None
     advance: bool = False
+    billno: str | None = None
 
     @field_validator("amount")
     @classmethod
@@ -351,6 +352,16 @@ class BudgetType:
         """
         if value <= 0:
             raise ValueError("Amount must be positive")
+        return value
+
+    @field_validator("billno")
+    @classmethod
+    def is_alphanumeric(cls, value):
+        """
+        Field validator that ensures billno has capital alphabets and digits
+        """
+        if not all(c.isdigit() or (c.isalpha() and c.isupper()) for c in value):
+            raise ValueError("billno must contain only capital letters and digits")
         return value
 
 
@@ -415,5 +426,6 @@ HttpUrlString = Annotated[
         lambda value: str(http_url_adapter.validate_python(value))
     ),
 ]
+
 # takes the time from IST timezone
 timezone = pytz.timezone("Asia/Kolkata")
