@@ -24,6 +24,7 @@ from mtypes import (
 )
 from otypes import Info, InputBillsStatus, InputBillsUpload
 from utils import (
+    delete_file,
     getClubDetails,
     getEventFinancesLink,
     getEventLink,
@@ -213,6 +214,13 @@ def addBill(details: InputBillsUpload, info: Info) -> bool:
     )
     if upd_ref.modified_count == 0:
         raise ValueError("Bills status not updated")
+
+    # if already a bills_status file exists, then delete it
+    if bill.get("filename"):
+        try:
+            delete_file(bill["filename"])
+        except Exception as e:
+            print(f"Error deleting file: {e}")
 
     event = eventsdb.find_one({"_id": details.eventid})
     if not event:
