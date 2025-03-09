@@ -281,7 +281,7 @@ def getEventFinancesLink(id) -> str:
         (str): link to the event finances page
     """
     host = os.environ.get("HOST", "http://localhost")
-    return f"{host}/manage/events/{id}/finances"
+    return f"{host}/manage/finances/{id}"
 
 
 # get email IDs of all members belonging to a role
