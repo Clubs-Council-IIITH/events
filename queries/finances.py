@@ -8,10 +8,8 @@ from typing import List
 import strawberry
 
 from db import eventsdb
-from mtypes import Bills_Status, Event_State_Status
+from mtypes import Bills_Status, Event_State_Status, timezone
 from otypes import BillsStatusType, Info
-
-from mtypes import timezone
 
 
 @strawberry.field

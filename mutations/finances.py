@@ -83,11 +83,9 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
         {"_id": details.eventid},
         {
             "$set": {
-                "bills_status": {
-                    "state": details.state,
-                    "updated_time": time_str,
-                    "slo_comment": details.slo_comment,
-                }
+                "bills_status.state": details.state,
+                "bills_status.updated_time": time_str,
+                "bills_status.slo_comment": details.slo_comment,
             }
         },
     )
