@@ -38,6 +38,7 @@ class Bills_State_Status(StrEnum):
     """
     Enum of status of an event's bills
     """
+
     # initially, the bills are `not_submitted`.
     not_submitted = auto()
     # right after the club submits the bills, before SLO processed it.
@@ -342,7 +343,10 @@ class BudgetType:
     amount: float
     description: str | None = None
     advance: bool = False
+
+    # After event
     billno: str | None = None
+    amount_used: float | None = None
 
     @field_validator("amount")
     @classmethod
@@ -360,8 +364,22 @@ class BudgetType:
         """
         Field validator that ensures billno has capital alphabets and digits
         """
-        if not all(c.isdigit() or (c.isalpha() and c.isupper()) for c in value):
-            raise ValueError("billno must contain only capital letters and digits")
+        if not all(
+            c.isdigit() or (c.isalpha() and c.isupper()) for c in value
+        ):
+            raise ValueError(
+                "billno must contain only capital letters and digits"
+            )
+        return value
+
+    @field_validator("amount_used")
+    @classmethod
+    def positive_amount_used(cls, value):
+        """
+        A field validator for the amount_used field.
+        """
+        if value is not None and value < 0:
+            raise ValueError("Amount used must be positive")
         return value
 
 

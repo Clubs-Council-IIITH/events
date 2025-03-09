@@ -360,10 +360,11 @@ Event Details:
     1. Event ID: $event_id
     2. Event Name: $event
     3. Event Date: $event_date
-    4. Total Budget: $total_budget
+    4. Total Proposed Budget: $total_budget
+    5. Total Budget Used: $total_budget_used
 
 To review the bills and update their status, please visit:
-$eventlink
+$eventfinancelink
 
 Should you have any questions or require additional information, please don't hesitate to reach out to the club or Clubs Council.
 
