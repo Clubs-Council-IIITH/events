@@ -8,7 +8,7 @@ from typing import List
 import strawberry
 
 from db import eventsdb
-from mtypes import Bills_Status, Event_State_Status
+from mtypes import Bills_Status, Event_State_Status, timezone
 from otypes import BillsStatusType, Info
 
 
@@ -59,7 +59,7 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
                   access to it or it is not approved."
         )
 
-    if event["datetimeperiod"][1] > datetime.now().strftime(
+    if event["datetimeperiod"][1] > datetime.now(timezone).strftime(
         "%Y-%m-%dT%H:%M:%S.%fZ"
     ):
         raise ValueError(f"{event['name']} has not ended yet.")
@@ -109,7 +109,7 @@ def allEventsBills(info: Info) -> List[BillsStatusType]:
     searchspace = {
         "status.state": Event_State_Status.approved.value,
         "datetimeperiod.1": {
-            "$lt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            "$lt": datetime.now(timezone).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         },
         "bills_status": {"$exists": True},
         "budget": {

@@ -341,3 +341,38 @@ Clubs Council
 (Note: This is an automated reminder from the Clubs Council system.)
 """  # noqa: E501
 )
+
+
+# email template for informing SLO when a club submits bills for an event
+BILL_SUBMISSION_SUBJECT = Template(
+    """
+[Events] $event_id: Bill Submitted for $event
+"""
+)
+
+BILL_SUBMISSION_BODY_FOR_SLO = Template(
+    """
+Dear SLO,
+
+This is to inform you that $club has submitted bill(s) for their event, $event.
+
+Event Details:
+    1. Event ID: $event_id
+    2. Event Name: $event
+    3. Event Date: $event_date
+    4. Total Proposed Budget: $total_budget
+    5. Total Budget Used: $total_budget_used
+
+To review the bills and update their status, please visit:
+$eventfinancelink
+
+Should you have any questions or require additional information, please don't hesitate to reach out to the club or Clubs Council.
+
+Best regards,
+Clubs Council.
+
+
+Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+"""  # noqa: E501
+)
+

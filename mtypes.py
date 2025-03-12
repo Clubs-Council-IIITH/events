@@ -39,16 +39,14 @@ class Bills_State_Status(StrEnum):
     Enum of status of an event's bills
     """
 
-    # initially, the bills are `not_submitted`
+    # initially, the bills are `not_submitted`.
     not_submitted = auto()
-    # after the club submits the bills, but they are incomplete,
-    # the state is `incomplete`
-    incomplete = auto()
-    # after the club submits the bills, and they are complete,
-    # the state is `submitted`
+    # right after the club submits the bills, before SLO processed it.
     submitted = auto()
-    # SLO have processed the bills, the state is `slo_processed`
-    slo_processed = auto()
+    # after the club submits the bill, SLO processed it and rejected.
+    rejected = auto()
+    # after the club submits the bill, SLO processed it and accepted.
+    accepted = auto()
 
 
 # Event Bills State Full Names
@@ -58,9 +56,9 @@ class Bills_Full_State_Status:
     """
 
     not_submitted = "Not Submitted"
-    incomplete = "Incomplete"
     submitted = "Submitted"
-    slo_processed = "Processed by SLO"
+    rejected = "Rejected"
+    accepted = "Accepted"
 
 
 # Event Bills Status
@@ -80,17 +78,23 @@ class Bills_Status:
 
     state: Bills_State_Status = Bills_State_Status.not_submitted
     updated_time: str | None = None
+    submitted_time: str | None = None
+    filename: str | None = None
     slo_comment: str | None = None
 
     def __init__(
         self,
         state: Bills_State_Status = Bills_State_Status.not_submitted,
         updated_time: str | None = None,
+        submitted_time: str | None = None,
+        filename: str | None = None,
         slo_comment: str | None = None,
     ):
         self.state = state
         self.updated_time = updated_time
         self.slo_comment = slo_comment
+        self.submitted_time = submitted_time
+        self.filename = filename
 
 
 # Event States
@@ -340,6 +344,10 @@ class BudgetType:
     description: str | None = None
     advance: bool = False
 
+    # After event
+    billno: str | None = None
+    amount_used: float | None = None
+
     @field_validator("amount")
     @classmethod
     def positive_amount(cls, value):
@@ -348,6 +356,30 @@ class BudgetType:
         """
         if value <= 0:
             raise ValueError("Amount must be positive")
+        return value
+
+    @field_validator("billno")
+    @classmethod
+    def is_alphanumeric(cls, value):
+        """
+        Field validator that ensures billno has capital alphabets and digits
+        """
+        if not all(
+            c.isdigit() or (c.isalpha() and c.isupper()) for c in value
+        ):
+            raise ValueError(
+                "billno must contain only capital letters and digits"
+            )
+        return value
+
+    @field_validator("amount_used")
+    @classmethod
+    def positive_amount_used(cls, value):
+        """
+        A field validator for the amount_used field.
+        """
+        if value is not None and value < 0:
+            raise ValueError("Amount used must be positive")
         return value
 
 
@@ -412,5 +444,6 @@ HttpUrlString = Annotated[
         lambda value: str(http_url_adapter.validate_python(value))
     ),
 ]
+
 # takes the time from IST timezone
 timezone = pytz.timezone("Asia/Kolkata")

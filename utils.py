@@ -268,6 +268,21 @@ def getEventLink(code) -> str:
     host = os.environ.get("HOST", "http://localhost")
     return f"{host}/manage/events/code/{code}"
 
+# method to get the event finances page link for SLO
+# It returns a link to the event finances page
+def getEventFinancesLink(id) -> str:
+    """
+    Produces a link to the event finances page based on the event id.
+
+    Args:
+        id (str): event id
+
+    Returns:
+        (str): link to the event finances page
+    """
+    host = os.environ.get("HOST", "http://localhost")
+    return f"{host}/manage/finances/{id}"
+
 
 # get email IDs of all members belonging to a role
 def getRoleEmails(role: str) -> List[str]:
