@@ -301,7 +301,7 @@ This is a reminder to submit the bill details or payment updates for your event,
 
 Please ensure that the bill details are submitted by the specified deadline. Failure to submit the bill details on time may result in delays in processing reimbursements or future event approvals.
 
-Your event had a budget of $total_budget INR. All bills must be submitted for processing reimbursements.
+Your event had a budget of $total_budget INR. All bills must be submitted for processing reimbursements/settling advance.
 
 To submit the bill details or update payment information, visit the link below:
 $eventlink

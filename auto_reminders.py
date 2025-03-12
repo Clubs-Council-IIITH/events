@@ -102,7 +102,7 @@ def check_for_bill_status():
 
 def check_for_ended_events():
     """
-    Checks for events that have ended in the last hour and sends reminder emails.
+    Checks for events that have ended on the last day and sends reminder emails.
     This function is meant to be run on a schedule.
 
     Args:
