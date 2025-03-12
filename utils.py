@@ -268,6 +268,7 @@ def getEventLink(code) -> str:
     host = os.environ.get("HOST", "http://localhost")
     return f"{host}/manage/events/code/{code}"
 
+
 # method to get the event finances page link for SLO
 # It returns a link to the event finances page
 def getEventFinancesLink(id) -> str:
