@@ -364,7 +364,7 @@ class BudgetType:
         """
         Field validator that ensures billno has capital alphabets and digits
         """
-        if not all(
+        if value is not None and not all(
             c.isdigit() or (c.isalpha() and c.isupper()) for c in value
         ):
             raise ValueError(
