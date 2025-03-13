@@ -55,8 +55,8 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
     event = eventsdb.find_one(searchspace)
     if not event:
         raise ValueError(
-            "Event not found. Either the event does not exist or you don't have\
-                  access to it or it is not approved."
+            "Event not found. Either the event does not exist or you don't \
+                  have access to it or it is not approved."
         )
 
     if event["datetimeperiod"][1] > datetime.now(timezone).strftime(
@@ -75,23 +75,23 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
         raise ValueError(f"{event['name']} has no bills status.")
 
     return Bills_Status(**event["bills_status"])
-  
+
 
 @strawberry.field
 def allEventsBills(info: Info) -> List[BillsStatusType]:
     """
     Get the bills status of all events
-    
-    This method is used to fetch the list of bills status of all past 
+
+    This method is used to fetch the list of bills status of all past
     approved events that have a budget and bills status.
 
     Args:
         info (Info): The user details
 
     Returns:
-        (List[BillsStatusType]): The list of bills status of all past approved 
+        (List[BillsStatusType]): The list of bills status of all past approved
                                events
-        
+
     Raises:
         ValueError: User not authenticated
         ValueError: User not authorized

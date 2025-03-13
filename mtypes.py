@@ -362,14 +362,23 @@ class BudgetType:
     @classmethod
     def is_alphanumeric(cls, value):
         """
-        Field validator that ensures billno has capital alphabets and digits
-        """
-        if value is not None and not all(
-            c.isdigit() or (c.isalpha() and c.isupper()) for c in value
+        Field validator that ensures billno has capital alphabets, digits, spaces,
+        and allowed symbols (_,-#()/;). Lowercase letters are converted to uppercase.
+        """  # noqa: E501
+
+        if value is None:
+            return value
+
+        value = value.upper()
+        allowed_symbols = " _,;-#()/"
+
+        if not all(
+            c.isdigit() or c.isupper() or c in allowed_symbols for c in value
         ):
             raise ValueError(
-                "billno must contain only capital letters and digits"
+                "billno must contain only letters, digits, spaces, and allowed symbols"
             )
+
         return value
 
     @field_validator("amount_used")
