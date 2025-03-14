@@ -145,7 +145,7 @@ def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
         raise ValueError("Event report not found")
 
     submitted_time = datetime.strptime(event_report["submitted_time"], "%Y-%m-%dT%H:%M:%S.%fZ")
-    if submitted_time + timedelta(days=1) < datetime.now():
+    if submitted_time + timedelta(days=3) < datetime.now():
         raise ValueError("Event report can't be updated")    
     
     report_dict = jsonable_encoder(details.to_pydantic())
