@@ -376,7 +376,7 @@ class BudgetType:
             c.isdigit() or c.isupper() or c in allowed_symbols for c in value
         ):
             raise ValueError(
-                "billno must contain only letters, digits, spaces, and allowed symbols"
+                "billno must contain only letters, digits, spaces, and allowed symbols"  # noqa: E501
             )
 
         return value
