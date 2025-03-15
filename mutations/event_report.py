@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import strawberry
 from fastapi.encoders import jsonable_encoder
@@ -87,5 +87,75 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
         EventReport.model_validate(event_report)
     )
 
+@strawberry.mutation
+def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
+    """
+    Edits an event report after completion of the event
+    
+    Args:
+        details (InputEventReport): The details of the event report to be edited.
+        info (Info): The context information of user for the request.
+    
+    Returns:
+        (EventReportType): The details of the edited event report.
 
-mutations = [addEventReport]
+    Raises:
+        ValueError: User not authenticated
+        ValueError: User not authorized
+        ValueError: Event ID is required
+        ValueError: Event not found
+        ValueError: User not authorized
+        ValueError: Event report not found
+        ValueError: Submitted by is not a valid member
+    """
+
+    user = info.context.user
+    if not user:
+        raise ValueError("User not authenticated")
+
+    user_role = user["role"]
+    if user_role not in ["club", "cc"]:
+        raise ValueError("User not authorized")
+
+    eventid = details.eventid
+    if not eventid:
+        raise ValueError("Event ID is required")
+    
+    event = eventsdb.find_one(
+        {
+            "_id": eventid,
+            "datetimeperiod.1": {
+                "$lt": datetime.now(timezone).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            },
+            "status.state": Event_State_Status.approved.value,
+        }
+    )
+    if not event:
+        raise ValueError("Event not found")
+    if user_role == "club" and event["clubid"] != user["uid"]:
+        raise ValueError("User not authorized")
+
+    searchspace = {
+        "event_id": eventid,
+    }
+
+    event_report = event_reportsdb.find_one(searchspace)
+
+    if not event_report:
+        raise ValueError("Event report not found")
+
+    submitted_time = datetime.strptime(event_report["submitted_time"], "%Y-%m-%dT%H:%M:%S.%fZ")
+    if submitted_time + timedelta(days=3) < datetime.now():
+        raise ValueError("Event report can't be updated")    
+    
+    report_dict = jsonable_encoder(details.to_pydantic())
+    report_dict["event_id"] = details.eventid
+    event_reportsdb.update_one(searchspace, {"$set": report_dict})
+    event_report = event_reportsdb.find_one(searchspace)
+
+    return EventReportType.from_pydantic(
+        EventReport.model_validate(event_report)
+    )
+
+
+mutations = [addEventReport, editEventReport]
