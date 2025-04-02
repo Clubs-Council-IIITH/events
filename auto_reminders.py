@@ -93,6 +93,7 @@ def check_for_bill_status():
                 ccRecipients=getRoleEmails("cc"),
                 cookies=bot_cookie,
             )
+            time.sleep(5)
 
         except Exception as e:
             print(
@@ -167,6 +168,7 @@ def check_for_ended_events():
                 ccRecipients=getRoleEmails("cc"),
                 cookies=bot_cookie,
             )
+            time.sleep(5)
 
         except Exception as e:
             print(
