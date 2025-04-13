@@ -114,6 +114,7 @@ class Event(BaseModel):
 
     mode: Event_Mode = Event_Mode.hybrid
     location: List[Event_Location] = []
+    locationAlternate: List[Event_Location] = []
     equipment: short_str_type | None = None
     additional: short_str_type | None = None
     population: event_popu_type | None = None

@@ -115,6 +115,10 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.location = [
             Event_Location(loc) for loc in details.location
         ]
+    if details.locationAlternate is not None:
+        event_instance.locationAlternate = [
+            Event_Location(loc) for loc in details.locationAlternate
+        ]
     if details.description is not None:
         event_instance.description = details.description.strip()
     if details.poster is not None:
@@ -264,6 +268,8 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.location is not None and updatable:
         # updates["status.room"] = False or user["role"] == "cc"
         updates["location"] = [Event_Location(loc) for loc in details.location]
+    if details.locationAlternate is not None and updatable:
+        updates["locationAlternate"] = [Event_Location(loc) for loc in details.locationAlternate]
     if details.collabclubs is not None and updatable:
         updates["collabclubs"] = details.collabclubs
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
@@ -532,14 +538,22 @@ def progressEvent(
 
     student_count = updated_event_instance.population
     mail_location = ""
+    mail_locationAlternate = ""
     if updated_event_instance.mode == Event_Mode.online:
         mail_location = "online"
+        mail_locationAlternate = "N/A"
         student_count = "N/A"
     else:
         mail_location = ", ".join(
             [
                 getattr(Event_Full_Location, loc)
                 for loc in updated_event_instance.location
+            ]
+        )
+        mail_locationAlternate = ", ".join(
+            [
+                getattr(Event_Full_Location, loc)
+                for loc in updated_event_instance.locationAlternate
             ]
         )
 
@@ -625,6 +639,7 @@ def progressEvent(
             start_time=event_start_time,
             end_time=event_end_time,
             location=mail_location,
+            locationAlternate=mail_locationAlternate,
             budget=budget,
             poc_name=poc_name,
             poc_roll=poc_roll,
@@ -662,6 +677,7 @@ def progressEvent(
             end_time=event_end_time,
             student_count=student_count,
             location=mail_location,
+            locationAlternate=mail_locationAlternate,
             budget=budget,
             additional=additional,
             eventlink=mail_eventlink,
@@ -686,6 +702,7 @@ def progressEvent(
             start_time=event_start_time,
             end_time=event_end_time,
             location=mail_location,
+            locationAlternate=mail_locationAlternate,
             equipment=equipment,
             budget=budget,
             additional=additional,

@@ -156,6 +156,7 @@ class InputEventDetails:
 
     name: str
     location: List[Event_Location] | None = None
+    locationAlternate: List[Event_Location] | None = None
     description: str | None = None
     clubid: str
     collabclubs: List[str] | None = None
