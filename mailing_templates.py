@@ -50,7 +50,7 @@ We are writing to request a venue & approval for an event organized by $club. Pl
 
      9. Budget    : $budget
 
-     10. Equipment Support      : $equipment
+    10. Equipment Support      : $equipment
     11. Additional Information : $additional
 
     12. Point of Contact -
