@@ -133,6 +133,8 @@ class InputEventDetails:
         name (str): Name of the event.
         location (List[Event_Location]): List of locations of the event.
                                          Default is None.
+        locationAlternate (List[Event_Location]): List of alternate locations
+                                                  of the event. This is optional. Default is None.
         description (str): Description of the event. Default is None.
         clubid (str): clubID of the club organizing the event.
         collabclubs (List[str]): List of clubIDs of collaborating clubs.
