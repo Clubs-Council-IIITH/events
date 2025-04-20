@@ -183,6 +183,7 @@ class InputEditEventDetails:
     eventid: str
     collabclubs: List[str] | None = None
     location: List[Event_Location] | None = None
+    locationAlternate: List[Event_Location] | None = None
     description: str | None = None
     clubid: str | None
     mode: Event_Mode | None = Event_Mode.hybrid
