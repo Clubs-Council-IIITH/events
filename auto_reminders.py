@@ -165,7 +165,6 @@ def check_for_ended_events():
                 mail_subject,
                 mail_body,
                 toRecipients=[mail_club],
-                ccRecipients=getRoleEmails("cc"),
                 cookies=bot_cookie,
             )
             time.sleep(5)
