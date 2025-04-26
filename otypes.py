@@ -133,6 +133,8 @@ class InputEventDetails:
         name (str): Name of the event.
         location (List[Event_Location]): List of locations of the event.
                                          Default is None.
+        locationAlternate (List[Event_Location]): List of alternate locations
+                                                  of the event. This is optional. Default is None.
         description (str): Description of the event. Default is None.
         clubid (str): clubID of the club organizing the event.
         collabclubs (List[str]): List of clubIDs of collaborating clubs.
@@ -156,6 +158,7 @@ class InputEventDetails:
 
     name: str
     location: List[Event_Location] | None = None
+    locationAlternate: List[Event_Location] | None = None
     description: str | None = None
     clubid: str
     collabclubs: List[str] | None = None
@@ -182,6 +185,7 @@ class InputEditEventDetails:
     eventid: str
     collabclubs: List[str] | None = None
     location: List[Event_Location] | None = None
+    locationAlternate: List[Event_Location] | None = None
     description: str | None = None
     clubid: str | None
     mode: Event_Mode | None = Event_Mode.hybrid
