@@ -14,7 +14,7 @@ from otypes import HolidayType, Info, InputHolidayDetails
 def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
     """
     Creates a new holiday, for SLO and CC
-    
+
     Args:
         details (InputHolidayDetails): The details of the holiday to be created.
         info (Info): The context of the request for user info.
@@ -25,7 +25,7 @@ def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
     Raises:
         Exception: You do not have permission to access this resource.
         Exception: A holiday already exists on this day.
-    """ # noqa: E501
+    """  # noqa: E501
     user = info.context.user
 
     if user is None or user.get("role") not in ["slo", "cc"]:
@@ -66,7 +66,7 @@ def editHoliday(
         Exception: You do not have permission to access this resource.
         Exception: Holiday not found.
         Exception: A holiday already exists on this day.
-    """ # noqa: E501
+    """  # noqa: E501
     user = info.context.user
 
     if user is None or user.get("role") not in ["slo", "cc"]:
@@ -92,7 +92,7 @@ def editHoliday(
 def deleteHoliday(id: str, info: Info) -> bool:
     """
     Delete an existing holiday, for SLO and CC
-    
+
     Args:
         id (str): The id of the holiday to be deleted.
         info (Info): The context of the request for user info.

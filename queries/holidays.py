@@ -23,7 +23,7 @@ def holidays(
     Args:
         start_date (date, optional): The start date of the range. Defaults to
                                      None.
-        end_date (date, optional): The end date of the range. 
+        end_date (date, optional): The end date of the range.
                                    Defaults to None.
 
     Returns:

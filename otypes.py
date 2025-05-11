@@ -154,7 +154,7 @@ class InputEventDetails:
         budget (List[BudgetInput]): List of budgets of the event.
                                     Default is None.
         poc (str): Point of contact for the event.
-    """ # noqa: E501
+    """  # noqa: E501
 
     name: str
     location: List[Event_Location] | None = None

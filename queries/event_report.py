@@ -9,11 +9,11 @@ from otypes import EventReportType, Info
 def eventReport(eventid: str, info: Info) -> EventReportType:
     """
     Get the event report of an event for cc,slo and club
-    
+
     Args:
         eventid (str): The id of the event
         info (Info): The user details
-        
+
     Returns:
         (EventReportType): The event report of the event
 
@@ -35,10 +35,14 @@ def eventReport(eventid: str, info: Info) -> EventReportType:
     event = eventsdb.find_one({"_id": eventid, "event_report_submitted": True})
     if not event:
         raise ValueError("Event not found")
-    if user_role == "club" and event["clubid"] != user["uid"] and (
-                event["collabclubs"] is None
-                or user["uid"] not in event["collabclubs"]
-            ):
+    if (
+        user_role == "club"
+        and event["clubid"] != user["uid"]
+        and (
+            event["collabclubs"] is None
+            or user["uid"] not in event["collabclubs"]
+        )
+    ):
         raise ValueError("User not authorized")
 
     event_report = event_reportsdb.find_one(

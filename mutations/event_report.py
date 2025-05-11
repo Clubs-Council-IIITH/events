@@ -14,11 +14,11 @@ from utils import getMember
 def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
     """
     Adds an event report after completion of the event
-    
+
     Args:
         details (InputEventReport): The details of the event report to be added.
         info (Info): The context information of user for the request.
-    
+
     Returns:
         (EventReportType): The details of the added event report.
 
@@ -30,7 +30,7 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
         ValueError: User not authorized
         ValueError: Event report already exists
         ValueError: Submitted by is not a valid member
-    """ # noqa: E501
+    """  # noqa: E501
 
     user = info.context.user
     if not user:
@@ -65,7 +65,7 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
 
     if event_report:
         raise ValueError("Event report already exists")
-    
+
     # Check if submitted_by is valid
     cid = event["clubid"]
     uid = details.submitted_by
@@ -87,15 +87,16 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
         EventReport.model_validate(event_report)
     )
 
+
 @strawberry.mutation
 def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
     """
     Edits an event report after completion of the event
-    
+
     Args:
         details (InputEventReport): The details of the event report to be edited.
         info (Info): The context information of user for the request.
-    
+
     Returns:
         (EventReportType): The details of the edited event report.
 
@@ -107,7 +108,7 @@ def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
         ValueError: User not authorized
         ValueError: Event report not found
         ValueError: Submitted by is not a valid member
-    """ # noqa: E501
+    """  # noqa: E501
 
     user = info.context.user
     if not user:
@@ -120,7 +121,7 @@ def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
     eventid = details.eventid
     if not eventid:
         raise ValueError("Event ID is required")
-    
+
     event = eventsdb.find_one(
         {
             "_id": eventid,
@@ -144,10 +145,12 @@ def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
     if not event_report:
         raise ValueError("Event report not found")
 
-    submitted_time = datetime.strptime(event_report["submitted_time"], "%Y-%m-%dT%H:%M:%S.%fZ")
+    submitted_time = datetime.strptime(
+        event_report["submitted_time"], "%Y-%m-%dT%H:%M:%S.%fZ"
+    )
     if submitted_time + timedelta(days=3) < datetime.now():
-        raise ValueError("Event report can't be updated")    
-    
+        raise ValueError("Event report can't be updated")
+
     report_dict = jsonable_encoder(details.to_pydantic())
     report_dict["event_id"] = details.eventid
     event_reportsdb.update_one(searchspace, {"$set": report_dict})

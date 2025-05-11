@@ -9,7 +9,7 @@ after budget is approved (through any track),
 if room status is unapproved, the event is `pending_room`, else skip to next
 after room is approved (through any track), the event is `approved`
 once the event is over, the club or cc can change the state to `completed`
-""" # noqa: E501
+"""  # noqa: E501
 
 import os
 from datetime import datetime, timedelta
@@ -202,10 +202,10 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     Args:
         details (InputEditEventDetails): The details of the event to be edited.
         info (Info): The context of the request for user info.
-    
+
     Returns:
         (EventType): The edited event.
-    
+
     Raises:
         Exception: Not Authenticated!
         Exception: Not Authenticated to access this API
@@ -213,7 +213,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         Exception: Event does not exist.
         Exception: Member Details for POC does not exist
         Exception: You do not have permission to access this resource.
-    """ # noqa: E501
+    """  # noqa: E501
     user = info.context.user
     allowed_roles = ["cc", "slo"]
 
@@ -269,7 +269,9 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         # updates["status.room"] = False or user["role"] == "cc"
         updates["location"] = [Event_Location(loc) for loc in details.location]
     if details.locationAlternate is not None and updatable:
-        updates["locationAlternate"] = [Event_Location(loc) for loc in details.locationAlternate]
+        updates["locationAlternate"] = [
+            Event_Location(loc) for loc in details.locationAlternate
+        ]
     if details.collabclubs is not None and updatable:
         updates["collabclubs"] = details.collabclubs
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
@@ -354,10 +356,10 @@ def progressEvent(
         cc_progress_room (bool | None, optional): progress room. Defaults to None.
         cc_approver (str | None, optional): cc approver. Defaults to None.
         slc_members_for_email (list[str] | None, optional): list of SLC members for email. Defaults to None.
-        
+
     Returns:
         (EventType): event object
-        
+
     Raises:
         Exception: Club does not exist.
         Exception: CC Approver is required to progress event.
@@ -754,7 +756,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
     Raises:
         Exception: Not Authenticated!
         Exception: Club does not exist.
-    """ # noqa: E501
+    """  # noqa: E501
     user = info.context.user
 
     if user is None or user["role"] not in ["club", "cc", "slo"]:
@@ -891,7 +893,7 @@ def rejectEvent(
         Exception: Not Authenticated!
         Exception: Club does not exist.
         Exception: Cannot reset event that has progressed beyond CC.
-    """ # noqa: E501
+    """  # noqa: E501
     user = info.context.user
 
     if user is None or user["role"] != "cc":
