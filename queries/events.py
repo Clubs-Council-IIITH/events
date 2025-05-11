@@ -190,9 +190,9 @@ def events(
             if user["uid"] == clubid:
                 restrictFullAccess = False
 
-    assert not (
-        restrictAccess and not restrictFullAccess
-    ), "restrictAccess and not restrictFullAccess can not be True at the same time."  # noqa: E501
+    assert not (restrictAccess and not restrictFullAccess), (
+        "restrictAccess and not restrictFullAccess can not be True at the same time."  # noqa: E501
+    )
 
     if not limit and paginationOn:
         raise Exception("Pagination limit is required.")

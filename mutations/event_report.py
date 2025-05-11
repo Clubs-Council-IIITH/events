@@ -30,7 +30,7 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
         ValueError: User not authorized
         ValueError: Event report already exists
         ValueError: Submitted by is not a valid member
-    """
+    """ # noqa: E501
 
     user = info.context.user
     if not user:
@@ -107,7 +107,7 @@ def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
         ValueError: User not authorized
         ValueError: Event report not found
         ValueError: Submitted by is not a valid member
-    """
+    """ # noqa: E501
 
     user = info.context.user
     if not user:

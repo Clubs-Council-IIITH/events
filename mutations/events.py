@@ -9,7 +9,7 @@ after budget is approved (through any track),
 if room status is unapproved, the event is `pending_room`, else skip to next
 after room is approved (through any track), the event is `approved`
 once the event is over, the club or cc can change the state to `completed`
-"""
+""" # noqa: E501
 
 import os
 from datetime import datetime, timedelta
@@ -213,7 +213,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         Exception: Event does not exist.
         Exception: Member Details for POC does not exist
         Exception: You do not have permission to access this resource.
-    """
+    """ # noqa: E501
     user = info.context.user
     allowed_roles = ["cc", "slo"]
 
@@ -754,7 +754,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
     Raises:
         Exception: Not Authenticated!
         Exception: Club does not exist.
-    """
+    """ # noqa: E501
     user = info.context.user
 
     if user is None or user["role"] not in ["club", "cc", "slo"]:
@@ -891,7 +891,7 @@ def rejectEvent(
         Exception: Not Authenticated!
         Exception: Club does not exist.
         Exception: Cannot reset event that has progressed beyond CC.
-    """
+    """ # noqa: E501
     user = info.context.user
 
     if user is None or user["role"] != "cc":

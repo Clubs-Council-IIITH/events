@@ -1,6 +1,6 @@
 """
 Gathers all the mutations form all the files within this folder and collects them for importing into main.py.
-"""
+""" # noqa: E501
 
 from mutations.event_report import mutations as event_report_mutations
 from mutations.events import mutations as events_mutations

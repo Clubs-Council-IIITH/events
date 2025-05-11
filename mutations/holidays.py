@@ -25,7 +25,7 @@ def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
     Raises:
         Exception: You do not have permission to access this resource.
         Exception: A holiday already exists on this day.
-    """
+    """ # noqa: E501
     user = info.context.user
 
     if user is None or user.get("role") not in ["slo", "cc"]:
@@ -66,7 +66,7 @@ def editHoliday(
         Exception: You do not have permission to access this resource.
         Exception: Holiday not found.
         Exception: A holiday already exists on this day.
-    """
+    """ # noqa: E501
     user = info.context.user
 
     if user is None or user.get("role") not in ["slo", "cc"]:
