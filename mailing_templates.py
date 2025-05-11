@@ -46,13 +46,14 @@ We are writing to request a venue & approval for an event organized by $club. Pl
      6. End Date  : $end_time
 
      7. Location  : $location
+     8. Alternate Location  : $locationAlternate
 
-     8. Budget    : $budget
+     9. Budget    : $budget
 
-     9. Equipment Support      : $equipment
-    10. Additional Information : $additional
+    10. Equipment Support      : $equipment
+    11. Additional Information : $additional
 
-    11. Point of Contact -
+    12. Point of Contact -
         Name   : $poc_name
         RollNo : $poc_roll
         Email  : $poc_email
@@ -83,12 +84,13 @@ We are writing to request for your approval for an event organized by $club. Ple
     5. Expected Number of Students: $student_count
 
     6. Location  : $location
+    7. Alternate Location  : $locationAlternate
 
-    7. Budget    : $budget
+    8. Budget    : $budget
 
-    8. Additional Information : $additional
+    9. Additional Information : $additional
 
-    9. Approval/Event Link: $eventlink
+    10. Approval/Event Link: $eventlink
 
 Should you require any further information or clarification, please do not hesitate to reach out to us.
 
@@ -152,16 +154,17 @@ Please be informed that your request is currently under review by our executive 
     5. End Date  : $end_time
 
     6. Location  : $location
+    7. Alternate Location  : $locationAlternate
 
-    7. Budget    : $budget
+    8. Budget    : $budget
 
-    8. Point of Contact -
+    9. Point of Contact -
         Name   : $poc_name
         RollNo : $poc_roll
         Email  : $poc_email
         Phone  : $poc_phone
     
-    9. Event Link: $eventlink
+    10. Event Link: $eventlink
 
 Should you have any queries or require assistance at any stage of the process, please do not hesitate to reach out to us. We are here to ensure a smooth and efficient coordination of your event.
     
