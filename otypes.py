@@ -1,7 +1,7 @@
 import json
 from datetime import date, datetime
 from functools import cached_property
-from typing import Dict, List, Tuple, TypeAlias
+from typing import Dict, List, Tuple, TypeAlias, Optional
 
 import strawberry
 from pydantic import BaseModel
@@ -151,6 +151,8 @@ class InputEventDetails:
                           Default is None.
         population (int): Population expected to attend the event.
                           Default is None.
+        external_population (Optional[int]): Population expected from 
+                          outside the campus attending the event.
         budget (List[BudgetInput]): List of budgets of the event.
                                     Default is None.
         poc (str): Point of contact for the event.
@@ -170,6 +172,7 @@ class InputEventDetails:
     equipment: str | None = None
     additional: str | None = None
     population: int | None = None
+    external_population: Optional[int] = None
     budget: List[BudgetInput] | None = None
     poc: str
 
@@ -196,6 +199,7 @@ class InputEditEventDetails:
     equipment: str | None = None
     additional: str | None = None
     population: int | None = None
+    external_population: Optional[int] = None
     budget: List[BudgetInput] | None = None
     poc: str | None = None
 
