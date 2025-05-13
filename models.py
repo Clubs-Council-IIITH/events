@@ -37,6 +37,7 @@ class EventReport(BaseModel):
         eventid (str): The ID of the event.
         summary (str): A summary of the event.
         attendance (int): The number of attendees.
+        external_attendance (Optional[int]): The number of external attendees if allowed.
         prizes (List[PrizesType]): The list prizes awarded in the event.
         prizes_breakdown (str): A breakdown of the prizes awarded.
         winners (str): The winners of the event.
@@ -50,6 +51,7 @@ class EventReport(BaseModel):
     eventid: str
     summary: medium_str_type
     attendance: event_popu_type
+    external_attendance: Optional[event_popu_type] = None
     prizes: List[PrizesType] = []
     prizes_breakdown: long_str_type
     winners: long_str_type
