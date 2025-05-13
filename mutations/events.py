@@ -555,7 +555,6 @@ def progressEvent(
     if updated_event_instance.mode == Event_Mode.online:
         mail_location = "online"
         mail_locationAlternate = "N/A"
-        student_count = "N/A"
     else:
         mail_location = ", ".join(
             [
