@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from pydantic import (
     BaseModel,
@@ -89,6 +89,8 @@ class Event(BaseModel):
                                      Defaults to None.
         population (event_popu_type): The estimated population for the event.
                                       Defaults to None.
+        external_popluation (Optional[event_popu_type]): This is an optionl 
+            field specifying the number of external participants in the event.
         poc (str): The point of contact for the event. Defaults to None.
         status (Event_Status): The approval and approver details.
         budget (List[BudgetInput]): The list of budgets for the event.
@@ -118,6 +120,7 @@ class Event(BaseModel):
     equipment: short_str_type | None = None
     additional: short_str_type | None = None
     population: event_popu_type | None = None
+    external_population: Optional[event_popu_type] = None
     poc: str | None = None
 
     status: Event_Status = Event_Status()
