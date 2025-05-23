@@ -3,18 +3,23 @@ from datetime import datetime, timezone
 from pymongo import MongoClient
 import csv
 
-current_year = datetime.now().year
-
-# MongoDB connection
-MONGO_URI = "mongodb://{}:{}@localhost:{}/".format(
+MONGO_URI = "mongodb://{}:{}@mongo:{}/".format(
     getenv("MONGO_USERNAME", default="username"),
     getenv("MONGO_PASSWORD", default="password"),
-    getenv("MONGO_PORT", default="27017"),
+    getenv("MONGO_PORT", default="27107"),
 )
-MONGO_DATABASE = 'dev'
+MONGO_DATABASE = getenv("MONGO_DATABASE", default="default")
+# MongoDB connection
+# MONGO_URI = "mongodb://{}:{}@localhost:{}/".format(
+#     getenv("MONGO_USERNAME", default="username"),
+#     getenv("MONGO_PASSWORD", default="password"),
+#     getenv("MONGO_PORT", default="27017"),
+# )
+# MONGO_DATABASE = 'dev'
 client = MongoClient(MONGO_URI)
 db = client[MONGO_DATABASE]
 
+current_year = datetime.now().year
 # Fetch active clubs
 results = db.clubs.find({"state": "active"})
 clubs = [result for result in results]
