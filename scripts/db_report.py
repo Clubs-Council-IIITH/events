@@ -52,13 +52,26 @@ for club in clubs:
 
             if start_date <= event_start <= end_date:
                 try:
-                    created_time = datetime.strptime(event['status']['submission_time'], "%d-%m-%Y %I:%M %p")
-                    last_updated_time = datetime.strptime(event['status']['last_updated_time'], "%d-%m-%Y %I:%M %p")
-                    created_time = created_time.replace(tzinfo=timezone.utc)
-                    last_updated_time = last_updated_time.replace(tzinfo=timezone.utc)
-                    time_difference = last_updated_time - created_time
-                    approvals += 1
-                    approval_time_sum += time_difference.total_seconds()
+                    cc_approver_time = event['status'].get('cc_approver_time')
+                    slo_approver_time = event['status'].get('slo_approver_time')
+                    slc_approver_time = event['status'].get('slc_approver_time')
+                    approver_times = []
+                    if cc_approver_time and cc_approver_time != "Not Approved":
+                        approver_times.append(datetime.strptime(cc_approver_time, "%d-%m-%Y %I:%M %p").replace(tzinfo=timezone.utc))
+                    if slo_approver_time and slo_approver_time != "Not Approved":
+                        approver_times.append(datetime.strptime(slo_approver_time, "%d-%m-%Y %I:%M %p").replace(tzinfo=timezone.utc))
+                    if slc_approver_time and slc_approver_time != "Not Approved":
+                        approver_times.append(datetime.strptime(slc_approver_time, "%d-%m-%Y %I:%M %p").replace(tzinfo=timezone.utc))
+                    
+                    if approver_times:
+                        approval_time = max(approver_times)
+                        approval_time = approval_time.replace(tzinfo=timezone.utc)
+                        created_time = datetime.strptime(event['status']['submission_time'], "%d-%m-%Y %I:%M %p")
+                        created_time = created_time.replace(tzinfo=timezone.utc)
+                        approval_time = approval_time.replace(tzinfo=timezone.utc)
+                        time_difference = approval_time - created_time
+                        approvals += 1
+                        approval_time_sum += time_difference.total_seconds()
                 except:
                     pass
                 if 'internal' in event['audience']:
@@ -159,11 +172,23 @@ approval_times = []
 for event in sorted_events:
     try:
         created_time = datetime.strptime(event['status']['submission_time'], "%d-%m-%Y %I:%M %p")
-        last_updated_time = datetime.strptime(event['status']['last_updated_time'], "%d-%m-%Y %I:%M %p")
         created_time = created_time.replace(tzinfo=timezone.utc)
-        last_updated_time = last_updated_time.replace(tzinfo=timezone.utc)
-        time_difference = last_updated_time - created_time
-        approval_times.append(time_difference.total_seconds() / (3600 * 24))
+        cc_approver_time = event['status'].get('cc_approver_time')
+        slo_approver_time = event['status'].get('slo_approver_time')
+        slc_approver_time = event['status'].get('slc_approver_time')
+        approver_times = []
+        if cc_approver_time and cc_approver_time != "Not Approved":
+            approver_times.append(datetime.strptime(cc_approver_time, "%d-%m-%Y %I:%M %p").replace(tzinfo=timezone.utc))
+        if slo_approver_time and slo_approver_time != "Not Approved":
+            approver_times.append(datetime.strptime(slo_approver_time, "%d-%m-%Y %I:%M %p").replace(tzinfo=timezone.utc))
+        if slc_approver_time and slc_approver_time != "Not Approved":
+            approver_times.append(datetime.strptime(slc_approver_time, "%d-%m-%Y %I:%M %p").replace(tzinfo=timezone.utc))
+
+        if approver_times:
+            approval_time = max(approver_times)
+            approval_time = approval_time.replace(tzinfo=timezone.utc)
+            time_difference = approval_time - created_time
+            approval_times.append(time_difference.total_seconds() / (3600 * 24))
     except:
         pass
 
