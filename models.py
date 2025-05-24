@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from pydantic import (
     BaseModel,
@@ -37,6 +37,7 @@ class EventReport(BaseModel):
         eventid (str): The ID of the event.
         summary (str): A summary of the event.
         attendance (int): The number of attendees.
+        external_attendance (Optional[int]): The number of external attendees if allowed.
         prizes (List[PrizesType]): The list prizes awarded in the event.
         prizes_breakdown (str): A breakdown of the prizes awarded.
         winners (str): The winners of the event.
@@ -50,6 +51,7 @@ class EventReport(BaseModel):
     eventid: str
     summary: medium_str_type
     attendance: event_popu_type
+    external_attendance: Optional[event_popu_type] = None
     prizes: List[PrizesType] = []
     prizes_breakdown: long_str_type
     winners: long_str_type
@@ -89,6 +91,8 @@ class Event(BaseModel):
                                      Defaults to None.
         population (event_popu_type): The estimated population for the event.
                                       Defaults to None.
+        external_popluation (Optional[event_popu_type]): This is an optionl 
+            field specifying the number of external participants in the event.
         poc (str): The point of contact for the event. Defaults to None.
         status (Event_Status): The approval and approver details.
         budget (List[BudgetInput]): The list of budgets for the event.
@@ -118,6 +122,7 @@ class Event(BaseModel):
     equipment: short_str_type | None = None
     additional: short_str_type | None = None
     population: event_popu_type | None = None
+    external_population: Optional[event_popu_type] = None
     poc: str | None = None
 
     status: Event_Status = Event_Status()

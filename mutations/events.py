@@ -133,6 +133,11 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.additional = details.additional
     if details.population is not None:
         event_instance.population = details.population
+    if details.external_population is not None and details.external_population > 0:
+        # External popluation should be lower than internal
+        if details.population and details.population < details.external_population:
+            raise Exception("Number of external participants should be less than the total participants.")
+        event_instance.external_population = details.external_population
     if details.budget is not None:
         event_instance.budget = list(
             map(
@@ -293,6 +298,11 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["additional"] = details.additional
     if details.population is not None:
         updates["population"] = details.population
+    if details.external_population is not None and details.external_population > 0:
+        if details.population and details.population < details.external_population:
+            raise Exception("Number of external participants should be less than the total participants.")
+        updates["external_population"] = details.external_population
+
     if details.budget is not None and updatable:
         # updates["status.budget"] = False or user["role"] == "cc"
         updates["budget"] = list(
@@ -539,12 +549,12 @@ def progressEvent(
         mail_description = "N/A"
 
     student_count = updated_event_instance.population
+
     mail_location = ""
     mail_locationAlternate = ""
     if updated_event_instance.mode == Event_Mode.online:
         mail_location = "online"
         mail_locationAlternate = "N/A"
-        student_count = "N/A"
     else:
         mail_location = ", ".join(
             [
@@ -558,6 +568,11 @@ def progressEvent(
                 for loc in updated_event_instance.locationAlternate
             ]
         )
+
+    # handle external participants
+    external_count = updated_event_instance.external_population
+    if external_count and external_count > 0:
+        student_count = student_count + f" (External Participants: {external_count})"
 
     equipment, additional, budget = "N/A", "N/A", "N/A"
     if updated_event_instance.equipment:
