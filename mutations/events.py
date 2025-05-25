@@ -133,10 +133,18 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.additional = details.additional
     if details.population is not None:
         event_instance.population = details.population
-    if details.external_population is not None and details.external_population > 0:
+    if (
+        details.external_population is not None
+        and details.external_population > 0
+    ):
         # External popluation should be lower than internal
-        if details.population and details.population < details.external_population:
-            raise Exception("Number of external participants should be less than the total participants.")
+        if (
+            details.population
+            and details.population < details.external_population
+        ):
+            raise Exception(
+                "Number of external participants should be less than total."
+            )
         event_instance.external_population = details.external_population
     if details.budget is not None:
         event_instance.budget = list(
@@ -298,9 +306,17 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["additional"] = details.additional
     if details.population is not None:
         updates["population"] = details.population
-    if details.external_population is not None and details.external_population > 0:
-        if details.population and details.population < details.external_population:
-            raise Exception("Number of external participants should be less than the total participants.")
+    if (
+        details.external_population is not None
+        and details.external_population > 0
+    ):
+        if (
+            details.population
+            and details.population < details.external_population
+        ):
+            raise Exception(
+                "Number of external participants should be less than total."
+            )
         updates["external_population"] = details.external_population
 
     if details.budget is not None and updatable:
@@ -572,7 +588,9 @@ def progressEvent(
     # handle external participants
     external_count = updated_event_instance.external_population
     if external_count and external_count > 0:
-        student_count = student_count + f" (External Participants: {external_count})"
+        student_count = (
+            student_count + f" (External Participants: {external_count})"
+        )
 
     equipment, additional, budget = "N/A", "N/A", "N/A"
     if updated_event_instance.equipment:
