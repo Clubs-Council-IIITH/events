@@ -9,7 +9,6 @@ import requests
 
 from db import eventsdb
 from mtypes import timezone
-from otypes import timelot_type
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
@@ -350,7 +349,7 @@ def eventsWithSorting(
     pagination=False,
     skip=0,
     limit: int | None = None,
-    timings: timelot_type | None = None,
+    timings: List[str] | None = None,
 ) -> List[dict]:
     """
     Provides a list of events based on the searchspace provided.
@@ -396,29 +395,25 @@ def eventsWithSorting(
         searchspace["name"] = {"$regex": name, "$options": "i"}
 
     if timings is not None:
-        timings_str = [
-            timings[0].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
-            timings[1].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
-        ]
         timings_conditions = [
             # Event starts within the timing period
             {
                 "datetimeperiod.0": {
-                    "$gte": timings_str[0],
-                    "$lt": timings_str[1],
+                    "$gte": timings[0],
+                    "$lt": timings[1],
                 }
             },
             # Event ends within the timing period
             {
                 "datetimeperiod.1": {
-                    "$gt": timings_str[0],
-                    "$lte": timings_str[1],
+                    "$gt": timings[0],
+                    "$lte": timings[1],
                 }
             },
             # Event spans the entire timing period
             {
-                "datetimeperiod.0": {"$lte": timings_str[0]},
-                "datetimeperiod.1": {"$gte": timings_str[1]},
+                "datetimeperiod.0": {"$lte": timings[0]},
+                "datetimeperiod.1": {"$gte": timings[1]},
             },
         ]
 
