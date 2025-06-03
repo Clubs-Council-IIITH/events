@@ -9,6 +9,7 @@ import requests
 
 from db import eventsdb
 from mtypes import timezone
+from otypes import timelot_type
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
@@ -349,6 +350,7 @@ def eventsWithSorting(
     pagination=False,
     skip=0,
     limit: int | None = None,
+    timings: timelot_type | None = None,
 ) -> List[dict]:
     """
     Provides a list of events based on the searchspace provided.
@@ -371,6 +373,8 @@ def eventsWithSorting(
         pagination (bool): if True, paginates the events. Defaults to False.
         skip (int): number of events to skip
         limit (int): number of events to return. Defaults to None.
+        timings (timelot_type | None): The time period for which the events
+                                are to be fetched. Defaults to None.
 
     Returns:
         (List[dict]): list of events
@@ -378,6 +382,7 @@ def eventsWithSorting(
     current_datetime = datetime.now(timezone).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
+
     if date_filter:
         required_events_query = {
             **searchspace,
@@ -389,6 +394,38 @@ def eventsWithSorting(
 
     if name is not None and pagination:
         searchspace["name"] = {"$regex": name, "$options": "i"}
+
+    if timings is not None:
+        timings_str = [
+            timings[0].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
+            timings[1].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
+        ]
+        timings_conditions = [
+            # Event starts within the timing period
+            {
+                "datetimeperiod.0": {
+                    "$gte": timings_str[0],
+                    "$lt": timings_str[1],
+                }
+            },
+            # Event ends within the timing period
+            {
+                "datetimeperiod.1": {
+                    "$gt": timings_str[0],
+                    "$lte": timings_str[1],
+                }
+            },
+            # Event spans the entire timing period
+            {
+                "datetimeperiod.0": {"$lte": timings_str[0]},
+                "datetimeperiod.1": {"$gte": timings_str[1]},
+            },
+        ]
+
+        searchspace = {
+            **searchspace,
+            "$or": timings_conditions,
+        }
 
     ongoing_events_query = {
         **searchspace,

@@ -139,6 +139,8 @@ def events(
     paginationOn: bool = False,
     limit: int | None = None,
     skip: int = 0,
+    timings: timelot_type | None = None,
+    location: List[Event_Location] | None = None,
 ) -> List[EventType]:
     """
     Returns a list of events as a search result that match the given criteria.
@@ -162,7 +164,11 @@ def events(
         paginationOn (bool): Whether to use pagination. Defaults to False.
         limit (int | None): The maximum number of events to return. Defaults
                             to None.
-        skip (int): The number of events to skip.
+        skip (int): The number of events to skip. Defaults to 0.
+        timings (timelot_type | None): The time period for which the events
+                                are to be fetched. Defaults to None.
+        location (List[Event_Location] | None): The locations of the events 
+                                to be fetched. Defaults to None.
 
     Returns:
         (List[EventType]): A list of events that match the given criteria.
@@ -232,6 +238,9 @@ def events(
             "$in": statuses,
         }
 
+    if location is not None:
+        searchspace["location"] = {"$in": location}
+
     events = eventsWithSorting(
         searchspace,
         date_filter=False,
@@ -239,6 +248,7 @@ def events(
         name=name,
         skip=skip,
         limit=limit,
+        timings=timings,
     )
 
     # hides few fields from public viewers
