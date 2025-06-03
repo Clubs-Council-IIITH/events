@@ -167,7 +167,7 @@ def events(
         skip (int): The number of events to skip. Defaults to 0.
         timings (timelot_type | None): The time period for which the events
                                 are to be fetched. Defaults to None.
-        location (List[Event_Location] | None): The locations of the events 
+        location (List[Event_Location] | None): The locations of the events
                                 to be fetched. Defaults to None.
 
     Returns:
@@ -240,7 +240,7 @@ def events(
 
     if location is not None:
         searchspace["location"] = {"$in": location}
-    
+
     timings_str: List[str] | None = None
     if timings is not None:
         timings_str = [
@@ -268,6 +268,7 @@ def events(
         for event in events
     ]
 
+
 @strawberry.field
 def clashingEvents(
     info: Info,
@@ -292,25 +293,23 @@ def clashingEvents(
     if user is None or user["role"] not in ["cc", "slo"]:
         raise Exception("You do not have permission to access this resource.")
 
-    searchspace: dict[str, Any] = {}
-    searchspace["status.state"] = {
+    searchspace = {
+        "status.state": {
             "$in": [
                 Event_State_Status.approved.value,
             ]
-        }
-    searchspace["audience"] = {"$nin": ["internal"]}
+        },
+        "audience": {"$nin": ["internal"]},
+    }
 
     event = eventsdb.find_one({"_id": id})
     if event is None:
         raise Exception("Event with given id does not exist.")
 
-    searchspace["location"] = {"$in": event["location"]}
-    timings = event["datetimeperiod"]
-
     events = eventsWithSorting(
         searchspace,
         date_filter=False,
-        timings=timings,
+        timings=event["datetimeperiod"],
     )
 
     return [
