@@ -273,6 +273,7 @@ def events(
 def clashingEvents(
     info: Info,
     id: str,
+    filterByLocation: bool = False,
 ) -> List[EventType]:
     """
     Returns a list of clashing events for the given event id.
@@ -305,6 +306,9 @@ def clashingEvents(
     event = eventsdb.find_one({"_id": id})
     if event is None:
         raise Exception("Event with given id does not exist.")
+    
+    if filterByLocation:
+        searchspace["location"] = {"$in": event["location"]}
 
     events = eventsWithSorting(
         searchspace,
