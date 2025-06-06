@@ -139,6 +139,8 @@ def events(
     paginationOn: bool = False,
     limit: int | None = None,
     skip: int = 0,
+    timings: timelot_type | None = None,
+    location: List[Event_Location] | None = None,
 ) -> List[EventType]:
     """
     Returns a list of events as a search result that match the given criteria.
@@ -162,7 +164,11 @@ def events(
         paginationOn (bool): Whether to use pagination. Defaults to False.
         limit (int | None): The maximum number of events to return. Defaults
                             to None.
-        skip (int): The number of events to skip.
+        skip (int): The number of events to skip. Defaults to 0.
+        timings (timelot_type | None): The time period for which the events
+                                are to be fetched. Defaults to None.
+        location (List[Event_Location] | None): The locations of the events
+                                to be fetched. Defaults to None.
 
     Returns:
         (List[EventType]): A list of events that match the given criteria.
@@ -232,6 +238,16 @@ def events(
             "$in": statuses,
         }
 
+    if location is not None:
+        searchspace["location"] = {"$in": location}
+
+    timings_str: List[str] | None = None
+    if timings is not None:
+        timings_str = [
+            timings[0].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
+            timings[1].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
+        ]
+
     events = eventsWithSorting(
         searchspace,
         date_filter=False,
@@ -239,6 +255,7 @@ def events(
         name=name,
         skip=skip,
         limit=limit,
+        timings=timings_str,
     )
 
     # hides few fields from public viewers
@@ -249,6 +266,60 @@ def events(
     return [
         EventType.from_pydantic(Event.model_validate(event))
         for event in events
+    ]
+
+
+@strawberry.field
+def clashingEvents(
+    info: Info,
+    id: str,
+    filterByLocation: bool = False,
+) -> List[EventType]:
+    """
+    Returns a list of clashing events for the given event id.
+
+    Args:
+        info (Info): The context information of user for the request.
+        id (str): The id of the event for which clashing events are to be
+                     fetched.
+
+    Returns:
+        (List[EventType]): A list of events that match the given criteria.
+
+    Raises:
+        Exception: You do not have permission to access this resource.
+    """
+
+    user = info.context.user
+    if user is None or user["role"] not in ["cc", "slo"]:
+        raise Exception("You do not have permission to access this resource.")
+
+    searchspace = {
+        "status.state": {
+            "$in": [
+                Event_State_Status.approved.value,
+            ]
+        },
+        "audience": {"$nin": ["internal"]},
+    }
+
+    event = eventsdb.find_one({"_id": id})
+    if event is None:
+        raise Exception("Event with given id does not exist.")
+    
+    if filterByLocation:
+        searchspace["location"] = {"$in": event["location"]}
+
+    events = eventsWithSorting(
+        searchspace,
+        date_filter=False,
+        timings=event["datetimeperiod"],
+    )
+
+    return [
+        EventType.from_pydantic(Event.model_validate(event))
+        for event in events
+        if event["_id"] != id
     ]
 
 
@@ -667,6 +738,7 @@ def downloadEventsData(
 queries = [
     event,
     events,
+    clashingEvents,
     eventid,
     incompleteEvents,
     # approvedEvents,
