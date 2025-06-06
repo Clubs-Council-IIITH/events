@@ -31,3 +31,5 @@ tomli==2.2.1
 typer==0.15.2
 typing-extensions>=4.13.1
 uvicorn==0.34.0
+matplotlib==3.10.3
+datetime==4.7
