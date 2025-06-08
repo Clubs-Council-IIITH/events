@@ -148,13 +148,13 @@ def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
     submitted_time = datetime.strptime(
         event_report["submitted_time"], "%Y-%m-%dT%H:%M:%S.%fZ"
     )
-    if submitted_time + timedelta(days=2) < datetime.now() and user_role == "club":
-        raise ValueError("Event report can't be updated")
-    
-    if submitted_time + timedelta(days=2) < datetime.now() and user_role == "cc":
-        raise ValueError("Event report can't be updated")
-    
-    if submitted_time + timedelta(days=14) < datetime.now() and user_role == "slo":
+
+    if user_role in ["club", "cc"]:
+        edit_window = timedelta(days=2)
+    elif user_role == "slo":
+        edit_window = timedelta(days=14)
+
+    if submitted_time + edit_window < datetime.now():
         raise ValueError("Event report can't be updated")
 
     report_dict = jsonable_encoder(details.to_pydantic())
