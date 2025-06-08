@@ -37,20 +37,22 @@ for club in clubs:
                 flag = 1
                 break
         if flag == 1:
-            users = db.users.find({"uid": member["uid"]})
-            users = [user for user in users]
+            users = list(db.users.find({"uid": member["uid"]}))
             for user in users:
                 if user["img"] is None:
                     if user["uid"] not in userlist:
                         userlist.append(user["uid"])
                     break
 
+userlist = list(set(userlist))  # Remove duplicates
+userlist.sort()
+
 # Write results to a CSV file
 with open("reports/members_without_images.csv", "w", newline="") as csvfile:
     csvwriter = csv.writer(csvfile)
 
     # Write the header
-    csvwriter.writerow(["User UID"])
+    csvwriter.writerow(["UIDs"])
 
     # Write the data
     for users in userlist:
