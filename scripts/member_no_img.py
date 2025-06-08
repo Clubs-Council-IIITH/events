@@ -1,6 +1,8 @@
 import csv
 from datetime import datetime
 from os import getenv, makedirs
+from typing import List
+import ldap
 
 from pymongo import MongoClient
 
@@ -12,6 +14,26 @@ MONGO_URI = "mongodb://{}:{}@mongo:{}/".format(
 MONGO_DATABASE = getenv("MONGO_DATABASE", default="default")
 client = MongoClient(MONGO_URI)
 db = client[MONGO_DATABASE]
+
+LDAP = ldap.initialize("ldap://ldap.iiit.ac.in")
+def ldap_search(filterstr: str) -> List[tuple]:
+    global LDAP
+    try:
+        result = LDAP.search_s(
+            "ou=Users,dc=iiit,dc=ac,dc=in",
+            ldap.SCOPE_SUBTREE,
+            filterstr,
+        )
+    except ldap.SERVER_DOWN:
+        # Reconnect to LDAP server and retry the search
+        LDAP = ldap.initialize("ldap://ldap.iiit.ac.in")
+        result = LDAP.search_s(
+            "ou=Users,dc=iiit,dc=ac,dc=in",
+            ldap.SCOPE_SUBTREE,
+            filterstr,
+        )
+
+    return result
 
 makedirs("reports", exist_ok=True)
 
@@ -52,8 +74,14 @@ with open("reports/members_without_images.csv", "w", newline="") as csvfile:
     csvwriter = csv.writer(csvfile)
 
     # Write the header
-    csvwriter.writerow(["UIDs"])
+    csvwriter.writerow(["email IDs"])
 
     # Write the data
     for users in userlist:
-        csvwriter.writerow([users])
+        result = ldap_search(f"(uid={users})")
+        try:
+            dn, details = result[-1]
+            email = details["mail"][0].decode()
+            csvwriter.writerow([email])
+        except:
+            csvwriter.writerow([f"Could not find email for {users} in LDAP"])
