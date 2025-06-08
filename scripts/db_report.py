@@ -179,6 +179,14 @@ for club in clubs:
             club_members_count[club["name"]][3], 2
         )
 
+club_events_keys = list(club_events.keys())
+club_events_keys.sort(
+    key=lambda x: (
+        -club_events[x][2],  # Sort by total no of events (desc)
+        x,  # Then by club name (asc)
+    ),
+)
+
 makedirs("reports", exist_ok=True)
 with open("reports/database_report.csv", "w", newline="") as csvfile:
     csvwriter = csv.writer(csvfile)
@@ -206,7 +214,8 @@ with open("reports/database_report.csv", "w", newline="") as csvfile:
         ]
     )
 
-    for club_name in sorted(club_events.keys()):
+    count = 0
+    for club_name in club_events_keys:
         internal_events = len(club_events[club_name][0])
         non_internal_events = len(club_events[club_name][1])
         total_events = club_events[club_name][2]
@@ -234,8 +243,11 @@ with open("reports/database_report.csv", "w", newline="") as csvfile:
                     avg_membership_duration,
                 ]
             )
+            count += 1
+    csvwriter.writerow(["Total no of active clubs", count])
     csvwriter.writerow([])
-    key = 0
+
+    count = 0
     csvwriter.writerow([f"Dead Clubs (<{deadclub_threshold} events)"])
     csvwriter.writerow(
         [
@@ -252,7 +264,7 @@ with open("reports/database_report.csv", "w", newline="") as csvfile:
         ]
     )
 
-    for club_name in sorted(club_events.keys()):
+    for club_name in club_events_keys:
         internal_events = len(club_events[club_name][0])
         non_internal_events = len(club_events[club_name][1])
         total_events = club_events[club_name][2]
@@ -278,8 +290,8 @@ with open("reports/database_report.csv", "w", newline="") as csvfile:
                     avg_membership_duration,
                 ]
             )
-            key += 1
-    csvwriter.writerow(["Total no of dead clubs", key])
+            count += 1
+    csvwriter.writerow(["Total no of dead clubs", count])
     csvwriter.writerow([])
     if approvals > 0:
         avg_approval_days = (
