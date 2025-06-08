@@ -25,11 +25,26 @@ if startYear > endYear:
     print("Start year cannot be greater than end year.")
     exit(1)
 
+include_bodies = (
+    input("Do you want to include bodies in the report? (yes/no): ")
+    .strip()
+    .lower()
+    .startswith("y")
+)
+club_categories = ["cultural", "technical", "affinity", "other"]
+if include_bodies:
+    club_categories.append("body")
+
 start_date = datetime(startYear, 4, 1, tzinfo=timezone.utc)
 end_date = datetime(endYear, 3, 31, 23, 59, 59, tzinfo=timezone.utc)
 
-results = db.clubs.find()
-clubs = [result for result in results]
+clubs = list(db.clubs.find(
+    {
+        "state": "active",
+        "category": {"$in": club_categories},
+    },
+    {"_id": 0, "cid": 1, "name": 1, "state": 1},
+))
 club_events = {}
 club_state = {}
 club_budget = {}
@@ -38,8 +53,7 @@ approval_time_sum = 0
 club_members_count = {}
 
 for club in clubs:
-    results = db.events.find({"clubid": club["cid"]})
-    events = [result for result in results]
+    events = list(db.events.find({"clubid": club["cid"]}))
 
     club_events[club["name"]] = [[], [], 0]
     club_budget[club["name"]] = [0, 0]
@@ -134,8 +148,7 @@ for club in clubs:
     )
     club_state[club["name"]] = club["state"]
 
-    results = db.members.find({"cid": club["cid"]})
-    members = [result for result in results]
+    members = list(db.members.find({"cid": club["cid"]}))
     club_members_count[club["name"]] = [0, 0, 0, 0]
     for member in members:
         for role in member["roles"]:
