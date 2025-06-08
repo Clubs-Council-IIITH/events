@@ -21,6 +21,9 @@ try:
 except:  # noqa: E722
     print("Invalid input! Please enter valid integers for the years.")
     exit(1)
+if startYear > endYear:
+    print("Start year cannot be greater than end year.")
+    exit(1)
 
 start_date = datetime(startYear, 4, 1, tzinfo=timezone.utc)
 end_date = datetime(endYear, 3, 31, 23, 59, 59, tzinfo=timezone.utc)
@@ -326,16 +329,19 @@ if exception_count > 0:
         "Number of exceptions: {}".format(exception_count)
     )
 
-# Raindrop plot
-plt.figure(figsize=(10, 6))
-plt.scatter(
-    range(len(approval_times)), approval_times, alpha=0.6, color="blue"
-)
-plt.title("Raindrop Plot of Approval Times")
-plt.xlabel("Event Index (Sorted by Submission Time)")
-plt.ylabel("Approval Time (days)")
-plt.grid(True, linestyle="--", alpha=0.5)
-plt.tight_layout()
+if len(approval_times) > 0:
+    # Raindrop plot
+    plt.figure(figsize=(10, 6))
+    plt.scatter(
+        range(len(approval_times)), approval_times, alpha=0.6, color="blue"
+    )
+    plt.title("Raindrop Plot of Approval Times")
+    plt.xlabel("Event Index (Sorted by Submission Time)")
+    plt.ylabel("Approval Time (days)")
+    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.tight_layout()
 
-# Save the plot as an image
-plt.savefig("reports/approval_times_plot.png")
+    # Save the plot as an image
+    plt.savefig("reports/approval_times_plot.png")
+else:
+    print("No approval times found in the given date range for raindrop plot.")
