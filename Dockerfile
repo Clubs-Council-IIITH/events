@@ -15,5 +15,5 @@ ENV VIRTUAL_ENV=/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY --from=python_cache /venv /venv
 COPY . .
-RUN strawberry export-schema main > schema.graphql
+# RUN strawberry export-schema main > schema.graphql
 ENTRYPOINT [ "./entrypoint.sh" ]

@@ -18,11 +18,17 @@ db = client[MONGO_DATABASE]
 try:
     startYear = int(input("Enter the start year: "))
     endYear = int(input("Enter the end year: "))
+    deadclub_threshold = int(
+        input("Enter the dead club threshold (default 4): ") or 4
+    )
 except:  # noqa: E722
     print("Invalid input! Please enter valid integers for the years.")
     exit(1)
 if startYear > endYear:
     print("Start year cannot be greater than end year.")
+    exit(1)
+if deadclub_threshold < 0:
+    print("Dead club threshold cannot be negative.")
     exit(1)
 
 include_bodies = (
@@ -35,16 +41,19 @@ club_categories = ["cultural", "technical", "affinity", "other"]
 if include_bodies:
     club_categories.append("body")
 
+
 start_date = datetime(startYear, 4, 1, tzinfo=timezone.utc)
 end_date = datetime(endYear, 3, 31, 23, 59, 59, tzinfo=timezone.utc)
 
-clubs = list(db.clubs.find(
-    {
-        "state": "active",
-        "category": {"$in": club_categories},
-    },
-    {"_id": 0, "cid": 1, "name": 1, "state": 1},
-))
+clubs = list(
+    db.clubs.find(
+        {
+            "state": "active",
+            "category": {"$in": club_categories},
+        },
+        {"_id": 0, "cid": 1, "name": 1, "state": 1},
+    )
+)
 club_events = {}
 club_state = {}
 club_budget = {}
@@ -180,7 +189,7 @@ with open("reports/database_report.csv", "w", newline="") as csvfile:
             )
         ]
     )
-    csvwriter.writerow([])
+    csvwriter.writerow([f"Active Clubs (>={deadclub_threshold} events)"])
     csvwriter.writerow(
         [
             "Club Name",
@@ -209,24 +218,25 @@ with open("reports/database_report.csv", "w", newline="") as csvfile:
         avg_membership_duration = club_members_count[club_name][3]
         state = club_state[club_name]
 
-        csvwriter.writerow(
-            [
-                club_name,
-                state,
-                internal_events,
-                non_internal_events,
-                total_events,
-                total_budget,
-                avg_budget,
-                members_joined,
-                members_left,
-                active_members,
-                avg_membership_duration,
-            ]
-        )
+        if total_events >= deadclub_threshold:
+            csvwriter.writerow(
+                [
+                    club_name,
+                    state,
+                    internal_events,
+                    non_internal_events,
+                    total_events,
+                    total_budget,
+                    avg_budget,
+                    members_joined,
+                    members_left,
+                    active_members,
+                    avg_membership_duration,
+                ]
+            )
     csvwriter.writerow([])
     key = 0
-    csvwriter.writerow(["Dead Clubs"])
+    csvwriter.writerow([f"Dead Clubs (<{deadclub_threshold} events)"])
     csvwriter.writerow(
         [
             "Club Name",
@@ -253,7 +263,7 @@ with open("reports/database_report.csv", "w", newline="") as csvfile:
         active_members = club_members_count[club_name][2]
         avg_membership_duration = club_members_count[club_name][3]
         state = club_state[club_name]
-        if total_events < 4:
+        if total_events < deadclub_threshold:
             csvwriter.writerow(
                 [
                     club_name,
