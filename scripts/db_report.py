@@ -335,13 +335,14 @@ if len(approval_times) > 0:
     plt.scatter(
         range(len(approval_times)), approval_times, alpha=0.6, color="blue"
     )
-    plt.title("Raindrop Plot of Approval Times")
+    plt.title(
+        f"Raindrop Plot of Approval Times for {len(approval_times)} Events"
+    )
     plt.xlabel("Event Index (Sorted by Submission Time)")
     plt.ylabel("Approval Time (days)")
     plt.grid(True, linestyle="--", alpha=0.5)
-    plt.tight_layout()
 
-    # Save the plot as an image
+    plt.tight_layout()
     plt.savefig("reports/approval_times_plot.png")
 else:
     print("No approval times found in the given date range for raindrop plot.")
