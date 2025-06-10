@@ -115,7 +115,7 @@ def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
         raise ValueError("User not authenticated")
 
     user_role = user["role"]
-    if user_role not in ["club", "cc"]:
+    if user_role not in ["club", "cc", "slo"]:
         raise ValueError("User not authorized")
 
     eventid = details.eventid
@@ -148,7 +148,13 @@ def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
     submitted_time = datetime.strptime(
         event_report["submitted_time"], "%Y-%m-%dT%H:%M:%S.%fZ"
     )
-    if submitted_time + timedelta(days=3) < datetime.now():
+
+    if user_role in ["club", "cc"]:
+        edit_window = timedelta(days=2)
+    elif user_role == "slo":
+        edit_window = timedelta(days=14)
+
+    if submitted_time + edit_window < datetime.now():
         raise ValueError("Event report can't be updated")
 
     report_dict = jsonable_encoder(details.to_pydantic())
