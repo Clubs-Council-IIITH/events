@@ -291,7 +291,7 @@ def clashingEvents(
     """
 
     user = info.context.user
-    if user is None or user["role"] not in ["cc", "slo"]:
+    if user is None or user["role"] not in ["cc", "slo" ,"club"]:
         raise Exception("You do not have permission to access this resource.")
 
     searchspace = {
@@ -306,6 +306,10 @@ def clashingEvents(
     event = eventsdb.find_one({"_id": id})
     if event is None:
         raise Exception("Event with given id does not exist.")
+
+    if (user["role"] == "club" and event["clubid"] != user["uid"]):
+        raise Exception("Not Authenticated to access this API")
+
 
     if filterByLocation:
         searchspace["location"] = {"$in": event["location"]}
