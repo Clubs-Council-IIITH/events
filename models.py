@@ -13,6 +13,7 @@ from mtypes import (
     Audience,
     Bills_Status,
     BudgetType,
+    SponsorType,
     ClubBodyCategoryType,
     Event_Location,
     Event_Mode,
@@ -128,6 +129,7 @@ class Event(BaseModel):
 
     status: Event_Status = Event_Status()
     budget: List[BudgetType] = []
+    sponsor: List[SponsorType] = []
     bills_status: Bills_Status = Bills_Status()
     event_report_submitted: bool = False
 

@@ -40,6 +40,7 @@ from models import Event
 from mtypes import (
     Audience,
     BudgetType,
+    SponsorType,
     ClubBodyCategoryType,
     Event_Full_Location,
     Event_Location,
@@ -155,6 +156,18 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
                     advance=x.advance,
                 ),
                 details.budget,
+            )
+        )
+    if details.sponsor is not None:
+        event_instance.sponsor = list(
+            map(
+                lambda x: SponsorType(
+                    name=x.name,
+                    website=x.website,
+                    amount=x.amount ,
+                    previously_sponsored=x.previously_sponsored
+                ),
+                details.sponsor,
             )
         )
     if details.collabclubs and details.collabclubs != []:
@@ -329,6 +342,18 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
                     advance=x.advance,
                 ),
                 details.budget,
+            )
+        )
+    if details.sponsor is not None:
+        updates["sponsor"] = list(
+            map(
+                lambda x: SponsorType(
+                    name=x.name,
+                    website=x.website,
+                    amount=x.amount, 
+                    previously_sponsored=x.previously_sponsored
+                ),
+                details.sponsor,
             )
         )
 
@@ -592,7 +617,7 @@ def progressEvent(
             student_count + f" (External Participants: {external_count})"
         )
 
-    equipment, additional, budget = "N/A", "N/A", "N/A"
+    equipment, additional, budget, sponsor = "N/A", "N/A", "N/A", "N/A"
     if updated_event_instance.equipment:
         equipment = updated_event_instance.equipment
     if updated_event_instance.additional:
@@ -619,6 +644,32 @@ def progressEvent(
         budget_table.align["Amount"] = "r"
 
         budget = "\n" + budget_table.get_string()
+
+    if updated_event_instance.sponsor:
+        sponsor_table = PrettyTable()
+        sponsor_table.field_names = ["Name", "Website", "Amount", "Previously Sponsored"]
+        for item in updated_event_instance.sponsor:
+            sponsor_table.add_row(
+                [
+                    item.name,
+                    item.website,
+                    item.amount,
+                    "Yes" if item.previously_sponsored else "No",
+                ],
+                divider=True,
+            )
+        total_sponsor = sum(
+            item.amount for item in updated_event_instance.sponsor
+        )
+        sponsor_table.add_row(["", "Total sponsor", total_sponsor, ""], divider=True)
+        sponsor_table.max_width["Name"] = 10
+        sponsor_table.max_width["Website"] = 20
+        sponsor_table.max_width["Amount"] = 8
+        sponsor_table.max_width["Previously Sponsored"] = 5
+        sponsor_table.align["Amount"] = "r"
+
+        sponsor = "\n" + sponsor_table.get_string()
+
 
     ist_offset = timedelta(hours=5, minutes=30)
     start_dt = updated_event_instance.datetimeperiod[0] + ist_offset
@@ -676,6 +727,7 @@ def progressEvent(
             location=mail_location,
             locationAlternate=mail_locationAlternate,
             budget=budget,
+            sponsor=sponsor,
             poc_name=poc_name,
             poc_roll=poc_roll,
             poc_email=poc_email,
@@ -714,6 +766,7 @@ def progressEvent(
             location=mail_location,
             locationAlternate=mail_locationAlternate,
             budget=budget,
+            sponsor=sponsor,
             additional=additional,
             eventlink=mail_eventlink,
         )
@@ -740,6 +793,7 @@ def progressEvent(
             locationAlternate=mail_locationAlternate,
             equipment=equipment,
             budget=budget,
+            sponsor=sponsor,
             additional=additional,
             poc_name=poc_name,
             poc_roll=poc_roll,
