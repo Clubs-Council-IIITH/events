@@ -15,6 +15,7 @@ from mtypes import (
     Bills_State_Status,
     Bills_Status,
     BudgetType,
+    SponsorType,
     Event_Location,
     Event_Mode,
     PyObjectId,
@@ -125,6 +126,15 @@ class BudgetInput(BudgetType):
 
 
 @strawberry.input
+class SponsorInput(SponsorType):
+    """
+    Input for taking all fields of the SponsorType class.
+    """
+
+    pass
+
+
+@strawberry.input
 class InputEventDetails:
     """
     Class for taking the details of an event.
@@ -155,6 +165,8 @@ class InputEventDetails:
                           outside the campus attending the event.
         budget (List[BudgetInput]): List of budgets of the event.
                                     Default is None.
+        sponsor (List[SponsorInput]): List of sponsor of the event.
+                                    Default is None.
         poc (str): Point of contact for the event.
     """  # noqa: E501
 
@@ -174,6 +186,7 @@ class InputEventDetails:
     population: int | None = None
     external_population: Optional[int] = None
     budget: List[BudgetInput] | None = None
+    sponsor: List[SponsorInput] | None = None
     poc: str
 
 
@@ -201,6 +214,7 @@ class InputEditEventDetails:
     population: int | None = None
     external_population: Optional[int] = None
     budget: List[BudgetInput] | None = None
+    sponsor: List[SponsorInput] | None = None
     poc: str | None = None
 
 

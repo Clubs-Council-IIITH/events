@@ -392,6 +392,34 @@ class BudgetType:
         return value
 
 
+@strawberry.type
+class SponsorType:
+    """
+    Class for info regarding a sponsor
+
+    Attributes:
+        name (str): Name of the sponsor.
+        website (str): Website to contact the Sponsor.
+        amount (float): Amount supported by sponsor.
+        previously_sponsored (bool | None): Whether the sponsor has sponsored an event previously
+    """
+
+    name: str
+    website: str
+    amount: float
+    previously_sponsored: bool = False
+
+    @field_validator("amount")
+    @classmethod
+    def positive_amount(cls, value):
+        """
+        A field validator for the amount field.
+        """
+        if value <= 0:
+            raise ValueError("Amount must be positive")
+        return value
+
+
 @strawberry.enum
 class ClubBodyCategoryType(StrEnum):
     """
