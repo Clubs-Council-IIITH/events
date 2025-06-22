@@ -546,7 +546,7 @@ def availableRooms(
         if event is not None:
             occupied_rooms.difference_update(event["location"])
 
-    all_rooms = set(Event_Location.__members__.values())
+    all_rooms = list(Event_Location.__members__.values())
 
     return RoomListType(
         locations=[
