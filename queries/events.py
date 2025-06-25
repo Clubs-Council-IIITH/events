@@ -273,7 +273,7 @@ def events(
 def clashingEvents(
     info: Info,
     id: str,
-    filterByLocation: bool = False,
+    filterByLocation: bool = True,
 ) -> List[EventType]:
     """
     Returns a list of clashing events for the given event id.
@@ -300,7 +300,6 @@ def clashingEvents(
                 Event_State_Status.approved.value,
             ]
         },
-        "audience": {"$nin": ["internal"]},
     }
 
     event = eventsdb.find_one({"_id": id})
