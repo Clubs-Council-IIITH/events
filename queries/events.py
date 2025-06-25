@@ -24,7 +24,7 @@ from otypes import (
     EventType,
     Info,
     InputDataReportDetails,
-    RoomList,
+    RoomInfo,
     RoomListType,
     timelot_type,
 )
@@ -273,7 +273,7 @@ def events(
 def clashingEvents(
     info: Info,
     id: str,
-    filterByLocation: bool = False,
+    filterByLocation: bool = True,
 ) -> List[EventType]:
     """
     Returns a list of clashing events for the given event id.
@@ -300,7 +300,6 @@ def clashingEvents(
                 Event_State_Status.approved.value,
             ]
         },
-        "audience": {"$nin": ["internal"]},
     }
 
     event = eventsdb.find_one({"_id": id})
@@ -521,31 +520,41 @@ def availableRooms(
         raise Exception("You do not have permission to access this resource.")
 
     assert timeslot[0] < timeslot[1], "Invalid timeslot"
+    timeslot_str = [
+        timeslot[0].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
+        timeslot[1].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
+    ]
 
     approved_events = eventsdb.find(
         {
             "status.state": Event_State_Status.approved.value,
+            "datetimeperiod.0": {"$lte": timeslot_str[1]},
+            "datetimeperiod.1": {"$gte": timeslot_str[0]},
         },
         {
             "location": 1,
-            "datetimeperiod": 1,
         },
     )
 
-    free_rooms = set(Event_Location.__members__.values())
+    occupied_rooms = set()
     for approved_event in approved_events:
-        start_time = dp.parse(approved_event["datetimeperiod"][0])
-        end_time = dp.parse(approved_event["datetimeperiod"][1])
-        if timeslot[1] >= start_time and timeslot[0] <= end_time:
-            free_rooms.difference_update(approved_event["location"])
+        occupied_rooms.update(approved_event["location"])
 
     if eventid is not None:
-        event = eventsdb.find_one({"_id": eventid})
+        event = eventsdb.find_one({"_id": eventid}, {"location": 1})
         if event is not None:
-            free_rooms.update(event["location"])
+            occupied_rooms.difference_update(event["location"])
 
-    return RoomListType.from_pydantic(
-        RoomList.model_validate({"locations": free_rooms})
+    all_rooms = list(Event_Location.__members__.values())
+
+    return RoomListType(
+        locations=[
+            RoomInfo(
+                location=room,
+                available=room not in occupied_rooms,
+            )
+            for room in all_rooms
+        ]
     )
 
 

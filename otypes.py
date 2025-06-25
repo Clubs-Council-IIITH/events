@@ -72,21 +72,23 @@ class EventType:
     pass
 
 
-class RoomList(BaseModel):
+@strawberry.type
+class RoomInfo:
     """
-    Model for storing the list of rooms.
+    Class for returning the location and availability of a room.
     """
 
-    locations: List[Event_Location]
+    location: Event_Location
+    available: bool
 
 
-@strawberry.experimental.pydantic.type(model=RoomList, all_fields=True)
+@strawberry.type
 class RoomListType:
     """
-    Type for returning a list of locations.
+    Type for returning a list of locations with the availability
     """
 
-    pass
+    locations: List[RoomInfo]
 
 
 @strawberry.type
