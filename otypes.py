@@ -4,7 +4,6 @@ from functools import cached_property
 from typing import Dict, List, Optional, Tuple, TypeAlias
 
 import strawberry
-from pydantic import BaseModel
 from strawberry.fastapi import BaseContext
 from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType

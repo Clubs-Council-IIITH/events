@@ -6,7 +6,6 @@ import csv
 import io
 from typing import Any, List
 
-import dateutil.parser as dp
 import strawberry
 
 from db import eventsdb
