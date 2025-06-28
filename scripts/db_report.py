@@ -6,12 +6,8 @@ import matplotlib.pyplot as plt
 from pymongo import MongoClient
 
 # MongoDB connection
-MONGO_URI = "mongodb://{}:{}@mongo:{}/".format(
-    getenv("MONGO_USERNAME", default="username"),
-    getenv("MONGO_PASSWORD", default="password"),
-    getenv("MONGO_PORT", default="27107"),
-)
-MONGO_DATABASE = getenv("MONGO_DATABASE", default="default")
+MONGO_URI = "mongodb://username:password@localhost:27017/"
+MONGO_DATABASE = "dev"
 client = MongoClient(MONGO_URI)
 db = client[MONGO_DATABASE]
 
@@ -98,11 +94,20 @@ for club in clubs:
                         slo_approver_time
                         and slo_approver_time != "Not Approved"
                     ):
-                        approver_times.append(
-                            datetime.strptime(
-                                slo_approver_time, "%d-%m-%Y %I:%M %p"
-                            ).replace(tzinfo=timezone.utc)
-                        )
+                        if slo_approver_time == 'Self Approved':
+                            slo_approver = event["status"].get("slo_approver")
+                            approver_times.append(
+                                datetime.strptime(
+                                    slo_approver, "%d-%m-%Y %I:%M %p"
+                                ).replace(tzinfo=timezone.utc)
+                            )
+                        else:
+                            approver_times.append(
+                                datetime.strptime(
+                                    slo_approver_time, "%d-%m-%Y %I:%M %p"
+                                ).replace(tzinfo=timezone.utc)
+                            )
+
                     if (
                         slc_approver_time
                         and slc_approver_time != "Not Approved"
@@ -113,7 +118,7 @@ for club in clubs:
                             ).replace(tzinfo=timezone.utc)
                         )
 
-                    if approver_times:
+                    if approver_times and "submission_time" in event["status"] and event["status"]["submission_time"]:
                         approval_time = max(approver_times)
                         approval_time = approval_time.replace(
                             tzinfo=timezone.utc
@@ -308,7 +313,7 @@ filtered_events = [
     event
     for event in all_events
     if "submission_time" in event["status"]
-    and event["status"]["submission_time"] is not None
+    and event["status"]["submission_time"]
 ]
 # sort by submission time
 sorted_events = sorted(
@@ -337,18 +342,25 @@ for event in sorted_events:
                 ).replace(tzinfo=timezone.utc)
             )
         if slo_approver_time and slo_approver_time != "Not Approved":
-            approver_times.append(
-                datetime.strptime(
-                    slo_approver_time, "%d-%m-%Y %I:%M %p"
-                ).replace(tzinfo=timezone.utc)
-            )
+            if slo_approver_time == 'Self Approved':
+                slo_approver = event["status"].get("slo_approver")
+                approver_times.append(
+                    datetime.strptime(
+                        slo_approver, "%d-%m-%Y %I:%M %p"
+                    ).replace(tzinfo=timezone.utc)
+                )
+            else:
+                approver_times.append(
+                    datetime.strptime(
+                        slo_approver_time, "%d-%m-%Y %I:%M %p"
+                    ).replace(tzinfo=timezone.utc)
+                )
         if slc_approver_time and slc_approver_time != "Not Approved":
             approver_times.append(
                 datetime.strptime(
                     slc_approver_time, "%d-%m-%Y %I:%M %p"
                 ).replace(tzinfo=timezone.utc)
             )
-
         if approver_times:
             approval_time = max(approver_times)
             approval_time = approval_time.replace(tzinfo=timezone.utc)
@@ -357,6 +369,7 @@ for event in sorted_events:
                 time_difference.total_seconds() / (3600 * 24)
             )
     except:  # noqa: E722
+        print("Event", event)
         exception_count += 1
 if exception_count > 0:
     print(

@@ -456,13 +456,11 @@ def progressEvent(
             "state": new_state,
             "cc_approver": None,
             "slc_approver": None,
-            "slo_approver": time_str if is_admin else None,
+            "slo_approver": user["uid"] if is_admin else None,
             "submission_time": time_str,
             "cc_approver_time": "Not Approved",
             "slc_approver_time": "Not Approved",
-            "slo_approver_time": "Self Approved"
-            if is_admin
-            else "Not Approved",
+            "slo_approver_time": time_str if is_admin else "Not Approved",
         }
 
     elif event_instance.status.state == Event_State_Status.pending_cc:
@@ -614,7 +612,7 @@ def progressEvent(
     external_count = updated_event_instance.external_population
     if external_count and external_count > 0:
         student_count = (
-            student_count + f" (External Participants: {external_count})"
+            str(student_count) + f" (External Participants: {external_count})"
         )
 
     equipment, additional, budget, sponsor = "N/A", "N/A", "N/A", "N/A"

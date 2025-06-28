@@ -4,7 +4,6 @@ from functools import cached_property
 from typing import Dict, List, Optional, Tuple, TypeAlias
 
 import strawberry
-from pydantic import BaseModel
 from strawberry.fastapi import BaseContext
 from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
@@ -73,21 +72,23 @@ class EventType:
     pass
 
 
-class RoomList(BaseModel):
+@strawberry.type
+class RoomInfo:
     """
-    Model for storing the list of rooms.
+    Class for returning the location and availability of a room.
     """
 
-    locations: List[Event_Location]
+    location: Event_Location
+    available: bool
 
 
-@strawberry.experimental.pydantic.type(model=RoomList, all_fields=True)
+@strawberry.type
 class RoomListType:
     """
-    Type for returning a list of locations.
+    Type for returning a list of locations with the availability
     """
 
-    pass
+    locations: List[RoomInfo]
 
 
 @strawberry.type
