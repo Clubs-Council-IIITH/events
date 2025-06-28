@@ -14,10 +14,10 @@ from mtypes import (
     Bills_State_Status,
     Bills_Status,
     BudgetType,
-    SponsorType,
     Event_Location,
     Event_Mode,
     PyObjectId,
+    SponsorType,
 )
 
 
