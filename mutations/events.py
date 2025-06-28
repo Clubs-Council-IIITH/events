@@ -589,7 +589,7 @@ def progressEvent(
     external_count = updated_event_instance.external_population
     if external_count and external_count > 0:
         student_count = (
-            student_count + f" (External Participants: {external_count})"
+            str(student_count) + f" (External Participants: {external_count})"
         )
 
     equipment, additional, budget = "N/A", "N/A", "N/A"
