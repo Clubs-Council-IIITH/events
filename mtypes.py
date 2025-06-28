@@ -401,7 +401,8 @@ class SponsorType:
         name (str): Name of the sponsor.
         website (str): Website to contact the Sponsor.
         amount (float): Amount supported by sponsor.
-        previously_sponsored (bool | None): Whether the sponsor has sponsored an event previously
+        previously_sponsored (bool | None): Whether the sponsor 
+            has sponsored an event previously
     """
 
     name: str
