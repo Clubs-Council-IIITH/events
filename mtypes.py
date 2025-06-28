@@ -405,7 +405,7 @@ class SponsorType:
     """
 
     name: str
-    website: str
+    website: str | None = None
     amount: float
     previously_sponsored: bool = False
 

@@ -163,8 +163,8 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
             map(
                 lambda x: SponsorType(
                     name=x.name,
-                    website=x.website,
-                    amount=x.amount ,
+                    website = x.website if x.website else "None",
+                    amount=x.amount,
                     previously_sponsored=x.previously_sponsored
                 ),
                 details.sponsor,
@@ -349,7 +349,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
             map(
                 lambda x: SponsorType(
                     name=x.name,
-                    website=x.website,
+                    website = x.website if x.website else "None",
                     amount=x.amount, 
                     previously_sponsored=x.previously_sponsored
                 ),
@@ -612,7 +612,7 @@ def progressEvent(
     external_count = updated_event_instance.external_population
     if external_count and external_count > 0:
         student_count = (
-            str(student_count) + f" (External Participants: {external_count})"
+            str(student_count + external_count) + f" (External Participants: {external_count})"
         )
 
     equipment, additional, budget, sponsor = "N/A", "N/A", "N/A", "N/A"
