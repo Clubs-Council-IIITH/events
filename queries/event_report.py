@@ -6,7 +6,7 @@ from otypes import EventReportType, Info
 
 
 @strawberry.field
-def eventReport(eventid: str, info: Info) -> EventReportType:
+async def eventReport(eventid: str, info: Info) -> EventReportType:
     """
     Get the event report of an event for cc,slo and club
 
@@ -32,7 +32,9 @@ def eventReport(eventid: str, info: Info) -> EventReportType:
     if user_role not in ["cc", "slo", "club"]:
         raise ValueError("User not authorized")
 
-    event = eventsdb.find_one({"_id": eventid, "event_report_submitted": True})
+    event = await eventsdb.find_one(
+        {"_id": eventid, "event_report_submitted": True}
+    )
     if not event:
         raise ValueError("Event not found")
     if (
@@ -45,7 +47,7 @@ def eventReport(eventid: str, info: Info) -> EventReportType:
     ):
         raise ValueError("User not authorized")
 
-    event_report = event_reportsdb.find_one(
+    event_report = await event_reportsdb.find_one(
         {
             "event_id": eventid,
         }
