@@ -127,7 +127,11 @@ async def allEventsBills(info: Info) -> List[BillsStatusType]:
                 ]
             }
         )
-    events = await eventsdb.find(searchspace).sort("datetimeperiod.1", -1).to_list(length=None)
+    events = (
+        await eventsdb.find(searchspace)
+        .sort("datetimeperiod.1", -1)
+        .to_list(length=None)
+    )
 
     if not events or len(events) == 0:
         raise ValueError("No events found")

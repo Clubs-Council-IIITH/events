@@ -6,7 +6,6 @@ from typing import List
 
 import fiscalyear
 import httpx
-import asyncio
 
 from db import eventsdb
 from mtypes import timezone
@@ -319,7 +318,9 @@ async def getRoleEmails(role: str) -> List[str]:
                 "http://gateway/graphql",
                 json={"query": query, "variables": variables},
             )
-        uids = list(map(lambda o: o["uid"], response.json()["data"]["usersByRole"]))
+        uids = list(
+            map(lambda o: o["uid"], response.json()["data"]["usersByRole"])
+        )
         emails = []
         for uid in uids:
             query = """
@@ -385,7 +386,11 @@ async def eventsWithSorting(
         required_events_query = {
             **searchspace,
         }
-        events = await eventsdb.find(required_events_query).sort("datetimeperiod.0", -1).to_list(length=None)
+        events = (
+            await eventsdb.find(required_events_query)
+            .sort("datetimeperiod.0", -1)
+            .to_list(length=None)
+        )
         return events
 
     if name is not None and pagination:
@@ -435,24 +440,42 @@ async def eventsWithSorting(
 
     if pagination:
         if skip < 0:
-            ongoing_events = await eventsdb.find(ongoing_events_query).sort(
-                "datetimeperiod.0", -1
-            ).to_list(length=None)
-            upcoming_events = await eventsdb.find(upcoming_events_query).sort(
-                "datetimeperiod.0", 1
-            ).to_list(length=None)
+            ongoing_events = (
+                await eventsdb.find(ongoing_events_query)
+                .sort("datetimeperiod.0", -1)
+                .to_list(length=None)
+            )
+            upcoming_events = (
+                await eventsdb.find(upcoming_events_query)
+                .sort("datetimeperiod.0", 1)
+                .to_list(length=None)
+            )
             events = ongoing_events + upcoming_events
         else:
-            past_events = await eventsdb.find(past_events_query)\
-                .sort("datetimeperiod.1", -1)\
-                .skip(skip)\
-                .limit(limit)\
+            past_events = (
+                await eventsdb.find(past_events_query)
+                .sort("datetimeperiod.1", -1)
+                .skip(skip)
+                .limit(limit)
                 .to_list(length=None)
+            )
             events = past_events
     else:
-        ongoing_events = await eventsdb.find(ongoing_events_query).sort("datetimeperiod.0", -1).to_list(length=None)
-        upcoming_events = await eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1).to_list(length=None)
-        past_events = await eventsdb.find(past_events_query).sort("datetimeperiod.1", -1).to_list(length=None)
+        ongoing_events = (
+            await eventsdb.find(ongoing_events_query)
+            .sort("datetimeperiod.0", -1)
+            .to_list(length=None)
+        )
+        upcoming_events = (
+            await eventsdb.find(upcoming_events_query)
+            .sort("datetimeperiod.0", 1)
+            .to_list(length=None)
+        )
+        past_events = (
+            await eventsdb.find(past_events_query)
+            .sort("datetimeperiod.1", -1)
+            .to_list(length=None)
+        )
         events = ongoing_events + upcoming_events + past_events
         if limit:
             events = events[:limit]

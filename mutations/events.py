@@ -206,9 +206,9 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     else:
         event_instance.club_category = ClubBodyCategoryType.club
 
-    created_id = (await eventsdb.insert_one(
-        jsonable_encoder(event_instance)
-    )).inserted_id
+    created_id = (
+        await eventsdb.insert_one(jsonable_encoder(event_instance))
+    ).inserted_id
     created_event = Event.model_validate(
         await eventsdb.find_one({"_id": created_id})
     )
@@ -423,7 +423,9 @@ async def progressEvent(
     event_instance = Event.model_validate(event_ref)
 
     mail_uid = user["uid"]
-    clubDetails = await getClubDetails(event_instance.clubid, info.context.cookies)
+    clubDetails = await getClubDetails(
+        event_instance.clubid, info.context.cookies
+    )
     if len(clubDetails.keys()) == 0:
         raise Exception("Club does not exist.")
     else:
@@ -776,9 +778,7 @@ async def progressEvent(
     elif (
         updated_event_instance.status.state == Event_State_Status.pending_room
     ):
-        cc_to = await getRoleEmails("cc") + (
-            [mail_club] if is_body else []
-        )
+        cc_to = await getRoleEmails("cc") + ([mail_club] if is_body else [])
         mail_to = await getRoleEmails("slo")
         mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
             event_id=updated_event_instance.code,
@@ -868,14 +868,18 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
         "%d-%m-%Y %I:%M %p"
     )
 
-    clubDetails = await getClubDetails(event_instance.clubid, info.context.cookies)
+    clubDetails = await getClubDetails(
+        event_instance.clubid, info.context.cookies
+    )
     if len(clubDetails.keys()) == 0:
         raise Exception("Club does not exist.")
     else:
         mail_club = clubDetails["email"]
         clubname = clubDetails["name"]
 
-    event_ref = await eventsdb.update_one(query, {"$set": {"status": updation}})
+    event_ref = await eventsdb.update_one(
+        query, {"$set": {"status": updation}}
+    )
     if event_ref.matched_count == 0:
         raise noaccess_error
 
@@ -993,7 +997,9 @@ async def rejectEvent(
 
     event_instance = Event.model_validate(event_ref)
 
-    clubDetails = await getClubDetails(event_instance.clubid, info.context.cookies)
+    clubDetails = await getClubDetails(
+        event_instance.clubid, info.context.cookies
+    )
     if len(clubDetails.keys()) == 0:
         raise Exception("Club does not exist.")
     else:

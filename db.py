@@ -39,6 +39,8 @@ db = client[MONGO_DATABASE]
 eventsdb = db.events
 holidaysdb = db.holidays
 event_reportsdb = db.event_reports
+
+
 async def create_index():
     try:
         # check if the holidays index exists
@@ -51,7 +53,9 @@ async def create_index():
             await eventsdb.create_index(
                 [("code", 1)], unique=True, name="unique_event_code"
             )
-        if "unique_event_id" not in (await event_reportsdb.index_information()):
+        if "unique_event_id" not in (
+            await event_reportsdb.index_information()
+        ):
             await event_reportsdb.create_index(
                 [("event_id", 1)], unique=True, name="unique_event_id"
             )

@@ -11,7 +11,9 @@ from utils import getMember
 
 
 @strawberry.mutation
-async def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
+async def addEventReport(
+    details: InputEventReport, info: Info
+) -> EventReportType:
     """
     Adds an event report after completion of the event
 
@@ -89,7 +91,9 @@ async def addEventReport(details: InputEventReport, info: Info) -> EventReportTy
 
 
 @strawberry.mutation
-async def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
+async def editEventReport(
+    details: InputEventReport, info: Info
+) -> EventReportType:
     """
     Edits an event report after completion of the event
 

@@ -11,7 +11,9 @@ from otypes import HolidayType, Info, InputHolidayDetails
 
 
 @strawberry.mutation
-async def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
+async def createHoliday(
+    details: InputHolidayDetails, info: Info
+) -> HolidayType:
     """
     Creates a new holiday, for SLO and CC
 
@@ -41,7 +43,9 @@ async def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType
     if await holidaysdb.find_one({"date": str(details.date)}):
         raise ValueError("A holiday already exists on this day.")
 
-    created_id = (await holidaysdb.insert_one(jsonable_encoder(holiday))).inserted_id
+    created_id = (
+        await holidaysdb.insert_one(jsonable_encoder(holiday))
+    ).inserted_id
     created_holiday = await holidaysdb.find_one({"_id": created_id})
 
     return HolidayType.from_pydantic(Holiday.model_validate(created_holiday))
@@ -77,7 +81,9 @@ async def editHoliday(
         raise ValueError("Holiday not found.")
 
     # Check if any other holiday on that day already exists
-    if await holidaysdb.find_one({"date": str(details.date), "_id": {"$ne": id}}):
+    if await holidaysdb.find_one(
+        {"date": str(details.date), "_id": {"$ne": id}}
+    ):
         raise ValueError("A holiday already exists on this day.")
 
     await holidaysdb.find_one_and_update(

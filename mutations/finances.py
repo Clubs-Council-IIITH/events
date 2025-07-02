@@ -33,7 +33,9 @@ from utils import (
 
 
 @strawberry.mutation
-async def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
+async def updateBillsStatus(
+    details: InputBillsStatus, info: Info
+) -> Bills_Status:
     """
     Updates the bills status of an event for SLO along with
     triggering an email to the organizing club.
@@ -74,9 +76,9 @@ async def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Stat
     if event is None:
         raise ValueError("Event not found.")
 
-    mail_to = (await getClubDetails(event["clubid"], info.context.cookies)).get(
-        "email", None
-    )
+    mail_to = (
+        await getClubDetails(event["clubid"], info.context.cookies)
+    ).get("email", None)
     if not mail_to:
         raise ValueError("Club email not found")
 
@@ -230,9 +232,9 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
         item.amount_used for item in event_instance.budget if item.amount_used
     )
 
-    clubname = (await getClubDetails(event["clubid"], info.context.cookies)).get(
-        "name", None
-    )
+    clubname = (
+        await getClubDetails(event["clubid"], info.context.cookies)
+    ).get("name", None)
     cc_to = await getRoleEmails("cc")
     slo_emails = await getRoleEmails("slo")
 
@@ -267,6 +269,7 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
     )
 
     return True
+
 
 # register all mutations
 mutations = [updateBillsStatus, addBill]

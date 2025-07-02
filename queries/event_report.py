@@ -32,7 +32,9 @@ async def eventReport(eventid: str, info: Info) -> EventReportType:
     if user_role not in ["cc", "slo", "club"]:
         raise ValueError("User not authorized")
 
-    event = await eventsdb.find_one({"_id": eventid, "event_report_submitted": True})
+    event = await eventsdb.find_one(
+        {"_id": eventid, "event_report_submitted": True}
+    )
     if not event:
         raise ValueError("Event not found")
     if (
