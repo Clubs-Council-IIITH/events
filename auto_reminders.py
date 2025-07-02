@@ -1,3 +1,4 @@
+import asyncio
 import threading
 import time
 from datetime import datetime, timedelta
@@ -17,7 +18,11 @@ from mtypes import Bills_State_Status, Event_State_Status, timezone
 from utils import get_bot_cookie, getClubDetails, getEventLink, getRoleEmails
 
 
-def check_for_bill_status():
+def run_async_job(coro):
+    asyncio.run(coro())
+
+
+async def check_for_bill_status():
     """
     Checks for events that have pending bills and sends reminder emails.
     This function is meant to be run on a schedule.
@@ -33,31 +38,29 @@ def check_for_bill_status():
     current_time = datetime.now(timezone)
     week_ago = current_time - timedelta(days=7)
 
-    pending_bills = list(
-        eventsdb.find(
-            {
-                "datetimeperiod.1": {
-                    "$gte": week_ago.isoformat(),
-                    "$lte": current_time.isoformat(),
-                },
-                "status.state": Event_State_Status.approved.value,
-                "budget": {"$exists": True, "$ne": []},
-                "bills_status.state": Bills_State_Status.not_submitted.value,
-            }
-        )
-    )
+    pending_bills = eventsdb.find(
+        {
+            "datetimeperiod.1": {
+                "$gte": week_ago.isoformat(),
+                "$lte": current_time.isoformat(),
+            },
+            "status.state": Event_State_Status.approved.value,
+            "budget": {"$exists": True, "$ne": []},
+            "bills_status.state": Bills_State_Status.not_submitted.value,
+        }
+    ).to_list(length=None)
 
     if len(pending_bills) == 0:
         # print("No pending bills found")
         return
 
-    bot_cookie = get_bot_cookie()
+    bot_cookie = await get_bot_cookie()
 
     for event in pending_bills:
         event_instance = Event.model_validate(event)
 
         try:
-            clubDetails = getClubDetails(event_instance.clubid, None)
+            clubDetails = await getClubDetails(event_instance.clubid, None)
 
             if len(clubDetails.keys()) == 0:
                 print(f"Club does not exist for event {event_instance.code}")
@@ -90,7 +93,7 @@ def check_for_bill_status():
                 mail_subject,
                 mail_body,
                 toRecipients=[mail_club],
-                ccRecipients=getRoleEmails("cc"),
+                ccRecipients=await getRoleEmails("cc"),
                 cookies=bot_cookie,
             )
             time.sleep(5)
@@ -101,7 +104,7 @@ def check_for_bill_status():
             )
 
 
-def check_for_ended_events():
+async def check_for_ended_events():
     """
     Checks for events that have ended on the last day and sends reminder emails.
     This function is meant to be run on a schedule.
@@ -133,13 +136,13 @@ def check_for_ended_events():
         # print("No ended events found")
         return
 
-    bot_cookie = get_bot_cookie()
+    bot_cookie = await get_bot_cookie()
 
     for event in ended_events:
         event_instance = Event.model_validate(event)
 
         try:
-            clubDetails = getClubDetails(event_instance.clubid, None)
+            clubDetails = await getClubDetails(event_instance.clubid, None)
 
             if len(clubDetails.keys()) == 0:
                 print(f"Club does not exist for event {event_instance.code}")
@@ -175,7 +178,7 @@ def check_for_ended_events():
             )
 
 
-def start_scheduler_instance(scheduler_instance: Scheduler):
+async def start_scheduler_instance(scheduler_instance: Scheduler):
     """
     Continuously runs the scheduler instance to execute any pending scheduled tasks.
 
@@ -192,7 +195,7 @@ def start_scheduler_instance(scheduler_instance: Scheduler):
 
     while True:
         scheduler_instance.run_pending()
-        time.sleep(1)
+        await asyncio.sleep(1)
 
 
 # start the scheduler in a background thread
@@ -212,7 +215,7 @@ def init_event_reminder_system():
     """  # noqa: E501
     ended_scheduler = Scheduler()
     ended_scheduler.every().day.at("00:00", timezone).do(
-        check_for_ended_events
+        run_async_job, check_for_ended_events
     )
     threading.Thread(
         target=start_scheduler_instance, args=(ended_scheduler,), daemon=True
@@ -220,7 +223,7 @@ def init_event_reminder_system():
 
     bill_scheduler = Scheduler()
     bill_scheduler.every().sunday.at("12:00", timezone).do(
-        check_for_bill_status
+        run_async_job, check_for_bill_status
     )
     threading.Thread(
         target=start_scheduler_instance, args=(bill_scheduler,), daemon=True

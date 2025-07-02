@@ -16,7 +16,7 @@ platformdirs==4.3.7
 prettytable==3.16.0
 pydantic>=2.11.2,<3.0.0
 Pygments==2.19.1
-pymongo==4.11.3
+pymongo==4.13.2
 python-dateutil>=2.9.0.post0
 python-multipart >=0.0.20
 pytz>=2025.2
@@ -33,3 +33,5 @@ typing-extensions>=4.13.1
 uvicorn==0.34.0
 matplotlib==3.10.3
 datetime==4.7
+httpx
+asyncio

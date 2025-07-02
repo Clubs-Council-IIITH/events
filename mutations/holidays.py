@@ -11,7 +11,7 @@ from otypes import HolidayType, Info, InputHolidayDetails
 
 
 @strawberry.mutation
-def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
+async def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
     """
     Creates a new holiday, for SLO and CC
 
@@ -38,17 +38,17 @@ def createHoliday(details: InputHolidayDetails, info: Info) -> HolidayType:
     )
 
     # Check if any holiday on that day already exists
-    if holidaysdb.find_one({"date": str(details.date)}):
+    if await holidaysdb.find_one({"date": str(details.date)}):
         raise ValueError("A holiday already exists on this day.")
 
-    created_id = holidaysdb.insert_one(jsonable_encoder(holiday)).inserted_id
-    created_holiday = holidaysdb.find_one({"_id": created_id})
+    created_id = (await holidaysdb.insert_one(jsonable_encoder(holiday))).inserted_id
+    created_holiday = await holidaysdb.find_one({"_id": created_id})
 
     return HolidayType.from_pydantic(Holiday.model_validate(created_holiday))
 
 
 @strawberry.mutation
-def editHoliday(
+async def editHoliday(
     id: str, details: InputHolidayDetails, info: Info
 ) -> HolidayType:
     """
@@ -72,24 +72,24 @@ def editHoliday(
     if user is None or user.get("role") not in ["slo", "cc"]:
         raise ValueError("You do not have permission to access this resource.")
 
-    holiday = holidaysdb.find_one({"_id": id})
+    holiday = await holidaysdb.find_one({"_id": id})
     if holiday is None:
         raise ValueError("Holiday not found.")
 
     # Check if any other holiday on that day already exists
-    if holidaysdb.find_one({"date": str(details.date), "_id": {"$ne": id}}):
+    if await holidaysdb.find_one({"date": str(details.date), "_id": {"$ne": id}}):
         raise ValueError("A holiday already exists on this day.")
 
-    holidaysdb.find_one_and_update(
+    await holidaysdb.find_one_and_update(
         {"_id": id}, {"$set": jsonable_encoder(details)}
     )
-    updated_holiday = holidaysdb.find_one({"_id": id})
+    updated_holiday = await holidaysdb.find_one({"_id": id})
 
     return HolidayType.from_pydantic(Holiday.model_validate(updated_holiday))
 
 
 @strawberry.mutation
-def deleteHoliday(id: str, info: Info) -> bool:
+async def deleteHoliday(id: str, info: Info) -> bool:
     """
     Delete an existing holiday, for SLO and CC
 
@@ -109,11 +109,11 @@ def deleteHoliday(id: str, info: Info) -> bool:
     if user is None or user.get("role") not in ["slo", "cc"]:
         raise ValueError("You do not have permission to access this resource.")
 
-    holiday = holidaysdb.find_one({"_id": id})
+    holiday = await holidaysdb.find_one({"_id": id})
     if holiday is None:
         raise ValueError("Holiday not found.")
 
-    holidaysdb.delete_one({"_id": id})
+    await holidaysdb.delete_one({"_id": id})
 
     return True
 
