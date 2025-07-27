@@ -20,7 +20,6 @@ pymongo==4.13.2
 python-dateutil>=2.9.0.post0
 python-multipart >=0.0.20
 pytz>=2025.2
-requests>=2.32.3
 rich==14.0.0
 schedule~=1.2.2
 six==1.17.0
@@ -34,4 +33,4 @@ uvicorn==0.34.0
 matplotlib==3.10.3
 datetime==4.7
 httpx
-asyncio
+apscheduler
