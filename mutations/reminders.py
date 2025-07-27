@@ -59,7 +59,7 @@ async def remindSLO(info: Info, eventid: str) -> bool:
     )
 
     # send email
-    triggerMail(
+    await triggerMail(
         mail_uid,
         mail_subject,
         mail_body,

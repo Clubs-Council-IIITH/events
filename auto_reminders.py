@@ -1,9 +1,5 @@
-import asyncio
-import threading
-import time
 from datetime import datetime, timedelta
-
-from schedule import Scheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from db import eventsdb
 from mailing import triggerMail
@@ -16,10 +12,6 @@ from mailing_templates import (
 from models import Event
 from mtypes import Bills_State_Status, Event_State_Status, timezone
 from utils import get_bot_cookie, getClubDetails, getEventLink, getRoleEmails
-
-
-def run_async_job(coro):
-    asyncio.run(coro())
 
 
 async def check_for_bill_status():
@@ -38,7 +30,7 @@ async def check_for_bill_status():
     current_time = datetime.now(timezone)
     week_ago = current_time - timedelta(days=7)
 
-    pending_bills = eventsdb.find(
+    pending_bills = await eventsdb.find(
         {
             "datetimeperiod.1": {
                 "$gte": week_ago.isoformat(),
@@ -88,7 +80,7 @@ async def check_for_bill_status():
                 total_budget=total_budget,
             )
 
-            triggerMail(
+            await triggerMail(
                 "events_autoemailing",
                 mail_subject,
                 mail_body,
@@ -96,7 +88,6 @@ async def check_for_bill_status():
                 ccRecipients=await getRoleEmails("cc"),
                 cookies=bot_cookie,
             )
-            time.sleep(5)
 
         except Exception as e:
             print(
@@ -119,18 +110,16 @@ async def check_for_ended_events():
     one_day_ago = current_time - timedelta(days=1)
 
     # find events that ended today
-    ended_events = list(
-        eventsdb.find(
-            {
-                "datetimeperiod.1": {
-                    "$gte": one_day_ago.isoformat(),
-                    "$lte": current_time.isoformat(),
-                },
-                "status.state": Event_State_Status.approved.value,
-                "event_report_submitted": {"$ne": True},
-            }
-        )
-    )
+    ended_events = await eventsdb.find(
+        {
+            "datetimeperiod.1": {
+                "$gte": one_day_ago.isoformat(),
+                "$lte": current_time.isoformat(),
+            },
+            "status.state": Event_State_Status.approved.value,
+            "event_report_submitted": {"$ne": True},
+        }
+    ).to_list(length=None)
 
     if len(ended_events) == 0:
         # print("No ended events found")
@@ -163,14 +152,13 @@ async def check_for_ended_events():
                 eventlink=getEventLink(event_instance.code),
             )
 
-            triggerMail(
+            await triggerMail(
                 "events_autoemailing",
                 mail_subject,
                 mail_body,
                 toRecipients=[mail_club],
                 cookies=bot_cookie,
             )
-            time.sleep(5)
 
         except Exception as e:
             print(
@@ -178,53 +166,11 @@ async def check_for_ended_events():
             )
 
 
-async def start_scheduler_instance(scheduler_instance: Scheduler):
-    """
-    Continuously runs the scheduler instance to execute any pending scheduled tasks.
-
-    This function runs an infinite loop that checks for pending tasks in the provided
-    scheduler instance and executes them. It pauses for one second between each check
-    to prevent excessive CPU usage.
-
-    Args:
-        scheduler_instance (Scheduler): The scheduler object responsible for managing and running scheduled tasks.
-
-    Returns:
-    None
-    """  # noqa: E501
-
-    while True:
-        scheduler_instance.run_pending()
-        await asyncio.sleep(1)
-
-
-# start the scheduler in a background thread
 def init_event_reminder_system():
     """
-    Initializes the event reminder system by starting the scheduler in a background thread.
-
-    Schedulers:
-        * Sends reminders for events that have ended in the last day. _Runs every day at 00:00._
-        * Sends reminders for events that have pending bills in the last week. _Runs every Sunday at 12:00._
-
-    Args:
-    None
-
-    Returns:
-    None
-    """  # noqa: E501
-    ended_scheduler = Scheduler()
-    ended_scheduler.every().day.at("00:00", timezone).do(
-        run_async_job, check_for_ended_events
-    )
-    threading.Thread(
-        target=start_scheduler_instance, args=(ended_scheduler,), daemon=True
-    ).start()
-
-    bill_scheduler = Scheduler()
-    bill_scheduler.every().sunday.at("12:00", timezone).do(
-        run_async_job, check_for_bill_status
-    )
-    threading.Thread(
-        target=start_scheduler_instance, args=(bill_scheduler,), daemon=True
-    ).start()
+    Initializes the event reminder system using AsyncIOScheduler.
+    """
+    scheduler = AsyncIOScheduler(timezone=timezone)
+    scheduler.add_job(check_for_ended_events, "cron", hour=0, minute=0)
+    scheduler.add_job(check_for_bill_status, "cron", day_of_week="sun", hour=12, minute=0)
+    scheduler.start()

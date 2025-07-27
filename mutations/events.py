@@ -739,7 +739,7 @@ async def progressEvent(
             poc_phone=poc_phone,
         )
 
-        triggerMail(
+        await triggerMail(
             mail_uid,
             mail_subject_club,
             mail_body_club,
@@ -815,7 +815,7 @@ async def progressEvent(
         )
 
     if len(mail_to):
-        triggerMail(
+        await triggerMail(
             mail_uid,
             mail_subject,
             mail_body,
@@ -929,7 +929,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
                 eventlink=getEventLink(event_instance.code),
             )
 
-            triggerMail(
+            await triggerMail(
                 user["uid"],
                 mail_subject_cc,
                 mail_body_cc,
@@ -948,7 +948,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
                 eventlink=getEventLink(event_instance.code),
             )
 
-            triggerMail(
+            await triggerMail(
                 user["uid"],
                 mail_subject,
                 mail_body,
@@ -1036,7 +1036,7 @@ async def rejectEvent(
     )
 
     # Mail to the club regarding the rejected event
-    triggerMail(
+    await triggerMail(
         user["uid"],
         mail_subject,
         mail_body,

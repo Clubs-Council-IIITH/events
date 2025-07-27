@@ -111,7 +111,7 @@ async def updateBillsStatus(
         comment=details.slo_comment,
         eventlink=getEventLink(event["code"]),
     )
-    triggerMail(
+    await triggerMail(
         mail_uid,
         mail_subject,
         mail_body,
@@ -257,7 +257,7 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
         eventfinancelink=getEventFinancesLink(event_instance.id),
     )
 
-    triggerMail(
+    await triggerMail(
         mail_uid,
         mail_subject,
         mail_body,
