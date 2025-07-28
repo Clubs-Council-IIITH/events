@@ -56,7 +56,6 @@ DEBUG = getenv("GLOBAL_DEBUG", "False").lower() in ("true", "1", "t")
 gql_app = GraphQLRouter(schema, graphiql=True, context_getter=get_context)
 
 # initialize the reminder
-init_event_reminder_system()
 app = FastAPI(
     debug=DEBUG,
     title="CC Events Microservice",
@@ -69,3 +68,4 @@ app.include_router(gql_app, prefix="/graphql")
 @app.on_event("startup")
 async def startup_event():
     await create_index()
+    init_event_reminder_system()
