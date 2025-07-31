@@ -15,7 +15,6 @@ from models import Event
 from mtypes import (
     Event_Full_Location,
     Event_Full_State_Status,
-    Event_Location,
     Event_State_Status,
 )
 from otypes import (
@@ -139,7 +138,7 @@ def events(
     limit: int | None = None,
     skip: int = 0,
     timings: timelot_type | None = None,
-    location: List[Event_Location] | None = None,
+    location: List[str] | None = None,
 ) -> List[EventType]:
     """
     Returns a list of events as a search result that match the given criteria.
@@ -166,7 +165,7 @@ def events(
         skip (int): The number of events to skip. Defaults to 0.
         timings (timelot_type | None): The time period for which the events
                                 are to be fetched. Defaults to None.
-        location (List[Event_Location] | None): The locations of the events
+        location (List[str] | None): The locations of the events
                                 to be fetched. Defaults to None.
 
     Returns:
@@ -544,7 +543,14 @@ def availableRooms(
         if event is not None:
             occupied_rooms.difference_update(event["location"])
 
-    all_rooms = list(Event_Location.__members__.values())
+    all_rooms = [
+    "h101", "h102", "h103", "h104", "h105",
+    "h201", "h202", "h203", "h204", "h205",
+    "h301", "h302", "h303", "h304",
+    "va3_117", "vsh1", "vsh2", "amphi", "warehouse",
+    "cieg", "sarg", "felig", "footg", "guest",
+    "krba", "lm22", "sm24", "sm32", "lm34", "d101", "other"
+    ]
 
     return RoomListType(
         locations=[

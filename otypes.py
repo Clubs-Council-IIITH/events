@@ -14,7 +14,6 @@ from mtypes import (
     Bills_State_Status,
     Bills_Status,
     BudgetType,
-    Event_Location,
     Event_Mode,
     PyObjectId,
     SponsorType,
@@ -78,7 +77,7 @@ class RoomInfo:
     Class for returning the location and availability of a room.
     """
 
-    location: Event_Location
+    location: str
     available: bool
 
 
@@ -142,9 +141,9 @@ class InputEventDetails:
 
     Attributes:
         name (str): Name of the event.
-        location (List[Event_Location]): List of locations of the event.
+        location (List[str]): List of locations of the event.
                                          Default is None.
-        locationAlternate (List[Event_Location]): List of alternate locations
+        locationAlternate (List[str]): List of alternate locations
                                                   of the event. This is optional. Default is None.
         description (str): Description of the event. Default is None.
         clubid (str): clubID of the club organizing the event.
@@ -172,8 +171,8 @@ class InputEventDetails:
     """  # noqa: E501
 
     name: str
-    location: List[Event_Location] | None = None
-    locationAlternate: List[Event_Location] | None = None
+    location: List[str] | None = None
+    locationAlternate: List[str] | None = None
     description: str | None = None
     clubid: str
     collabclubs: List[str] | None = None
@@ -201,8 +200,8 @@ class InputEditEventDetails:
     name: str | None = None
     eventid: str
     collabclubs: List[str] | None = None
-    location: List[Event_Location] | None = None
-    locationAlternate: List[Event_Location] | None = None
+    location: List[str] | None = None
+    locationAlternate: List[str] | None = None
     description: str | None = None
     clubid: str | None
     mode: Event_Mode | None = Event_Mode.hybrid

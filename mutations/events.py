@@ -42,7 +42,6 @@ from mtypes import (
     BudgetType,
     ClubBodyCategoryType,
     Event_Full_Location,
-    Event_Location,
     Event_Mode,
     Event_State_Status,
     SponsorType,
@@ -114,11 +113,11 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.mode = Event_Mode(details.mode)
     if details.location is not None:
         event_instance.location = [
-            Event_Location(loc) for loc in details.location
+            str(loc) for loc in details.location
         ]
     if details.locationAlternate is not None:
         event_instance.locationAlternate = [
-            Event_Location(loc) for loc in details.locationAlternate
+            str(loc) for loc in details.locationAlternate
         ]
     if details.description is not None:
         event_instance.description = details.description.strip()
@@ -293,10 +292,10 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["mode"] = Event_Mode(details.mode)
     if details.location is not None and updatable:
         # updates["status.room"] = False or user["role"] == "cc"
-        updates["location"] = [Event_Location(loc) for loc in details.location]
+        updates["location"] = [str(loc) for loc in details.location]
     if details.locationAlternate is not None and updatable:
         updates["locationAlternate"] = [
-            Event_Location(loc) for loc in details.locationAlternate
+            str(loc) for loc in details.locationAlternate
         ]
     if details.collabclubs is not None and updatable:
         updates["collabclubs"] = details.collabclubs
