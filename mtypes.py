@@ -267,6 +267,50 @@ EVENT_FULL_LOCATION_MAP = {
     "other": "Other",
 }
 
+class Event_Location(StrEnum):
+    """
+   Enum for locations for the Event
+    """
+
+    # Himalaya
+    h101 = auto()
+    h102 = auto()
+    h103 = auto()
+    h104 = auto()
+    h201 = auto()
+    h202 = auto()
+    h203 = auto()
+    h204 = auto()
+    h301 = auto()
+    h302 = auto()
+    h303 = auto()
+    h304 = auto()
+    # Vindhya
+    va3_117 = auto()
+    vsh1 = auto()
+    vsh2 = auto()
+    # Other
+    amphi = auto()
+    warehouse = auto()
+    cieg = auto()
+    sarg = auto()
+    felig = auto()
+    footg = auto()
+    guest = auto()
+    # Academic Rooms
+    h105 = auto()
+    h205 = auto()
+    # KRB
+    krba = auto()
+    lm22 = auto()
+    sm24 = auto()
+    sm32 = auto()
+    lm34 = auto()
+    # T-Hub
+    d101 = auto()
+    # nota
+    other = auto()
+
 event_popu_type = Annotated[int, Field(ge=0)]
 
 very_short_str_type = Annotated[

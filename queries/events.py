@@ -14,6 +14,7 @@ from db import eventsdb
 from models import Event
 from mtypes import (
     EVENT_FULL_LOCATION_MAP,
+    Event_Location,
     Event_Full_State_Status,
     Event_State_Status,
 )
@@ -543,14 +544,7 @@ def availableRooms(
         if event is not None:
             occupied_rooms.difference_update(event["location"])
 
-    all_rooms = [
-    "h101", "h102", "h103", "h104", "h105",
-    "h201", "h202", "h203", "h204", "h205",
-    "h301", "h302", "h303", "h304",
-    "va3_117", "vsh1", "vsh2", "amphi", "warehouse",
-    "cieg", "sarg", "felig", "footg", "guest",
-    "krba", "lm22", "sm24", "sm32", "lm34", "d101", "other"
-    ]
+    all_rooms = list(Event_Location.__members__.values())
 
     return RoomListType(
         locations=[
