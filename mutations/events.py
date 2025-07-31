@@ -41,7 +41,7 @@ from mtypes import (
     Audience,
     BudgetType,
     ClubBodyCategoryType,
-    Event_Full_Location,
+    EVENT_FULL_LOCATION_MAP,
     Event_Mode,
     Event_State_Status,
     SponsorType,
@@ -596,13 +596,13 @@ def progressEvent(
     else:
         mail_location = ", ".join(
             [
-                getattr(Event_Full_Location, loc)
+                EVENT_FULL_LOCATION_MAP.get(loc, loc)
                 for loc in updated_event_instance.location
             ]
         )
         mail_locationAlternate = ", ".join(
             [
-                getattr(Event_Full_Location, loc)
+                EVENT_FULL_LOCATION_MAP.get(loc, loc)
                 for loc in updated_event_instance.locationAlternate
             ]
         )

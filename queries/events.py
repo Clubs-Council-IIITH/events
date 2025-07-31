@@ -13,7 +13,7 @@ from db import eventsdb
 # import all models and types
 from models import Event
 from mtypes import (
-    Event_Full_Location,
+    EVENT_FULL_LOCATION_MAP,
     Event_Full_State_Status,
     Event_State_Status,
 )
@@ -715,7 +715,7 @@ def downloadEventsData(
                 value = event.get(field, [])
                 if len(value) >= 1:
                     value = ", ".join(
-                        getattr(Event_Full_Location, loc) for loc in value
+                        EVENT_FULL_LOCATION_MAP.get(loc, loc) for loc in value
                     )
             elif field == "budget":
                 if isinstance(value, list):

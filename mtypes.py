@@ -233,90 +233,39 @@ class Event_Mode(StrEnum):
 
 
 # Event Full Location Names
-class Event_Full_Location:
-    """
-    String representation of the locations in Event_Location
-    """
-
-    h101 = "Himalaya 101"
-    h102 = "Himalaya 102"
-    h103 = "Himalaya 103"
-    h104 = "Himalaya 104"
-    h201 = "Himalaya 201"
-    h202 = "Himalaya 202"
-    h203 = "Himalaya 203"
-    h204 = "Himalaya 204"
-    h301 = "Himalaya 301"
-    h302 = "Himalaya 302"
-    h303 = "Himalaya 303"
-    h304 = "Himalaya 304"
-    va3_117 = "Vindhya A3 117"
-    vsh1 = "Vindhya SH1"
-    vsh2 = "Vindhya SH2"
-    amphi = "Amphitheatre"
-    warehouse = "Bakul Warehouse"
-    felig = "Felicity Ground"
-    footg = "Football Ground"
-    guest = "Guest House"
-    cieg = "CIE Gaming"
-    sarg = "Saranga Hall"
-    h105 = "Himalaya 105"
-    h205 = "Himalaya 205"
-    krba = "KRB Auditorium"
-    lm22 = "LM-22, KRB"
-    sm24 = "SM-24, KRB"
-    sm32 = "SM-32, KRB"
-    lm34 = "LM-34, KRB"
-    d101 = "D101, T-Hub"
-    other = "Other"
-
-
-# Event Locations
-@strawberry.enum
-class Event_Location(StrEnum):
-    """
-    Enum for locations for the Event
-    """
-
-    # Himalaya
-    h101 = auto()
-    h102 = auto()
-    h103 = auto()
-    h104 = auto()
-    h201 = auto()
-    h202 = auto()
-    h203 = auto()
-    h204 = auto()
-    h301 = auto()
-    h302 = auto()
-    h303 = auto()
-    h304 = auto()
-    # Vindhya
-    va3_117 = auto()
-    vsh1 = auto()
-    vsh2 = auto()
-    # Other
-    amphi = auto()
-    warehouse = auto()
-    cieg = auto()
-    sarg = auto()
-    felig = auto()
-    footg = auto()
-    guest = auto()
-    # Academic Rooms
-    h105 = auto()
-    h205 = auto()
-    # KRB
-    krba = auto()
-    lm22 = auto()
-    sm24 = auto()
-    sm32 = auto()
-    lm34 = auto()
-    # T-Hub
-    d101 = auto()
-    # nota
-    other = auto()
-
+EVENT_FULL_LOCATION_MAP = {
+    "h101": "Himalaya 101",
+    "h102": "Himalaya 102",
+    "h103": "Himalaya 103",
+    "h104": "Himalaya 104",
+    "h201": "Himalaya 201",
+    "h202": "Himalaya 202",
+    "h203": "Himalaya 203",
+    "h204": "Himalaya 204",
+    "h301": "Himalaya 301",
+    "h302": "Himalaya 302",
+    "h303": "Himalaya 303",
+    "h304": "Himalaya 304",
+    "va3_117": "Vindhya A3 117",
+    "vsh1": "Vindhya SH1",
+    "vsh2": "Vindhya SH2",
+    "amphi": "Amphitheatre",
+    "warehouse": "Bakul Warehouse",
+    "felig": "Felicity Ground",
+    "footg": "Football Ground",
+    "guest": "Guest House",
+    "cieg": "CIE Gaming",
+    "sarg": "Saranga Hall",
+    "h105": "Himalaya 105",
+    "h205": "Himalaya 205",
+    "krba": "KRB Auditorium",
+    "lm22": "LM-22, KRB",
+    "sm24": "SM-24, KRB",
+    "sm32": "SM-32, KRB",
+    "lm34": "LM-34, KRB",
+    "d101": "D101, T-Hub",
+    "other": "Other",
+}
 
 event_popu_type = Annotated[int, Field(ge=0)]
 
