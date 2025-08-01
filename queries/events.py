@@ -140,6 +140,7 @@ def events(
     skip: int = 0,
     timings: timelot_type | None = None,
     location: List[Event_Location] | None = None,
+    otherLocation: str | None = None,
 ) -> List[EventType]:
     """
     Returns a list of events as a search result that match the given criteria.
@@ -238,7 +239,15 @@ def events(
         }
 
     if location is not None:
-        searchspace["location"] = {"$in": location}
+        search_locations = []
+        search_other_locations=[]
+        for loc in location:
+            if loc == "other" and otherLocation:
+                search_other_locations.append(otherLocation)
+            else:
+                search_locations.append(loc)
+        searchspace["location"] = {"$in": search_locations}
+        searchspace["otherLocation"] = {"$in": search_other_locations}
 
     timings_str: List[str] | None = None
     if timings is not None:
@@ -306,7 +315,15 @@ def clashingEvents(
         raise Exception("Event with given id does not exist.")
 
     if filterByLocation:
-        searchspace["location"] = {"$in": event["location"]}
+        search_locations = []
+        search_other_locations = []
+        for loc in event["location"]:
+            if loc == "other" and event.get("otherLocation"):
+                search_other_locations.append(event["otherLocation"])
+            else:
+                search_locations.append(loc)
+        searchspace["location"] = {"$in": search_locations}
+        searchspace["otherLocation"] = {"$in": search_other_locations}
 
     events = eventsWithSorting(
         searchspace,
@@ -709,7 +726,9 @@ def downloadEventsData(
                 value = event.get(field, [])
                 if len(value) >= 1:
                     value = ", ".join(
-                        getattr(Event_Full_Location, loc) for loc in value
+                        getattr(Event_Full_Location, loc) if loc != "other"
+                        else event.get("otherLocation")
+                        for loc in value
                     )
             elif field == "budget":
                 if isinstance(value, list):
