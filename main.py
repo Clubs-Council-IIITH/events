@@ -13,6 +13,7 @@ Attributes:
     app (FastAPI): The FastAPI application instance.
 """
 
+from contextlib import asynccontextmanager
 from os import getenv
 
 import strawberry
@@ -55,17 +56,18 @@ DEBUG = getenv("GLOBAL_DEBUG", "False").lower() in ("true", "1", "t")
 # serve API with FastAPI router
 gql_app = GraphQLRouter(schema, graphiql=True, context_getter=get_context)
 
-# initialize the reminder
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    await create_index()
+    init_event_reminder_system()
+    yield
+    # shutdown
+
 app = FastAPI(
     debug=DEBUG,
     title="CC Events Microservice",
     description="Handles Data of Events & Holidays",
+    lifespan=lifespan,
 )
 app.include_router(gql_app, prefix="/graphql")
-
-
-# Run async DB index creation at startup
-@app.on_event("startup")
-async def startup_event():
-    await create_index()
-    init_event_reminder_system()
