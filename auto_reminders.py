@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from db import eventsdb
@@ -172,5 +173,7 @@ def init_event_reminder_system():
     """
     scheduler = AsyncIOScheduler(timezone=timezone)
     scheduler.add_job(check_for_ended_events, "cron", hour=0, minute=0)
-    scheduler.add_job(check_for_bill_status, "cron", day_of_week="sun", hour=12, minute=0)
+    scheduler.add_job(
+        check_for_bill_status, "cron", day_of_week="sun", hour=12, minute=0
+    )
     scheduler.start()
