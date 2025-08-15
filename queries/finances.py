@@ -13,7 +13,7 @@ from otypes import BillsStatusType, Info
 
 
 @strawberry.field
-def eventBills(eventid: str, info: Info) -> Bills_Status:
+async def eventBills(eventid: str, info: Info) -> Bills_Status:
     """
     Get the bills status of an event for cc,slo and club
 
@@ -52,7 +52,7 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
             {"collabclubs": {"$in": [user["uid"]]}},
         ]
 
-    event = eventsdb.find_one(searchspace)
+    event = await eventsdb.find_one(searchspace)
     if not event:
         raise ValueError(
             "Event not found. Either the event does not exist or you don't \
@@ -78,7 +78,7 @@ def eventBills(eventid: str, info: Info) -> Bills_Status:
 
 
 @strawberry.field
-def allEventsBills(info: Info) -> List[BillsStatusType]:
+async def allEventsBills(info: Info) -> List[BillsStatusType]:
     """
     Get the bills status of all events
 
@@ -127,7 +127,11 @@ def allEventsBills(info: Info) -> List[BillsStatusType]:
                 ]
             }
         )
-    events = list(eventsdb.find(searchspace).sort("datetimeperiod.1", -1))
+    events = (
+        await eventsdb.find(searchspace)
+        .sort("datetimeperiod.1", -1)
+        .to_list(length=None)
+    )
 
     if not events or len(events) == 0:
         raise ValueError("No events found")

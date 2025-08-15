@@ -1,6 +1,5 @@
 import os
-
-import requests
+import httpx
 
 from utils import convert_to_html
 
@@ -8,7 +7,7 @@ inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
 
 # API call to send mail notification
-def triggerMail(
+async def triggerMail(
     uid,
     subject,
     body,
@@ -50,11 +49,12 @@ def triggerMail(
         # print("mailbody:", body)
 
         if cookies:
-            requests.post(
-                "http://gateway/graphql",
-                json={"query": query, "variables": variables},
-                cookies=cookies,
-            )
+            async with httpx.AsyncClient() as client:
+                await client.post(
+                    "http://gateway/graphql",
+                    json={"query": query, "variables": variables},
+                    cookies=cookies,
+                )
         else:
             raise Exception(
                 "Couldn't find cookie, cannot send email without cookies!"

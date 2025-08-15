@@ -33,7 +33,9 @@ from utils import (
 
 
 @strawberry.mutation
-def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
+async def updateBillsStatus(
+    details: InputBillsStatus, info: Info
+) -> Bills_Status:
     """
     Updates the bills status of an event for SLO along with
     triggering an email to the organizing club.
@@ -60,7 +62,7 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
     current_time = datetime.now(timezone)
     time_str = current_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
-    event = eventsdb.find_one(
+    event = await eventsdb.find_one(
         {
             "_id": details.eventid,
             "status.state": Event_State_Status.approved.value,  # type: ignore
@@ -68,19 +70,19 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
             "budget": {
                 "$exists": True,
                 "$ne": [],
-            },  # Ensure the budget array exists and is not empty
+            },
         }
     )
     if event is None:
         raise ValueError("Event not found.")
 
-    mail_to = getClubDetails(event["clubid"], info.context.cookies).get(
-        "email", None
-    )
+    mail_to = (
+        await getClubDetails(event["clubid"], info.context.cookies)
+    ).get("email", None)
     if not mail_to:
         raise ValueError("Club email not found")
 
-    upd_ref = eventsdb.update_one(
+    upd_ref = await eventsdb.update_one(
         {"_id": details.eventid},
         {
             "$set": {
@@ -93,11 +95,11 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
     if upd_ref.modified_count == 0:
         raise ValueError("Bills status not updated")
 
-    event = eventsdb.find_one({"_id": details.eventid})
+    event = await eventsdb.find_one({"_id": details.eventid})
     if not event:
         raise ValueError("Event not found")
 
-    cc_to = getRoleEmails("cc")
+    cc_to = await getRoleEmails("cc")
 
     mail_uid = user["uid"]
     mail_subject = EVENT_BILL_STATUS_SUBJECT.safe_substitute(
@@ -109,8 +111,7 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
         comment=details.slo_comment,
         eventlink=getEventLink(event["code"]),
     )
-    # email to club regarding the updation in the bills status
-    triggerMail(
+    await triggerMail(
         mail_uid,
         mail_subject,
         mail_body,
@@ -120,12 +121,11 @@ def updateBillsStatus(details: InputBillsStatus, info: Info) -> Bills_Status:
         ccRecipients=cc_to,
         cookies=info.context.cookies,
     )
-
     return Bills_Status(**event["bills_status"])
 
 
 @strawberry.mutation
-def addBill(details: InputBillsUpload, info: Info) -> bool:
+async def addBill(details: InputBillsUpload, info: Info) -> bool:
     """
     Submits a bill for an approved event and notifies the Student Life Office (SLO).
 
@@ -148,7 +148,7 @@ def addBill(details: InputBillsUpload, info: Info) -> bool:
     current_time = datetime.now(timezone)
     time_str = current_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
-    event = eventsdb.find_one(
+    event = await eventsdb.find_one(
         {
             "_id": details.eventid,
             "status.state": Event_State_Status.approved.value,  # type: ignore
@@ -156,7 +156,7 @@ def addBill(details: InputBillsUpload, info: Info) -> bool:
             "budget": {
                 "$exists": True,
                 "$ne": [],
-            },  # Ensure the budget array exists and is not empty
+            },
         }
     )
 
@@ -198,7 +198,7 @@ def addBill(details: InputBillsUpload, info: Info) -> bool:
         raise ValueError("New budget total doesn't match the old budget total")
 
     # change state to submitted and put filename
-    upd_ref = eventsdb.update_one(
+    upd_ref = await eventsdb.update_one(
         {"_id": details.eventid},
         {
             "$set": {
@@ -218,11 +218,11 @@ def addBill(details: InputBillsUpload, info: Info) -> bool:
     # if already a bills_status file exists, then delete it
     if bill.get("filename"):
         try:
-            delete_file(bill["filename"])
+            await delete_file(bill["filename"])
         except Exception as e:
             print(f"Error deleting file: {e}")
 
-    event = eventsdb.find_one({"_id": details.eventid})
+    event = await eventsdb.find_one({"_id": details.eventid})
     if not event:
         raise ValueError("Event not found")
 
@@ -232,12 +232,11 @@ def addBill(details: InputBillsUpload, info: Info) -> bool:
         item.amount_used for item in event_instance.budget if item.amount_used
     )
 
-    clubname = getClubDetails(event["clubid"], info.context.cookies).get(
-        "name", None
-    )
-
-    cc_to = getRoleEmails("cc")
-    slo_emails = getRoleEmails("slo")
+    clubname = (
+        await getClubDetails(event["clubid"], info.context.cookies)
+    ).get("name", None)
+    cc_to = await getRoleEmails("cc")
+    slo_emails = await getRoleEmails("slo")
 
     if not slo_emails:
         raise Exception("No SLO emails found to send a reminder.")
@@ -258,8 +257,7 @@ def addBill(details: InputBillsUpload, info: Info) -> bool:
         eventfinancelink=getEventFinancesLink(event_instance.id),
     )
 
-    # email to club regarding the updation in the bills status
-    triggerMail(
+    await triggerMail(
         mail_uid,
         mail_subject,
         mail_body,

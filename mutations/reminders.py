@@ -12,7 +12,7 @@ from utils import getEventLink, getRoleEmails
 
 
 @strawberry.mutation
-def remindSLO(info: Info, eventid: str) -> bool:
+async def remindSLO(info: Info, eventid: str) -> bool:
     """
     Sends a reminder email to the SLO to approve the event.
 
@@ -31,12 +31,12 @@ def remindSLO(info: Info, eventid: str) -> bool:
     if user is None or user.get("role") != "cc":
         raise Exception("You do not have permission to access this resource.")
 
-    event_ref = eventsdb.find_one({"_id": eventid})
+    event_ref = await eventsdb.find_one({"_id": eventid})
     if not event_ref:
         raise Exception("Event not found.")
 
     event_instance = Event.model_validate(event_ref)
-    slo_emails = getRoleEmails("slo")
+    slo_emails = await getRoleEmails("slo")
 
     if not slo_emails:
         raise Exception("No SLO emails found to send a reminder.")
@@ -59,7 +59,7 @@ def remindSLO(info: Info, eventid: str) -> bool:
     )
 
     # send email
-    triggerMail(
+    await triggerMail(
         mail_uid,
         mail_subject,
         mail_body,

@@ -13,7 +13,7 @@ from otypes import HolidayType
 
 
 @strawberry.field
-def holidays(
+async def holidays(
     start_date: date | None = None, end_date: date | None = None
 ) -> List[HolidayType]:
     """
@@ -43,8 +43,7 @@ def holidays(
     elif end_date:
         query["date"] = {"$lte": str(end_date)}
 
-    holidays = holidaysdb.find(query)
-
+    holidays = await holidaysdb.find(query).to_list(length=None)
     return [
         HolidayType.from_pydantic(Holiday.model_validate(holiday))
         for holiday in holidays
@@ -52,7 +51,7 @@ def holidays(
 
 
 @strawberry.field
-def holiday(id: str) -> HolidayType:
+async def holiday(id: str) -> HolidayType:
     """
     This method searches for a holiday by its id and returns it.
 
@@ -63,7 +62,7 @@ def holiday(id: str) -> HolidayType:
         (HolidayType): The holiday's details.
     """
 
-    holiday = holidaysdb.find_one({"_id": id})
+    holiday = await holidaysdb.find_one({"_id": id})
 
     return HolidayType.from_pydantic(Holiday.model_validate(holiday))
 
