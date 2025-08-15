@@ -73,7 +73,7 @@ def getUser(uid, cookies=None) -> tuple[dict, dict] | None:
 
     Returns:
         (tuple[dict, dict] | None): tuple containing userProfile and userMeta or None
-    """
+    """  # noqa: E501
 
     try:
         query = """
