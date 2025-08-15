@@ -744,6 +744,7 @@ async def progressEvent(
             mail_subject_club,
             mail_body_club,
             toRecipients=mail_to_club,
+            ccRecipients=[poc_email],
             cookies=info.context.cookies,
         )
     elif (
@@ -804,6 +805,7 @@ async def progressEvent(
         mail_to = [
             mail_club,
         ]
+        cc_to = [poc_email]
         mail_subject = CLUB_EVENT_SUBJECT.safe_substitute(
             event_id=updated_event_instance.code,
             event=mail_event_title,

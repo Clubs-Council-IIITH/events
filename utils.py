@@ -63,7 +63,7 @@ async def getMember(cid, uid, cookies=None) -> dict | None:
         return None
 
 
-async def getUser(uid, cookies=None) -> dict | None:
+async def getUser(uid, cookies=None) -> tuple[dict, dict] | None:
     """
     Function makes a query to the Users service resolved by the userProfile
     method, fetches info about a user.
@@ -73,7 +73,7 @@ async def getUser(uid, cookies=None) -> dict | None:
         cookies (dict): cookies. Defaults to None.
 
     Returns:
-        (dict | None): response of the request
+        (tuple[dict, dict] | None): tuple containing userProfile and userMeta or None
     """
 
     try:
