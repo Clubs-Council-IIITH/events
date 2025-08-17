@@ -239,15 +239,7 @@ def events(
         }
 
     if location is not None:
-        search_locations = []
-        search_other_locations=[]
-        for loc in location:
-            if loc == "other" and otherLocation:
-                search_other_locations.append(otherLocation)
-            else:
-                search_locations.append(loc)
-        searchspace["location"] = {"$in": search_locations}
-        searchspace["otherLocation"] = {"$in": search_other_locations}
+        searchspace["location"] = {"$in": location}
 
     timings_str: List[str] | None = None
     if timings is not None:
@@ -315,15 +307,7 @@ def clashingEvents(
         raise Exception("Event with given id does not exist.")
 
     if filterByLocation:
-        search_locations = []
-        search_other_locations = []
-        for loc in event["location"]:
-            if loc == "other" and event.get("otherLocation"):
-                search_other_locations.append(event["otherLocation"])
-            else:
-                search_locations.append(loc)
-        searchspace["location"] = {"$in": search_locations}
-        searchspace["otherLocation"] = {"$in": search_other_locations}
+        searchspace["location"] = {"$in": event["location"]}
 
     events = eventsWithSorting(
         searchspace,

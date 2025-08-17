@@ -120,9 +120,9 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.locationAlternate = [
             Event_Location(loc) for loc in details.locationAlternate
         ]
-    if details.otherLocation is not None:
+    if details.otherLocation is not None and "other" in details.location:
         event_instance.otherLocation = details.otherLocation
-    if details.otherLocationAlternate is not None:
+    if details.otherLocationAlternate is not None and "other" in details.locationAlternate:
         event_instance.otherLocationAlternate = details.otherLocationAlternate
     if details.description is not None:
         event_instance.description = details.description.strip()
@@ -302,10 +302,10 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["locationAlternate"] = [
             Event_Location(loc) for loc in details.locationAlternate
         ]
-    if details.otherLocation is not None and updatable:
-        updates["otherLocation"]=details.otherLocation
-    if details.otherLocationAlternate is not None and updatable:
-        updates["otherLocationAlternate"]=details.otherLocationAlternate
+    if details.otherLocation is not None and updatable and "other" in details.otherLocation:
+        updates["otherLocation"] = details.otherLocation
+    if details.otherLocationAlternate is not None and updatable and "other" in details.otherLocationAlternate:
+        updates["otherLocationAlternate"] = details.otherLocationAlternate
     if details.collabclubs is not None and updatable:
         updates["collabclubs"] = details.collabclubs
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
