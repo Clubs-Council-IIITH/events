@@ -318,25 +318,22 @@ async def getRoleEmails(role: str) -> List[str]:
                 "http://gateway/graphql",
                 json={"query": query, "variables": variables},
             )
-        uids = list(
-            map(lambda o: o["uid"], response.json()["data"]["usersByRole"])
-        )
-        emails = []
-        for uid in uids:
-            query = """
-                query UserProfile($userInput: UserInput) {
-                  userProfile(userInput: $userInput) {
-                    email
-                  }
-                }
-            """
-            variables = {"userInput": {"uid": uid}}
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
+            uids = [user["uid"] for user in response.json()["data"]["usersByRole"]]
+            emails = []
+            for uid in uids:
+                query = """
+                    query UserProfile($userInput: UserInput) {
+                      userProfile(userInput: $userInput) {
+                        email
+                      }
+                    }
+                """
+                variables = {"userInput": {"uid": uid}}
+                resp = await client.post(
                     "http://gateway/graphql",
                     json={"query": query, "variables": variables},
                 )
-            emails.append(response.json()["data"]["userProfile"]["email"])
+                emails.append(resp.json()["data"]["userProfile"]["email"])
         return emails
     except Exception:
         return []

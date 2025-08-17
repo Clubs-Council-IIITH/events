@@ -379,7 +379,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
 
     if old_poster_file:
         try:
-            delete_file(old_poster_file)
+            await delete_file(old_poster_file)
         except Exception as e:
             print(f"Error deleting poster file {old_poster_file}\nError: {e}")
     event_ref = await eventsdb.find_one({"_id": details.eventid})
