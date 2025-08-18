@@ -307,6 +307,7 @@ def clashingEvents(
         raise Exception("Event with given id does not exist.")
 
     if filterByLocation:
+        event["location"] = [loc for loc in event["location"] if loc != "other"]
         searchspace["location"] = {"$in": event["location"]}
 
     events = eventsWithSorting(
