@@ -11,7 +11,9 @@ from utils import getMember
 
 
 @strawberry.mutation
-def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
+async def addEventReport(
+    details: InputEventReport, info: Info
+) -> EventReportType:
     """
     Adds an event report after completion of the event
 
@@ -43,7 +45,7 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
     eventid = details.eventid
     if not eventid:
         raise ValueError("Event ID is required")
-    event = eventsdb.find_one(
+    event = await eventsdb.find_one(
         {
             "_id": eventid,
             "datetimeperiod.1": {
@@ -61,7 +63,7 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
         "event_id": eventid,
     }
 
-    event_report = event_reportsdb.find_one(searchspace)
+    event_report = await event_reportsdb.find_one(searchspace)
 
     if event_report:
         raise ValueError("Event report already exists")
@@ -69,16 +71,16 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
     # Check if submitted_by is valid
     cid = event["clubid"]
     uid = details.submitted_by
-    if not getMember(cid, uid, info.context.cookies):
+    if not await getMember(cid, uid, info.context.cookies):
         raise ValueError("Submitted by is not a valid member")
 
     report_dict = jsonable_encoder(details.to_pydantic())
     report_dict["event_id"] = details.eventid
-    event_report_id = event_reportsdb.insert_one(report_dict).inserted_id
-    event_report = event_reportsdb.find_one({"_id": event_report_id})
+    event_report_id = await event_reportsdb.insert_one(report_dict).inserted_id
+    event_report = await event_reportsdb.find_one({"_id": event_report_id})
 
     # Update event report submitted status to True
-    eventsdb.update_one(
+    await eventsdb.update_one(
         {"_id": eventid},
         {"$set": {"event_report_submitted": True}},
     )
@@ -89,7 +91,9 @@ def addEventReport(details: InputEventReport, info: Info) -> EventReportType:
 
 
 @strawberry.mutation
-def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
+async def editEventReport(
+    details: InputEventReport, info: Info
+) -> EventReportType:
     """
     Edits an event report after completion of the event
 
@@ -122,7 +126,7 @@ def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
     if not eventid:
         raise ValueError("Event ID is required")
 
-    event = eventsdb.find_one(
+    event = await eventsdb.find_one(
         {
             "_id": eventid,
             "datetimeperiod.1": {
@@ -140,7 +144,7 @@ def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
         "event_id": eventid,
     }
 
-    event_report = event_reportsdb.find_one(searchspace)
+    event_report = await event_reportsdb.find_one(searchspace)
 
     if not event_report:
         raise ValueError("Event report not found")
@@ -159,8 +163,8 @@ def editEventReport(details: InputEventReport, info: Info) -> EventReportType:
 
     report_dict = jsonable_encoder(details.to_pydantic())
     report_dict["event_id"] = details.eventid
-    event_reportsdb.update_one(searchspace, {"$set": report_dict})
-    event_report = event_reportsdb.find_one(searchspace)
+    await event_reportsdb.update_one(searchspace, {"$set": report_dict})
+    event_report = await event_reportsdb.find_one(searchspace)
 
     return EventReportType.from_pydantic(
         EventReport.model_validate(event_report)

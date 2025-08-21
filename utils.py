@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List
 
 import fiscalyear
-import requests
+import httpx
 
 from db import eventsdb
 from mtypes import timezone
@@ -19,7 +19,7 @@ FISCAL_START_MONTH = 4
 fiscalyear.START_MONTH = FISCAL_START_MONTH
 
 
-def getMember(cid, uid, cookies=None) -> dict | None:
+async def getMember(cid, uid, cookies=None) -> dict | None:
     """
     This function makes a query to the Members service resolved by the
     member method, fetches info about a member.
@@ -45,24 +45,25 @@ def getMember(cid, uid, cookies=None) -> dict | None:
             }
         """
         variables = {"memberInput": {"cid": cid, "uid": uid, "rid": None}}
-        if cookies:
-            request = requests.post(
-                "http://gateway/graphql",
-                json={"query": query, "variables": variables},
-                cookies=cookies,
-            )
-        else:
-            request = requests.post(
-                "http://gateway/graphql",
-                json={"query": query, "variables": variables},
-            )
-        return request.json()["data"]["member"]
+        async with httpx.AsyncClient() as client:
+            if cookies:
+                response = await client.post(
+                    "http://gateway/graphql",
+                    json={"query": query, "variables": variables},
+                    cookies=cookies,
+                )
+            else:
+                response = await client.post(
+                    "http://gateway/graphql",
+                    json={"query": query, "variables": variables},
+                )
+        return response.json()["data"]["member"]
 
     except Exception:
         return None
 
 
-def getUser(uid, cookies=None) -> tuple[dict, dict] | None:
+async def getUser(uid, cookies=None) -> tuple[dict, dict] | None:
     """
     Function makes a query to the Users service resolved by the userProfile
     method, fetches info about a user.
@@ -90,26 +91,27 @@ def getUser(uid, cookies=None) -> tuple[dict, dict] | None:
             }
         """
         variable = {"userInput": {"uid": uid}}
-        if cookies:
-            request = requests.post(
-                "http://gateway/graphql",
-                json={"query": query, "variables": variable},
-                cookies=cookies,
-            )
-        else:
-            request = requests.post(
-                "http://gateway/graphql",
-                json={"query": query, "variables": variable},
-            )
+        async with httpx.AsyncClient() as client:
+            if cookies:
+                response = await client.post(
+                    "http://gateway/graphql",
+                    json={"query": query, "variables": variable},
+                    cookies=cookies,
+                )
+            else:
+                response = await client.post(
+                    "http://gateway/graphql",
+                    json={"query": query, "variables": variable},
+                )
 
-        return request.json()["data"]["userProfile"], request.json()["data"][
+        return response.json()["data"]["userProfile"], response.json()["data"][
             "userMeta"
         ]
     except Exception:
         return None
 
 
-def getClubs(cookies=None) -> dict:
+async def getClubs(cookies=None) -> dict:
     """
     Function to call a query to the Clubs service resolved by the allClubs
     method, fetches info about all clubs.
@@ -132,23 +134,24 @@ def getClubs(cookies=None) -> dict:
                         }
                     }
                 """
-        if cookies:
-            request = requests.post(
-                "http://gateway/graphql",
-                json={"query": query},
-                cookies=cookies,
-            )
-        else:
-            request = requests.post(
-                "http://gateway/graphql", json={"query": query}
-            )
-        return request.json()["data"]["allClubs"]
+        async with httpx.AsyncClient() as client:
+            if cookies:
+                response = await client.post(
+                    "http://gateway/graphql",
+                    json={"query": query},
+                    cookies=cookies,
+                )
+            else:
+                response = await client.post(
+                    "http://gateway/graphql", json={"query": query}
+                )
+        return response.json()["data"]["allClubs"]
     except Exception:
         return []
 
 
 # method gets club code from club id
-def getClubCode(clubid: str) -> str | None:
+async def getClubCode(clubid: str) -> str | None:
     """
     Fetches the code of the club whose club id is given.
 
@@ -158,14 +161,14 @@ def getClubCode(clubid: str) -> str | None:
     Returns:
         (str | None): club code or None if club not found
     """
-    allclubs = getClubs()
+    allclubs = await getClubs()
     for club in allclubs:
         if club["cid"] == clubid:
             return club["code"]
     return None
 
 
-def getClubDetails(
+async def getClubDetails(
     clubid: str,
     cookies,
 ) -> dict:
@@ -193,17 +196,18 @@ def getClubDetails(
                     }
                 """
         variable = {"clubInput": {"cid": clubid}}
-        request = requests.post(
-            "http://gateway/graphql",
-            json={"query": query, "variables": variable},
-            cookies=cookies,
-        )
-        return request.json()["data"]["club"]
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "http://gateway/graphql",
+                json={"query": query, "variables": variable},
+                cookies=cookies,
+            )
+        return response.json()["data"]["club"]
     except Exception:
         return {}
 
 
-def getEventCode(clubid, starttime) -> str:
+async def getEventCode(clubid, starttime) -> str:
     """
     generate event code based on starttime and organizing club
 
@@ -218,7 +222,7 @@ def getEventCode(clubid, starttime) -> str:
         ValueError: Invalid clubid
     """
 
-    club_code = getClubCode(clubid)
+    club_code = await getClubCode(clubid)
     if club_code is None:
         raise ValueError("Invalid clubid")
 
@@ -230,7 +234,7 @@ def getEventCode(clubid, starttime) -> str:
     start = year.start
     end = year.end
 
-    club_events = eventsdb.find(
+    club_events = await eventsdb.find(
         {
             "clubid": clubid,
             "datetimeperiod": {
@@ -238,10 +242,10 @@ def getEventCode(clubid, starttime) -> str:
                 "$lte": end.isoformat(),
             },
         }
-    )
+    ).to_list(length=None)
 
     max_code = 0
-    for i in list(club_events):
+    for i in club_events:
         code = i["code"]
         code = int(code[-3:])
         if code > max_code:
@@ -286,7 +290,7 @@ def getEventFinancesLink(id) -> str:
 
 
 # get email IDs of all members belonging to a role
-def getRoleEmails(role: str) -> List[str]:
+async def getRoleEmails(role: str) -> List[str]:
     """
     Brings all the emails of members belonging to a role
 
@@ -309,40 +313,33 @@ def getRoleEmails(role: str) -> List[str]:
             "role": role,
             "interCommunicationSecret": inter_communication_secret,
         }
-        request = requests.post(
-            "http://gateway/graphql",
-            json={"query": query, "variables": variables},
-        )
-
-        # extract UIDs
-        uids = list(
-            map(lambda o: o["uid"], request.json()["data"]["usersByRole"])
-        )
-
-        # get emails of each UID
-        emails = []
-        for uid in uids:
-            query = """
-                query UserProfile($userInput: UserInput) {
-                  userProfile(userInput: $userInput) {
-                    email
-                  }
-                }
-            """
-            variables = {"userInput": {"uid": uid}}
-            request = requests.post(
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
                 "http://gateway/graphql",
                 json={"query": query, "variables": variables},
             )
-            emails.append(request.json()["data"]["userProfile"]["email"])
-
+            uids = [user["uid"] for user in response.json()["data"]["usersByRole"]]
+            emails = []
+            for uid in uids:
+                query = """
+                    query UserProfile($userInput: UserInput) {
+                      userProfile(userInput: $userInput) {
+                        email
+                      }
+                    }
+                """
+                variables = {"userInput": {"uid": uid}}
+                resp = await client.post(
+                    "http://gateway/graphql",
+                    json={"query": query, "variables": variables},
+                )
+                emails.append(resp.json()["data"]["userProfile"]["email"])
         return emails
-
     except Exception:
         return []
 
 
-def eventsWithSorting(
+async def eventsWithSorting(
     searchspace,
     name: str | None = None,
     date_filter=False,
@@ -386,8 +383,10 @@ def eventsWithSorting(
         required_events_query = {
             **searchspace,
         }
-        events = list(
-            eventsdb.find(required_events_query).sort("datetimeperiod.0", -1)
+        events = (
+            await eventsdb.find(required_events_query)
+            .sort("datetimeperiod.0", -1)
+            .to_list(length=None)
         )
         return events
 
@@ -438,37 +437,42 @@ def eventsWithSorting(
 
     if pagination:
         if skip < 0:
-            ongoing_events = list(
-                eventsdb.find(ongoing_events_query).sort(
-                    "datetimeperiod.0", -1
-                )
+            ongoing_events = (
+                await eventsdb.find(ongoing_events_query)
+                .sort("datetimeperiod.0", -1)
+                .to_list(length=None)
             )
-            upcoming_events = list(
-                eventsdb.find(upcoming_events_query).sort(
-                    "datetimeperiod.0", 1
-                )
+            upcoming_events = (
+                await eventsdb.find(upcoming_events_query)
+                .sort("datetimeperiod.0", 1)
+                .to_list(length=None)
             )
-
             events = ongoing_events + upcoming_events
         else:
-            past_events = list(
-                eventsdb.find(past_events_query)
+            past_events = (
+                await eventsdb.find(past_events_query)
                 .sort("datetimeperiod.1", -1)
                 .skip(skip)
                 .limit(limit)
+                .to_list(length=None)
             )
             events = past_events
     else:
-        ongoing_events = list(
-            eventsdb.find(ongoing_events_query).sort("datetimeperiod.0", -1)
+        ongoing_events = (
+            await eventsdb.find(ongoing_events_query)
+            .sort("datetimeperiod.0", -1)
+            .to_list(length=None)
         )
-        upcoming_events = list(
-            eventsdb.find(upcoming_events_query).sort("datetimeperiod.0", 1)
+        upcoming_events = (
+            await eventsdb.find(upcoming_events_query)
+            .sort("datetimeperiod.0", 1)
+            .to_list(length=None)
         )
-        past_events = list(
-            eventsdb.find(past_events_query).sort("datetimeperiod.1", -1)
+        past_events = (
+            await eventsdb.find(past_events_query)
+            .sort("datetimeperiod.1", -1)
+            .to_list(length=None)
         )
-
         events = ongoing_events + upcoming_events + past_events
         if limit:
             events = events[:limit]
@@ -538,7 +542,7 @@ def convert_to_html(text) -> str:
 
 
 # method used to delete a file from the file server
-def delete_file(filename) -> str:
+async def delete_file(filename) -> str:
     """
     Method used to delete a file from the file service.
 
@@ -548,13 +552,14 @@ def delete_file(filename) -> str:
     Returns:
         (str): response from the file service.
     """
-    response = requests.post(
-        "http://files/delete-file",
-        params={
-            "filename": filename,
-            "inter_communication_secret": inter_communication_secret,
-        },
-    )
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "http://files/delete-file",
+            params={
+                "filename": filename,
+                "inter_communication_secret": inter_communication_secret,
+            },
+        )
 
     if response.status_code != 200:
         raise Exception(response.text)
@@ -562,7 +567,7 @@ def delete_file(filename) -> str:
     return response.text
 
 
-def get_bot_cookie() -> dict:
+async def get_bot_cookie() -> dict:
     """
     Method to get the bot cookie.
 
@@ -570,10 +575,11 @@ def get_bot_cookie() -> dict:
         (dict): cookies.
     """
 
-    response = requests.post(
-        "http://auth/bot-cookie",
-        json={"secret": inter_communication_secret, "uid": "events"},
-    )
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "http://auth/bot-cookie",
+            json={"secret": inter_communication_secret, "uid": "events"},
+        )
 
     return_dict = {}
     for key, value in response.cookies.items():
