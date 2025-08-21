@@ -318,7 +318,9 @@ async def getRoleEmails(role: str) -> List[str]:
                 "http://gateway/graphql",
                 json={"query": query, "variables": variables},
             )
-            uids = [user["uid"] for user in response.json()["data"]["usersByRole"]]
+            uids = [
+                user["uid"] for user in response.json()["data"]["usersByRole"]
+            ]
             emails = []
             for uid in uids:
                 query = """

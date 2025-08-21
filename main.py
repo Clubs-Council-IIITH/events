@@ -56,6 +56,7 @@ DEBUG = getenv("GLOBAL_DEBUG", "False").lower() in ("true", "1", "t")
 # serve API with FastAPI router
 gql_app = GraphQLRouter(schema, graphiql=True, context_getter=get_context)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
@@ -63,6 +64,7 @@ async def lifespan(app: FastAPI):
     init_event_reminder_system()
     yield
     # shutdown
+
 
 app = FastAPI(
     debug=DEBUG,
