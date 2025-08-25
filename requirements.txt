@@ -3,17 +3,11 @@ datetime==5.5
 email_validator >=2.2.0
 fastapi==0.116.1
 fiscalyear==0.4.0
-greenlet==3.2.4
 httpx==0.28.1
-libcst==1.8.2
 matplotlib==3.10.5
-msgpack==1.1.1
-mypy-extensions==1.1.0
 pathspec==0.12.1
 prettytable==3.16.0
 pymongo==4.14.1
 python-multipart >=0.0.20
-strawberry-graphql[fastapi]==0.280.0
+strawberry-graphql[debug-server]==0.280.0
 tomli==2.2.1
-typer==0.16.1
-uvicorn==0.35.0
