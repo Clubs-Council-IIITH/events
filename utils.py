@@ -367,9 +367,12 @@ async def eventsWithSorting(
         searchspace (dict): search space for events
         name (str): name of the event. Defaults to None.
         date_filter (bool): if True, filters events based on date.
-                            Defaults to False.
+                            Defaults to False. Does not work with
+                            pagination.
         pagination (bool): if True, paginates the events. Defaults to False.
-        skip (int): number of events to skip
+        skip (int): number of events to skip. Ignored if pagination is False.
+                    Defaults to 0. Value lt 0 returns all upcoming and
+                    current events, while value ge 0 skips that many events.
         limit (int): number of events to return. Defaults to None.
         timings (timelot_type | None): The time period for which the events
                                 are to be fetched. Defaults to None.
@@ -390,7 +393,7 @@ async def eventsWithSorting(
             .sort("datetimeperiod.0", -1)
             .to_list(length=None)
         )
-        return events
+        return events[:limit] if limit else events
 
     if name is not None and pagination:
         searchspace["name"] = {"$regex": name, "$options": "i"}

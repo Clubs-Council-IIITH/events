@@ -162,8 +162,11 @@ async def events(
                               to None.
         paginationOn (bool): Whether to use pagination. Defaults to False.
         limit (int | None): The maximum number of events to return. Defaults
-                            to None.
-        skip (int): The number of events to skip. Defaults to 0.
+                            to None. Must be set if paginationOn is True.
+        skip (int): The number of events to skip. Defaults to 0. Value lt
+                    0 returns all upcoming and current events, while
+                    value ge 0 skips that many events. Ignored if
+                    paginationOn is False.
         timings (timelot_type | None): The time period for which the events
                                 are to be fetched. Defaults to None.
         location (List[Event_Location] | None): The locations of the events
@@ -690,7 +693,7 @@ async def downloadEventsData(
             value = event.get(field)
 
             if field in ["datetimeperiod.0", "datetimeperiod.1"]:
-                value = event.get("datetimeperiod")
+                value = event["datetimeperiod"]
                 value = (
                     value[0].split("T")[0]
                     if field == "datetimeperiod.0"
