@@ -76,7 +76,9 @@ async def addEventReport(
 
     report_dict = jsonable_encoder(details.to_pydantic())
     report_dict["event_id"] = details.eventid
-    event_report_id = await event_reportsdb.insert_one(report_dict).inserted_id
+    event_report_id = (
+        await event_reportsdb.insert_one(report_dict)
+    ).inserted_id
     event_report = await event_reportsdb.find_one({"_id": event_report_id})
 
     # Update event report submitted status to True
