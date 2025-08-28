@@ -140,6 +140,7 @@ async def events(
     skip: int = 0,
     timings: timelot_type | None = None,
     location: List[Event_Location] | None = None,
+    otherLocation: str | None = None,
 ) -> List[EventType]:
     """
     Returns a list of events as a search result that match the given criteria.
@@ -309,6 +310,7 @@ async def clashingEvents(
         raise Exception("Event with given id does not exist.")
 
     if filterByLocation:
+        event["location"] = [loc for loc in event["location"] if loc != "other"]
         searchspace["location"] = {"$in": event["location"]}
 
     events = await eventsWithSorting(
@@ -712,7 +714,9 @@ async def downloadEventsData(
                 value = event.get(field, [])
                 if len(value) >= 1:
                     value = ", ".join(
-                        getattr(Event_Full_Location, loc) for loc in value
+                        getattr(Event_Full_Location, loc) if loc != "other"
+                        else event.get("otherLocation")
+                        for loc in value
                     )
             elif field == "budget":
                 if isinstance(value, list):
