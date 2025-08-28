@@ -904,10 +904,11 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
                 eventlink=getEventLink(event_instance.code),
                 deleted_by="Clubs Council",
             )
-        if user["role"] == "slo":
+        elif user["role"] == "slo":
             mail_to = [
                 mail_club,
             ]
+            cc_to = await getRoleEmails("cc")
             mail_subject = DELETE_EVENT_SUBJECT.safe_substitute(
                 event_id=event_instance.code,
                 event=event_instance.name,
@@ -919,23 +920,12 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
                 deleted_by="Student Life Office",
             )
 
-            # Mail to CC for the deleted event
-            mail_to_cc = await getRoleEmails("cc")
-            mail_subject_cc = DELETE_EVENT_SUBJECT.safe_substitute(
-                event_id=event_instance.code,
-                event=event_instance.name,
-            )
-            mail_body_cc = DELETE_EVENT_BODY_FOR_CC.safe_substitute(
-                club="Student Life Office",
-                event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
-            )
-
             await triggerMail(
                 user["uid"],
-                mail_subject_cc,
-                mail_body_cc,
-                toRecipients=mail_to_cc,
+                mail_subject,
+                mail_body,
+                toRecipients=mail_to,
+                ccRecipients=cc_to,
                 cookies=info.context.cookies,
             )
         elif user["role"] == "club":
