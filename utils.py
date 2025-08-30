@@ -97,7 +97,7 @@ async def getUser(uid, cookies=None) -> tuple[dict, dict] | None:
         return None
 
 
-async def getClubs(cookies=None) -> dict:
+async def getClubs(cookies=None) -> List[dict]:
     """
     Function to call a query to the Clubs service resolved by the allClubs
     method, fetches info about all clubs.
@@ -106,7 +106,7 @@ async def getClubs(cookies=None) -> dict:
         cookies (dict): cookies. Defaults to None.
 
     Returns:
-        (dict): responce of the request
+        (List[dict]): responce of the request
     """
 
     try:
@@ -126,7 +126,7 @@ async def getClubs(cookies=None) -> dict:
             )
         return response.json()["data"]["allClubs"]
     except Exception:
-        return {}
+        return []
 
 
 # method gets club code from club id
@@ -150,7 +150,7 @@ async def getClubCode(clubid: str) -> str | None:
 async def getClubDetails(
     clubid: str,
     cookies,
-) -> dict:
+) -> List[dict]:
     """
     This method makes a query to the clubs service resolved by the club
     method, used to get a club's name from its clubid.
@@ -160,7 +160,7 @@ async def getClubDetails(
         cookies (dict): cookies
 
     Returns:
-        (dict): response of the request
+        (List[dict]): response of the request
     """
 
     try:
@@ -182,7 +182,7 @@ async def getClubDetails(
             )
         return response.json()["data"]["club"]
     except Exception:
-        return {}
+        return []
 
 
 async def getEventCode(clubid, starttime) -> str:
