@@ -140,7 +140,6 @@ def events(
     skip: int = 0,
     timings: timelot_type | None = None,
     location: List[Event_Location] | None = None,
-    otherLocation: str | None = None,
 ) -> List[EventType]:
     """
     Returns a list of events as a search result that match the given criteria.
@@ -344,7 +343,8 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     if not user or user["role"] != "club" or user["uid"] != clubid:
         raise Exception("You do not have permission to access this resource.")
 
-    events = eventsdb.find(
+    # TODO: Sorting within mongo query itself
+    events = await eventsdb.find(
         {
             "$or": [{"clubid": clubid}, {"collabclubs": {"$in": [clubid]}}],
             "status.state": Event_State_Status.incomplete.value,
@@ -481,6 +481,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
 
     events = eventsdb.find(searchspace)
 
+    # TODO: Sorting within mongo query itself
     # simply sorts events in ascending order of time
     events = sorted(
         events,
