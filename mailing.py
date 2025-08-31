@@ -1,6 +1,6 @@
 import os
 
-import httpx
+from httpx import AsyncClient
 
 from utils import convert_to_html
 
@@ -50,11 +50,10 @@ async def triggerMail(
         # print("mailbody:", body)
 
         if cookies:
-            async with httpx.AsyncClient() as client:
+            async with AsyncClient(cookies=cookies) as client:
                 await client.post(
                     "http://gateway/graphql",
                     json={"query": query, "variables": variables},
-                    cookies=cookies,
                 )
         else:
             raise Exception(

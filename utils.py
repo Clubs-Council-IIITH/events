@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List
 
 import fiscalyear
-import httpx
+from httpx import AsyncClient
 
 from db import eventsdb
 from mtypes import timezone
@@ -45,18 +45,11 @@ async def getMember(cid, uid, cookies=None) -> dict | None:
             }
         """
         variables = {"memberInput": {"cid": cid, "uid": uid, "rid": None}}
-        async with httpx.AsyncClient() as client:
-            if cookies:
-                response = await client.post(
-                    "http://gateway/graphql",
-                    json={"query": query, "variables": variables},
-                    cookies=cookies,
-                )
-            else:
-                response = await client.post(
-                    "http://gateway/graphql",
-                    json={"query": query, "variables": variables},
-                )
+        async with AsyncClient(cookies=cookies) as client:
+            response = await client.post(
+                "http://gateway/graphql",
+                json={"query": query, "variables": variables},
+            )
         return response.json()["data"]["member"]
 
     except Exception:
@@ -91,18 +84,11 @@ async def getUser(uid, cookies=None) -> tuple[dict, dict] | None:
             }
         """
         variable = {"userInput": {"uid": uid}}
-        async with httpx.AsyncClient() as client:
-            if cookies:
-                response = await client.post(
-                    "http://gateway/graphql",
-                    json={"query": query, "variables": variable},
-                    cookies=cookies,
-                )
-            else:
-                response = await client.post(
-                    "http://gateway/graphql",
-                    json={"query": query, "variables": variable},
-                )
+        async with AsyncClient(cookies=cookies) as client:
+            response = await client.post(
+                "http://gateway/graphql",
+                json={"query": query, "variables": variable},
+            )
 
         return response.json()["data"]["userProfile"], response.json()["data"][
             "userMeta"
@@ -111,7 +97,7 @@ async def getUser(uid, cookies=None) -> tuple[dict, dict] | None:
         return None
 
 
-async def getClubs(cookies=None) -> dict:
+async def getClubs(cookies=None) -> List[dict]:
     """
     Function to call a query to the Clubs service resolved by the allClubs
     method, fetches info about all clubs.
@@ -120,7 +106,7 @@ async def getClubs(cookies=None) -> dict:
         cookies (dict): cookies. Defaults to None.
 
     Returns:
-        (dict): responce of the request
+        (List[dict]): responce of the request
     """
 
     try:
@@ -134,17 +120,10 @@ async def getClubs(cookies=None) -> dict:
                         }
                     }
                 """
-        async with httpx.AsyncClient() as client:
-            if cookies:
-                response = await client.post(
-                    "http://gateway/graphql",
-                    json={"query": query},
-                    cookies=cookies,
-                )
-            else:
-                response = await client.post(
-                    "http://gateway/graphql", json={"query": query}
-                )
+        async with AsyncClient(cookies=cookies) as client:
+            response = await client.post(
+                "http://gateway/graphql", json={"query": query}
+            )
         return response.json()["data"]["allClubs"]
     except Exception:
         return []
@@ -171,7 +150,7 @@ async def getClubCode(clubid: str) -> str | None:
 async def getClubDetails(
     clubid: str,
     cookies,
-) -> dict:
+) -> List[dict]:
     """
     This method makes a query to the clubs service resolved by the club
     method, used to get a club's name from its clubid.
@@ -181,7 +160,7 @@ async def getClubDetails(
         cookies (dict): cookies
 
     Returns:
-        (dict): response of the request
+        (List[dict]): response of the request
     """
 
     try:
@@ -196,15 +175,14 @@ async def getClubDetails(
                     }
                 """
         variable = {"clubInput": {"cid": clubid}}
-        async with httpx.AsyncClient() as client:
+        async with AsyncClient(cookies=cookies) as client:
             response = await client.post(
                 "http://gateway/graphql",
                 json={"query": query, "variables": variable},
-                cookies=cookies,
             )
         return response.json()["data"]["club"]
     except Exception:
-        return {}
+        return []
 
 
 async def getEventCode(clubid, starttime) -> str:
@@ -313,7 +291,7 @@ async def getRoleEmails(role: str) -> List[str]:
             "role": role,
             "interCommunicationSecret": inter_communication_secret,
         }
-        async with httpx.AsyncClient() as client:
+        async with AsyncClient() as client:
             response = await client.post(
                 "http://gateway/graphql",
                 json={"query": query, "variables": variables},
@@ -557,7 +535,7 @@ async def delete_file(filename) -> str:
     Returns:
         (str): response from the file service.
     """
-    async with httpx.AsyncClient() as client:
+    async with AsyncClient() as client:
         response = await client.post(
             "http://files/delete-file",
             params={
@@ -580,7 +558,7 @@ async def get_bot_cookie() -> dict:
         (dict): cookies.
     """
 
-    async with httpx.AsyncClient() as client:
+    async with AsyncClient() as client:
         response = await client.post(
             "http://auth/bot-cookie",
             json={"secret": inter_communication_secret, "uid": "events"},
