@@ -66,7 +66,7 @@ noaccess_error = Exception(
 
 
 @strawberry.mutation
-def createEvent(details: InputEventDetails, info: Info) -> EventType:
+async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     """
     Method to create an event by a club,CC.
 
@@ -100,7 +100,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         raise Exception("Start time cannot be after end time.")
 
     # Check if the club exists
-    club_details = getClubDetails(details.clubid, info.context.cookies)
+    club_details = await getClubDetails(details.clubid, info.context.cookies)
     if len(club_details.keys()) == 0:
         raise Exception("Club does not exist.")
 
@@ -178,7 +178,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.collabclubs = details.collabclubs
 
     # Check POC Details Exist or not
-    if not getMember(
+    if not await getMember(
         details.clubid, details.poc, cookies=info.context.cookies
     ):
         raise Exception("Member Details for POC does not exist")
@@ -199,7 +199,7 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     event_instance.status.last_updated_by = user["uid"]
 
     # generates and sets the event's code
-    event_instance.code = getEventCode(
+    event_instance.code = await getEventCode(
         details.clubid, details.datetimeperiod[0]
     )
 
@@ -210,18 +210,18 @@ def createEvent(details: InputEventDetails, info: Info) -> EventType:
     else:
         event_instance.club_category = ClubBodyCategoryType.club
 
-    created_id = eventsdb.insert_one(
-        jsonable_encoder(event_instance)
+    created_id = (
+        await eventsdb.insert_one(jsonable_encoder(event_instance))
     ).inserted_id
     created_event = Event.model_validate(
-        eventsdb.find_one({"_id": created_id})
+        await eventsdb.find_one({"_id": created_id})
     )
 
     return EventType.from_pydantic(created_event)
 
 
 @strawberry.mutation
-def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
+async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     """
     Method used to edit an event by a club,CC,SLO
 
@@ -261,8 +261,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
                 "Start datetime cannot be same/after end datetime."
             )
 
-    event_ref = eventsdb.find_one({"_id": details.eventid})
-
+    event_ref = await eventsdb.find_one({"_id": details.eventid})
     if not event_ref:
         raise Exception("Event does not exist.")
 
@@ -311,7 +310,7 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
         updates["poc"] = details.poc
         # Check POC Details Exist or not
-        if not getMember(
+        if not await getMember(
             details.clubid, details.poc, cookies=info.context.cookies
         ):
             raise Exception("Member Details for POC does not exist")
@@ -382,22 +381,21 @@ def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
 
     updation = {"$set": jsonable_encoder(updates)}
 
-    upd_ref = eventsdb.update_one(query, updation)
+    upd_ref = await eventsdb.update_one(query, updation)
     if upd_ref.matched_count == 0:
         raise Exception("You do not have permission to access this resource.")
 
     if old_poster_file:
         try:
-            delete_file(old_poster_file)
+            await delete_file(old_poster_file)
         except Exception as e:
             print(f"Error deleting poster file {old_poster_file}\nError: {e}")
-
-    event_ref = eventsdb.find_one({"_id": details.eventid})
+    event_ref = await eventsdb.find_one({"_id": details.eventid})
     return EventType.from_pydantic(Event.model_validate(event_ref))
 
 
 @strawberry.mutation
-def progressEvent(
+async def progressEvent(
     eventid: str,
     info: Info,
     cc_progress_budget: bool | None = None,
@@ -427,13 +425,15 @@ def progressEvent(
 
     user = info.context.user
 
-    event_ref = eventsdb.find_one({"_id": eventid})
+    event_ref = await eventsdb.find_one({"_id": eventid})
     if event_ref is None or user is None:
         raise noaccess_error
     event_instance = Event.model_validate(event_ref)
 
     mail_uid = user["uid"]
-    clubDetails = getClubDetails(event_instance.clubid, info.context.cookies)
+    clubDetails = await getClubDetails(
+        event_instance.clubid, info.context.cookies
+    )
     if len(clubDetails.keys()) == 0:
         raise Exception("Club does not exist.")
     else:
@@ -574,17 +574,17 @@ def progressEvent(
     updation["deleted_time"] = event_instance.status.deleted_time
     updation["deleted_by"] = event_instance.status.deleted_by
 
-    poc = getUser(event_instance.poc, info.context.cookies)
+    poc = await getUser(event_instance.poc, info.context.cookies)
     if not poc:
         raise Exception("POC does not exist.")
 
-    upd_ref = eventsdb.update_one(
+    upd_ref = await eventsdb.update_one(
         {"_id": eventid}, {"$set": {"status": updation}}
     )
     if upd_ref.matched_count == 0:
         raise noaccess_error
 
-    event_ref = eventsdb.find_one({"_id": eventid})
+    event_ref = await eventsdb.find_one({"_id": eventid})
     updated_event_instance = Event.model_validate(event_ref)
 
     ## trigger mail notification
@@ -723,7 +723,7 @@ def progressEvent(
     mail_to = []
     cc_to = []
     if updated_event_instance.status.state == Event_State_Status.pending_cc:
-        mail_to = getRoleEmails("cc")
+        mail_to = await getRoleEmails("cc")
 
         # Mail to club also for the successful submission of the event
         mail_to_club = [
@@ -751,7 +751,7 @@ def progressEvent(
             poc_phone=poc_phone,
         )
 
-        triggerMail(
+        await triggerMail(
             mail_uid,
             mail_subject_club,
             mail_body_club,
@@ -763,8 +763,8 @@ def progressEvent(
         updated_event_instance.status.state
         == Event_State_Status.pending_budget
     ):
-        cc_to = getRoleEmails("cc") + getRoleEmails("slo")
-        slc_emails = getRoleEmails("slc")
+        cc_to = await getRoleEmails("cc") + await getRoleEmails("slo")
+        slc_emails = await getRoleEmails("slc")
 
         if slc_members_for_email is not None:
             mail_to = []
@@ -791,14 +791,8 @@ def progressEvent(
     elif (
         updated_event_instance.status.state == Event_State_Status.pending_room
     ):
-        cc_to = getRoleEmails("cc") + (
-            [
-                mail_club,
-            ]
-            if is_body
-            else []
-        )
-        mail_to = getRoleEmails("slo")
+        cc_to = await getRoleEmails("cc") + ([mail_club] if is_body else [])
+        mail_to = await getRoleEmails("slo")
         mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
             event_id=updated_event_instance.code,
             club=clubname,
@@ -835,7 +829,7 @@ def progressEvent(
         )
 
     if len(mail_to):
-        triggerMail(
+        await triggerMail(
             mail_uid,
             mail_subject,
             mail_body,
@@ -843,12 +837,11 @@ def progressEvent(
             ccRecipients=cc_to,
             cookies=info.context.cookies,
         )
-
     return EventType.from_pydantic(updated_event_instance)
 
 
 @strawberry.mutation
-def deleteEvent(eventid: str, info: Info) -> EventType:
+async def deleteEvent(eventid: str, info: Info) -> EventType:
     """
     change the state of an event to `deleted` by CC, SLO or club, also triggers emails to concerned parties
 
@@ -875,7 +868,7 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         # if user is not an admin, they can only delete their own events
         query["clubid"] = user["uid"]
 
-    event_ref = eventsdb.find_one(query)
+    event_ref = await eventsdb.find_one(query)
     if event_ref is None:
         raise noaccess_error
     event_instance = Event.model_validate(event_ref)
@@ -889,14 +882,18 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
         "%d-%m-%Y %I:%M %p"
     )
 
-    clubDetails = getClubDetails(event_instance.clubid, info.context.cookies)
+    clubDetails = await getClubDetails(
+        event_instance.clubid, info.context.cookies
+    )
     if len(clubDetails.keys()) == 0:
         raise Exception("Club does not exist.")
     else:
         mail_club = clubDetails["email"]
         clubname = clubDetails["name"]
 
-    event_ref = eventsdb.update_one(query, {"$set": {"status": updation}})
+    event_ref = await eventsdb.update_one(
+        query, {"$set": {"status": updation}}
+    )
     if event_ref.matched_count == 0:
         raise noaccess_error
 
@@ -919,10 +916,11 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
                 eventlink=getEventLink(event_instance.code),
                 deleted_by="Clubs Council",
             )
-        if user["role"] == "slo":
+        elif user["role"] == "slo":
             mail_to = [
                 mail_club,
             ]
+            cc_to = await getRoleEmails("cc")
             mail_subject = DELETE_EVENT_SUBJECT.safe_substitute(
                 event_id=event_instance.code,
                 event=event_instance.name,
@@ -934,28 +932,16 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
                 deleted_by="Student Life Office",
             )
 
-            # Mail to CC for the deleted event
-            mail_to_cc = getRoleEmails("cc")
-            mail_subject_cc = DELETE_EVENT_SUBJECT.safe_substitute(
-                event_id=event_instance.code,
-                event=event_instance.name,
-            )
-            mail_body_cc = DELETE_EVENT_BODY_FOR_CC.safe_substitute(
-                club="Student Life Office",
-                event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
-            )
-
-            triggerMail(
+            await triggerMail(
                 user["uid"],
-                mail_subject_cc,
-                mail_body_cc,
-                toRecipients=mail_to_cc,
+                mail_subject,
+                mail_body,
+                toRecipients=mail_to,
+                ccRecipients=cc_to,
                 cookies=info.context.cookies,
             )
-
         elif user["role"] == "club":
-            mail_to = getRoleEmails("cc")
+            mail_to = await getRoleEmails("cc")
             mail_subject = DELETE_EVENT_SUBJECT.safe_substitute(
                 event_id=event_instance.code,
                 event=event_instance.name,
@@ -966,20 +952,20 @@ def deleteEvent(eventid: str, info: Info) -> EventType:
                 eventlink=getEventLink(event_instance.code),
             )
 
-        triggerMail(
-            user["uid"],
-            mail_subject,
-            mail_body,
-            toRecipients=mail_to,
-            cookies=info.context.cookies,
-        )
+            await triggerMail(
+                user["uid"],
+                mail_subject,
+                mail_body,
+                toRecipients=mail_to,
+                cookies=info.context.cookies,
+            )
 
-    event_ref = eventsdb.find_one({"_id": eventid})
+    event_ref = await eventsdb.find_one({"_id": eventid})
     return EventType.from_pydantic(Event.model_validate(event_ref))
 
 
 @strawberry.mutation
-def rejectEvent(
+async def rejectEvent(
     eventid: str,
     reason: str,
     info: Info,
@@ -1009,13 +995,15 @@ def rejectEvent(
         "_id": eventid,
     }
 
-    event_ref = eventsdb.find_one(query)
+    event_ref = await eventsdb.find_one(query)
     if event_ref is None:
         raise noaccess_error
 
     event_instance = Event.model_validate(event_ref)
 
-    clubDetails = getClubDetails(event_instance.clubid, info.context.cookies)
+    clubDetails = await getClubDetails(
+        event_instance.clubid, info.context.cookies
+    )
     if len(clubDetails.keys()) == 0:
         raise Exception("Club does not exist.")
     else:
@@ -1031,7 +1019,7 @@ def rejectEvent(
     status["room"] = False
     status["submission_time"] = None
 
-    upd_ref = eventsdb.update_one(
+    upd_ref = await eventsdb.update_one(
         {"_id": eventid}, {"$set": {"status": status}}
     )
     if upd_ref.matched_count == 0:
@@ -1052,7 +1040,7 @@ def rejectEvent(
     )
 
     # Mail to the club regarding the rejected event
-    triggerMail(
+    await triggerMail(
         user["uid"],
         mail_subject,
         mail_body,
@@ -1064,7 +1052,7 @@ def rejectEvent(
 
 
 @strawberry.mutation
-def updateEventsCid(
+async def updateEventsCid(
     info: Info,
     old_cid: str,
     new_cid: str,
@@ -1099,7 +1087,7 @@ def updateEventsCid(
         }
     }
 
-    upd_ref = eventsdb.update_many({"clubid": old_cid}, updation)
+    upd_ref = await eventsdb.update_many({"clubid": old_cid}, updation)
     return upd_ref.modified_count
 
 

@@ -31,7 +31,7 @@ from utils import eventsWithSorting, getClubs, trim_public_events
 
 
 @strawberry.field
-def event(eventid: str, info: Info) -> EventType:
+async def event(eventid: str, info: Info) -> EventType:
     """
     Fetches an event with the given id
 
@@ -51,9 +51,9 @@ def event(eventid: str, info: Info) -> EventType:
 
     """
     user = info.context.user
-    event = eventsdb.find_one({"_id": eventid})
+    event = await eventsdb.find_one({"_id": eventid})
 
-    allclubs = getClubs(info.context.cookies)
+    allclubs = await getClubs(info.context.cookies)
     list_allclubs = list()
     for club in allclubs:
         list_allclubs.append(club["cid"])
@@ -106,7 +106,7 @@ def event(eventid: str, info: Info) -> EventType:
 
 
 @strawberry.field
-def eventid(code: str, info: Info) -> str:
+async def eventid(code: str, info: Info) -> str:
     """
     method returns eventid of the event with the given event code
 
@@ -121,7 +121,7 @@ def eventid(code: str, info: Info) -> str:
         Exception: Event with given code does not exist.
     """
 
-    event = eventsdb.find_one({"code": code})
+    event = await eventsdb.find_one({"code": code})
 
     if event is None:
         raise Exception("Event with given code does not exist.")
@@ -130,7 +130,7 @@ def eventid(code: str, info: Info) -> str:
 
 
 @strawberry.field
-def events(
+async def events(
     info: Info,
     clubid: str | None = None,
     name: str | None = None,
@@ -162,8 +162,11 @@ def events(
                               to None.
         paginationOn (bool): Whether to use pagination. Defaults to False.
         limit (int | None): The maximum number of events to return. Defaults
-                            to None.
-        skip (int): The number of events to skip. Defaults to 0.
+                            to None. Must be set if paginationOn is True.
+        skip (int): The number of events to skip. Defaults to 0. Value lt
+                    0 returns all upcoming and current events, while
+                    value ge 0 skips that many events. Ignored if
+                    paginationOn is False.
         timings (timelot_type | None): The time period for which the events
                                 are to be fetched. Defaults to None.
         location (List[Event_Location] | None): The locations of the events
@@ -209,7 +212,7 @@ def events(
             {"collabclubs": {"$in": [clubid]}},
         ]
     else:
-        allclubs = getClubs(info.context.cookies)
+        allclubs = await getClubs(info.context.cookies)
         list_allclubs = list()
         for club in allclubs:
             list_allclubs.append(club["cid"])
@@ -247,7 +250,7 @@ def events(
             timings[1].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
         ]
 
-    events = eventsWithSorting(
+    events = await eventsWithSorting(
         searchspace,
         date_filter=False,
         pagination=paginationOn,
@@ -269,7 +272,7 @@ def events(
 
 
 @strawberry.field
-def clashingEvents(
+async def clashingEvents(
     info: Info,
     id: str,
     filterByLocation: bool = True,
@@ -301,7 +304,7 @@ def clashingEvents(
         },
     }
 
-    event = eventsdb.find_one({"_id": id})
+    event = await eventsdb.find_one({"_id": id})
     if event is None:
         raise Exception("Event with given id does not exist.")
 
@@ -309,7 +312,7 @@ def clashingEvents(
         event["location"] = [loc for loc in event["location"] if loc != "other"]
         searchspace["location"] = {"$in": event["location"]}
 
-    events = eventsWithSorting(
+    events = await eventsWithSorting(
         searchspace,
         date_filter=False,
         timings=event["datetimeperiod"],
@@ -323,7 +326,7 @@ def clashingEvents(
 
 
 @strawberry.field
-def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
+async def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     """
     Return all incomplete events of a club for the club
 
@@ -349,7 +352,7 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
             "$or": [{"clubid": clubid}, {"collabclubs": {"$in": [clubid]}}],
             "status.state": Event_State_Status.incomplete.value,
         }
-    )
+    ).to_list(length=None)
 
     # sort events in ascending order of time
     events = sorted(
@@ -409,7 +412,7 @@ def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
 
 
 @strawberry.field
-def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
+async def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     """
     Returns all the pending events of a give club id
 
@@ -479,7 +482,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
                 },
             ]
 
-    events = eventsdb.find(searchspace)
+    events = await eventsdb.find(searchspace).to_list(length=None)
 
     # TODO: Sorting within mongo query itself
     # simply sorts events in ascending order of time
@@ -496,7 +499,7 @@ def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
 
 
 @strawberry.field
-def availableRooms(
+async def availableRooms(
     timeslot: timelot_type, eventid: str | None, info: Info
 ) -> RoomListType:
     """
@@ -527,7 +530,7 @@ def availableRooms(
         timeslot[1].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
     ]
 
-    approved_events = eventsdb.find(
+    approved_events = await eventsdb.find(
         {
             "status.state": Event_State_Status.approved.value,
             "datetimeperiod.0": {"$lte": timeslot_str[1]},
@@ -536,14 +539,14 @@ def availableRooms(
         {
             "location": 1,
         },
-    )
+    ).to_list(length=None)
 
     occupied_rooms = set()
     for approved_event in approved_events:
         occupied_rooms.update(approved_event["location"])
 
     if eventid is not None:
-        event = eventsdb.find_one({"_id": eventid}, {"location": 1})
+        event = await eventsdb.find_one({"_id": eventid}, {"location": 1})
         if event is not None:
             occupied_rooms.difference_update(event["location"])
 
@@ -561,7 +564,7 @@ def availableRooms(
 
 
 @strawberry.field
-def downloadEventsData(
+async def downloadEventsData(
     details: InputDataReportDetails, info: Info
 ) -> CSVResponse:
     """
@@ -597,7 +600,7 @@ def downloadEventsData(
         raise Exception("Invalid status")
 
     all_events = list()
-    allclubs = getClubs(info.context.cookies)
+    allclubs = await getClubs(info.context.cookies)
     searchspace: dict[str, Any] = {}
 
     if details.clubid:
@@ -649,7 +652,7 @@ def downloadEventsData(
                     "$nin": to_exclude,
                 }
 
-            all_events = eventsWithSorting(searchspace, date_filter=True)
+            all_events = await eventsWithSorting(searchspace, date_filter=True)
 
     header_mapping = {
         "code": "Event Code",
@@ -693,7 +696,7 @@ def downloadEventsData(
             value = event.get(field)
 
             if field in ["datetimeperiod.0", "datetimeperiod.1"]:
-                value = event.get("datetimeperiod")
+                value = event["datetimeperiod"]
                 value = (
                     value[0].split("T")[0]
                     if field == "datetimeperiod.0"
