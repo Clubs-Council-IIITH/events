@@ -1,13 +1,8 @@
 apscheduler==3.11.0
 datetime==5.5
-email_validator >=2.2.0
 fastapi==0.116.1
 fiscalyear==0.4.0
 httpx==0.28.1
-matplotlib==3.10.5
-pathspec==0.12.1
 prettytable==3.16.0
 pymongo==4.14.1
-python-multipart >=0.0.20
 strawberry-graphql[debug-server]==0.280.0
-tomli==2.2.1
