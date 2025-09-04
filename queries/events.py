@@ -309,6 +309,7 @@ async def clashingEvents(
         raise Exception("Event with given id does not exist.")
 
     if filterByLocation:
+        event["location"] = [loc for loc in event["location"] if loc != "other"]
         searchspace["location"] = {"$in": event["location"]}
 
     events = await eventsWithSorting(
@@ -345,6 +346,7 @@ async def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     if not user or user["role"] != "club" or user["uid"] != clubid:
         raise Exception("You do not have permission to access this resource.")
 
+    # TODO: Sorting within mongo query itself
     events = await eventsdb.find(
         {
             "$or": [{"clubid": clubid}, {"collabclubs": {"$in": [clubid]}}],
@@ -482,6 +484,7 @@ async def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
 
     events = await eventsdb.find(searchspace).to_list(length=None)
 
+    # TODO: Sorting within mongo query itself
     # simply sorts events in ascending order of time
     events = sorted(
         events,
@@ -712,7 +715,9 @@ async def downloadEventsData(
                 value = event.get(field, [])
                 if len(value) >= 1:
                     value = ", ".join(
-                        getattr(Event_Full_Location, loc) for loc in value
+                        getattr(Event_Full_Location, loc) if loc != "other"
+                        else event.get("otherLocation")
+                        for loc in value
                     )
             elif field == "budget":
                 if isinstance(value, list):

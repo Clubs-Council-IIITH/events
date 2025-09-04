@@ -120,6 +120,10 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.locationAlternate = [
             Event_Location(loc) for loc in details.locationAlternate
         ]
+    if details.otherLocation is not None and "other" in details.location:
+        event_instance.otherLocation = details.otherLocation
+    if details.otherLocationAlternate is not None and "other" in details.locationAlternate:
+        event_instance.otherLocationAlternate = details.otherLocationAlternate
     if details.description is not None:
         event_instance.description = details.description.strip()
     if details.poster is not None:
@@ -297,6 +301,10 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["locationAlternate"] = [
             Event_Location(loc) for loc in details.locationAlternate
         ]
+    if details.otherLocation is not None and updatable and "other" in details.otherLocation:
+        updates["otherLocation"] = details.otherLocation
+    if details.otherLocationAlternate is not None and updatable and "other" in details.otherLocationAlternate:
+        updates["otherLocationAlternate"] = details.otherLocationAlternate
     if details.collabclubs is not None and updatable:
         updates["collabclubs"] = details.collabclubs
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
@@ -597,13 +605,17 @@ async def progressEvent(
     else:
         mail_location = ", ".join(
             [
-                getattr(Event_Full_Location, loc)
+                getattr(Event_Full_Location, loc, None)
+                if loc != "other"
+                else updated_event_instance.otherLocation
                 for loc in updated_event_instance.location
             ]
         )
         mail_locationAlternate = ", ".join(
             [
-                getattr(Event_Full_Location, loc)
+                getattr(Event_Full_Location, loc, None)
+                if loc != "other"
+                else updated_event_instance.otherLocationAlternate
                 for loc in updated_event_instance.locationAlternate
             ]
         )
