@@ -301,9 +301,9 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["locationAlternate"] = [
             Event_Location(loc) for loc in details.locationAlternate
         ]
-    if details.otherLocation is not None and updatable and "other" in details.otherLocation:
+    if details.otherLocation is not None and "other" in details.otherLocation and updatable:
         updates["otherLocation"] = details.otherLocation
-    if details.otherLocationAlternate is not None and updatable and "other" in details.otherLocationAlternate:
+    if details.otherLocationAlternate is not None and "other" in details.otherLocationAlternate and updatable:
         updates["otherLocationAlternate"] = details.otherLocationAlternate
     if details.collabclubs is not None and updatable:
         updates["collabclubs"] = details.collabclubs
@@ -320,7 +320,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["audience"] = [Audience(aud) for aud in details.audience]
     if details.link is not None:
         updates["link"] = details.link
-    if details.equipment is not None:
+    if details.equipment is not None and updatable:
         updates["equipment"] = details.equipment
     if details.additional is not None:
         updates["additional"] = details.additional
@@ -351,7 +351,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
                 details.budget,
             )
         )
-    if details.sponsor is not None:
+    if details.sponsor is not None and updatable:
         updates["sponsor"] = list(
             map(
                 lambda x: SponsorType(
