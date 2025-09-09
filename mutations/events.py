@@ -607,7 +607,7 @@ async def progressEvent(
             [
                 getattr(Event_Full_Location, loc, None)
                 if loc != "other"
-                else updated_event_instance.otherLocation or "other"
+                else (updated_event_instance.otherLocation or "other")
                 for loc in updated_event_instance.location
             ]
         )
@@ -615,7 +615,7 @@ async def progressEvent(
             [
                 getattr(Event_Full_Location, loc, None)
                 if loc != "other"
-                else updated_event_instance.otherLocationAlternate or "other"
+                else (updated_event_instance.otherLocationAlternate or "other")
                 for loc in updated_event_instance.locationAlternate
             ]
         )

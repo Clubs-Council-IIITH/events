@@ -716,7 +716,7 @@ async def downloadEventsData(
                 if len(value) >= 1:
                     value = ", ".join(
                         getattr(Event_Full_Location, loc) if loc != "other"
-                        else event.get("otherLocation")
+                        else (event.get("otherLocation") or "other")
                         for loc in value
                     )
             elif field == "budget":
