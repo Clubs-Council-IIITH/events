@@ -410,16 +410,6 @@ class SponsorType:
     amount: float
     previously_sponsored: bool = False
 
-    @field_validator("amount")
-    @classmethod
-    def positive_amount(cls, value):
-        """
-        A field validator for the amount field.
-        """
-        if value <= 0:
-            raise ValueError("Amount must be positive")
-        return value
-
 
 @strawberry.enum
 class ClubBodyCategoryType(StrEnum):
