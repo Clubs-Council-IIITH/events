@@ -14,6 +14,14 @@ from pydantic import (
 from pydantic_core import core_schema
 from typing_extensions import Annotated, Any
 
+event_popu_type = Annotated[int, Field(ge=0)]
+
+very_short_str_type = Annotated[
+    str, StringConstraints(min_length=1, max_length=200)
+]
+short_str_type = Annotated[str, StringConstraints(max_length=1000)]
+medium_str_type = Annotated[str, StringConstraints(max_length=5000)]
+long_str_type = Annotated[str, StringConstraints(max_length=10000)]
 
 # Audience for the Event
 @strawberry.enum
@@ -73,22 +81,23 @@ class Bills_Status:
                                     are `not_submitted`.
         updated_time (str | None): Time of approval/rejection. Defaults
                                    to None.
-        slo_comment (str | None): Comment of SLO. Defaults to None.
+        filename (very_short_str_type | None): filename of the bill submitted
+        slo_comment (short_str_type | None): Comment of SLO. Defaults to None.
     """
 
     state: Bills_State_Status = Bills_State_Status.not_submitted
     updated_time: str | None = None
     submitted_time: str | None = None
-    filename: str | None = None
-    slo_comment: str | None = None
+    filename: very_short_str_type | None = None
+    slo_comment: short_str_type | None = None
 
     def __init__(
         self,
         state: Bills_State_Status = Bills_State_Status.not_submitted,
         updated_time: str | None = None,
         submitted_time: str | None = None,
-        filename: str | None = None,
-        slo_comment: str | None = None,
+        filename: very_short_str_type | None = None,
+        slo_comment: short_str_type | None = None,
     ):
         self.state = state
         self.updated_time = updated_time
@@ -318,16 +327,6 @@ class Event_Location(StrEnum):
     other = auto()
 
 
-event_popu_type = Annotated[int, Field(ge=0)]
-
-very_short_str_type = Annotated[
-    str, StringConstraints(min_length=1, max_length=200)
-]
-short_str_type = Annotated[str, StringConstraints(max_length=1000)]
-medium_str_type = Annotated[str, StringConstraints(max_length=5000)]
-long_str_type = Annotated[str, StringConstraints(max_length=10000)]
-
-
 @strawberry.type
 class BudgetType:
     """
@@ -335,17 +334,19 @@ class BudgetType:
 
     Attributes:
         amount (float): Amount of the budget.
-        description (str | None): Description of the budget. Defaults to None.
+        description (short_str_type | None): Description of the budget. Defaults to None.
         advance (bool): Whether the budget is the required advance or not.
                         Defaults to False.
+        billno (very_short_str_type): Bill number submitted associated with budget entry.
+        amount_used (float): Amount actually used in the event.
     """
 
     amount: float
-    description: str | None = None
+    description: short_str_type | None = None
     advance: bool = False
 
     # After event
-    billno: str | None = None
+    billno: very_short_str_type | None = None
     amount_used: float | None = None
 
     @field_validator("amount")
@@ -398,17 +399,17 @@ class SponsorType:
     Class for info regarding a sponsor
 
     Attributes:
-        name (str): Name of the sponsor.
+        name (very_short_str_type): Name of the sponsor.
         amount (float): Amount supported by sponsor.
         previously_sponsored (bool | None): Whether the sponsor
             has sponsored an event previously
-        comment (str): Any additional comments
+        comment (short_str_type): Any additional comments
     """
 
-    name: str
+    name: very_short_str_type
     amount: float
     previously_sponsored: bool = False
-    comment: str | None = None
+    comment: short_str_type | None = None
 
     @field_validator("amount")
     @classmethod

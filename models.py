@@ -87,10 +87,10 @@ class Event(BaseModel):
         link (HttpUrlString): The link to the event's page. Defaults to None.
         mode (Event_Mode): The mode of the event. Defaults to hybrid.
         location (List[Event_Location]): The list of locations for the event.
-        otherLocation (str): The 'Other' location of the event. Defaults to None.
+        otherLocation (very_short_str_type): The 'Other' location of the event. Defaults to None.
         locationAlternate (List[Event_Location]): The list of alternate
                                                   locations for the event.
-        otherLocationAlternate (str): The 'Other' alternate location of the
+        otherLocationAlternate (very_short_str_type): The 'Other' alternate location of the
                                       event. Defaults to None.
         equipment (short_str_type): The equipment required for the event.
                                     Defaults to None.
@@ -125,9 +125,9 @@ class Event(BaseModel):
 
     mode: Event_Mode = Event_Mode.hybrid
     location: List[Event_Location] = []
-    otherLocation: str | None = None
+    otherLocation: very_short_str_type | None = None
     locationAlternate: List[Event_Location] = []
-    otherLocationAlternate: str | None = None
+    otherLocationAlternate: very_short_str_type | None = None
     equipment: short_str_type | None = None
     additional: short_str_type | None = None
     population: event_popu_type | None = None
