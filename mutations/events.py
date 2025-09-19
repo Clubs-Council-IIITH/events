@@ -167,9 +167,9 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
             map(
                 lambda x: SponsorType(
                     name=x.name,
-                    website=x.website if x.website else "None",
                     amount=x.amount,
                     previously_sponsored=x.previously_sponsored,
+                    comment=x.comment if x.comment else "None",
                 ),
                 details.sponsor,
             )
@@ -356,9 +356,9 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
             map(
                 lambda x: SponsorType(
                     name=x.name,
-                    website=x.website if x.website else "None",
                     amount=x.amount,
                     previously_sponsored=x.previously_sponsored,
+                    comment=x.comment if x.comment else "None",
                 ),
                 details.sponsor,
             )
@@ -660,17 +660,17 @@ async def progressEvent(
         sponsor_table = PrettyTable()
         sponsor_table.field_names = [
             "Name",
-            "Website",
             "Amount",
             "Previously Sponsored",
+            "Comment",
         ]
         for item in updated_event_instance.sponsor:
             sponsor_table.add_row(
                 [
                     item.name,
-                    item.website,
                     item.amount,
                     "Yes" if item.previously_sponsored else "No",
+                    item.comment,
                 ],
                 divider=True,
             )
@@ -681,9 +681,9 @@ async def progressEvent(
             ["", "Total sponsor", total_sponsor, ""], divider=True
         )
         sponsor_table.max_width["Name"] = 10
-        sponsor_table.max_width["Website"] = 20
         sponsor_table.max_width["Amount"] = 8
         sponsor_table.max_width["Previously Sponsored"] = 5
+        sponsor_table.max_width["Comment"] = 20
         sponsor_table.align["Amount"] = "r"
 
         sponsor = "\n" + sponsor_table.get_string()
