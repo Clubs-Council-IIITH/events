@@ -17,11 +17,22 @@ from typing_extensions import Annotated, Any
 event_popu_type = Annotated[int, Field(ge=0)]
 
 very_short_str_type = Annotated[
-    str, StringConstraints(min_length=1, max_length=200)
+    str,
+    StringConstraints(min_length=1, max_length=200),
 ]
-short_str_type = Annotated[str, StringConstraints(max_length=1000)]
-medium_str_type = Annotated[str, StringConstraints(max_length=5000)]
-long_str_type = Annotated[str, StringConstraints(max_length=10000)]
+short_str_type = Annotated[
+    str,
+    StringConstraints(max_length=1000),
+]
+medium_str_type = Annotated[
+    str,
+    StringConstraints(max_length=5000),
+]
+long_str_type = Annotated[
+    str,
+    StringConstraints(max_length=10000),
+]
+
 
 # Audience for the Event
 @strawberry.enum

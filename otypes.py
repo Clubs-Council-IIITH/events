@@ -4,6 +4,12 @@ from functools import cached_property
 from typing import Dict, List, Optional, Tuple, TypeAlias
 
 import strawberry
+from graphql import GraphQLError
+from pydantic import (
+    BaseModel,
+    TypeAdapter,
+    ValidationError,
+)
 from strawberry.fastapi import BaseContext
 from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
@@ -18,6 +24,10 @@ from mtypes import (
     Event_Mode,
     PyObjectId,
     SponsorType,
+    event_popu_type,
+    medium_str_type,
+    short_str_type,
+    very_short_str_type,
 )
 
 
@@ -105,16 +115,18 @@ class BillsStatusType:
     eventReportSubmitted: str
 
 
-@strawberry.input
-class InputBillsStatus:
+@strawberry.type
+class CSVResponse:
     """
-    Input for taking event id, state of the bill and slo comment during
-    the approval/rejection of bills.
+    Type for returning the csv file, success/error message.
     """
 
-    eventid: str
-    state: Bills_State_Status
-    slo_comment: str | None = None
+    csvFile: str
+    successMessage: str
+    errorMessage: str
+
+
+# EVENT INPUTS
 
 
 @strawberry.input
@@ -135,10 +147,9 @@ class SponsorInput(SponsorType):
     pass
 
 
-@strawberry.input
-class InputEventDetails:
+class InputEventDetailsBaseModel(BaseModel):
     """
-    Class for taking the details of an event.
+    Base Model Class for taking the details of an event.
 
     Attributes:
         name (str): Name of the event.
@@ -174,12 +185,12 @@ class InputEventDetails:
         poc (str): Point of contact for the event.
     """  # noqa: E501
 
-    name: str
+    name: very_short_str_type
     location: List[Event_Location] | None = None
-    otherLocation: str | None = None
+    otherLocation: str | None = None  # very_short_str_type
     locationAlternate: List[Event_Location] | None = None
-    otherLocationAlternate: str | None = None
-    description: str | None = None
+    otherLocationAlternate: str | None = None  # very_short_str_type
+    description: medium_str_type | None = None
     clubid: str
     collabclubs: List[str] | None = None
     mode: Event_Mode | None = Event_Mode.hybrid
@@ -187,43 +198,64 @@ class InputEventDetails:
     datetimeperiod: List[datetime]
     audience: List[Audience] | None = None
     link: str | None = None
-    equipment: str | None = None
-    additional: str | None = None
-    population: int | None = None
-    external_population: Optional[int] = None
+    equipment: short_str_type | None = None
+    additional: short_str_type | None = None
+    population: event_popu_type | None = None
+    external_population: Optional[event_popu_type] = None
     budget: List[BudgetInput] | None = None
     sponsor: List[SponsorInput] | None = None
     poc: str
 
 
-@strawberry.input
-class InputEditEventDetails:
+@strawberry.experimental.pydantic.input(
+    model=InputEventDetailsBaseModel, all_fields=True
+)
+class InputEventDetails:
     """
-    Input similar to InputEventDetails but along with the event
+    Input for taking all fields of the InputEventDetailsBaseModel class.
+    """
+
+    pass
+
+
+class InputEditEventDetailsBaseModel(BaseModel):
+    """
+    Input similar to InputEventDetailsBaseModel but along with the event
     id(self-generated) attribute.
     """
 
-    name: str | None = None
+    name: very_short_str_type | None = None
     eventid: str
     collabclubs: List[str] | None = None
     location: List[Event_Location] | None = None
-    otherLocation: str | None = None
+    otherLocation: very_short_str_type | None = None
     locationAlternate: List[Event_Location] | None = None
-    otherLocationAlternate: str | None = None
-    description: str | None = None
+    otherLocationAlternate: very_short_str_type | None = None
+    description: medium_str_type | None = None
     clubid: str | None
     mode: Event_Mode | None = Event_Mode.hybrid
     poster: str | None = None
     datetimeperiod: List[datetime] | None = None
     audience: List[Audience] | None = None
     link: str | None = None
-    equipment: str | None = None
-    additional: str | None = None
-    population: int | None = None
-    external_population: Optional[int] = None
+    equipment: short_str_type | None = None
+    additional: short_str_type | None = None
+    population: event_popu_type | None = None
+    external_population: Optional[event_popu_type] = None
     budget: List[BudgetInput] | None = None
     sponsor: List[SponsorInput] | None = None
     poc: str | None = None
+
+
+@strawberry.experimental.pydantic.input(
+    model=InputEditEventDetailsBaseModel, all_fields=True
+)
+class InputEditEventDetails:
+    """
+    Input for taking all fields of the InputEditEventDetailsBaseModel class.
+    """
+
+    pass
 
 
 @strawberry.input
@@ -248,15 +280,49 @@ class InputEventReport:
     pass
 
 
-@strawberry.type
-class CSVResponse:
+@strawberry.input
+class InputBillsStatus:
     """
-    Type for returning the csv file, success/error message.
+    Input for taking event id, state of the bill and slo comment during
+    the approval/rejection of bills.
     """
 
-    csvFile: str
-    successMessage: str
-    errorMessage: str
+    eventid: str
+    state: Bills_State_Status
+    slo_comment: str | None = None  # short_str_type
+
+    def __post_init__(self):
+        if self.slo_comment is not None:
+            try:
+                short_str_type_adapter = TypeAdapter(short_str_type)
+                self.slo_comment = short_str_type_adapter.validate_python(
+                    self.slo_comment
+                )
+            except ValidationError as e:
+                raise GraphQLError(
+                    f"Invalid slo_comment: {e.errors()[0]['msg']}"
+                )
+
+
+@strawberry.input
+class InputBillsUpload:
+    """
+    Input for taking event id, and filename of the bill generated by
+    getSignedUploadURL function.
+    """
+
+    eventid: str
+    filename: str  # very_short_str_type
+    budget: List[BudgetInput]
+
+    def __post_init__(self):
+        try:
+            very_short_str_type_adapter = TypeAdapter(very_short_str_type)
+            self.filename = very_short_str_type_adapter.validate_python(
+                self.filename
+            )
+        except ValidationError as e:
+            raise GraphQLError(f"Invalid filename: {e.errors()[0]['msg']}")
 
 
 # custom data type for start and end of event
@@ -272,8 +338,26 @@ class InputHolidayDetails:
     """
 
     date: date
-    name: str
-    description: str | None = None
+    name: str  # very_short_str_type
+    description: str | None = None  # medium_str_type
+
+    def __post_init__(self):
+        try:
+            very_short_str_type_adapter = TypeAdapter(very_short_str_type)
+            self.name = very_short_str_type_adapter.validate_python(self.name)
+        except ValidationError as e:
+            raise GraphQLError(f"Invalid name: {e.errors()[0]['msg']}")
+
+        if self.description is not None:
+            medium_str_type_adapter = TypeAdapter(medium_str_type)
+            try:
+                self.description = medium_str_type_adapter.validate_python(
+                    self.description
+                )
+            except ValidationError as e:
+                raise GraphQLError(
+                    f"Invalid description: {e.errors()[0]['msg']}"
+                )
 
 
 @strawberry.experimental.pydantic.type(model=Holiday, all_fields=True)
@@ -283,15 +367,3 @@ class HolidayType:
     """
 
     pass
-
-
-@strawberry.input
-class InputBillsUpload:
-    """
-    Input for taking event id, and filename of the bill generated by
-    getSignedUploadURL function.
-    """
-
-    eventid: str
-    filename: str
-    budget: List[BudgetInput]
