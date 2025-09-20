@@ -342,6 +342,7 @@ class InputBillsUpload:
 
 # custom data type for start and end of event
 timelot_type = Tuple[datetime, datetime]
+"""A custom data type for start and end of event"""
 
 # Holidays Types
 
