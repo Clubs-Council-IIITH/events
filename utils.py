@@ -151,7 +151,7 @@ async def getClubCode(clubid: str) -> str | None:
 async def getClubDetails(
     clubid: str,
     cookies,
-) -> List[dict]:
+) -> dict:
     """
     This method makes a query to the clubs service resolved by the club
     method, used to get a club's name from its clubid.
@@ -183,7 +183,7 @@ async def getClubDetails(
             )
         return response.json()["data"]["club"]
     except Exception:
-        return []
+        return {}
 
 
 async def getEventCode(clubid, starttime) -> str:
@@ -437,7 +437,7 @@ async def eventsWithSorting(
                 await eventsdb.find(past_events_query)
                 .sort("datetimeperiod.1", -1)
                 .skip(skip)
-                .limit(limit)
+                .limit(limit or 0)
                 .to_list(length=None)
             )
             events = past_events

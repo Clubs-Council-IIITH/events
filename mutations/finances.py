@@ -257,9 +257,7 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
         mail_uid,
         mail_subject,
         mail_body,
-        toRecipients=[
-            slo_emails,
-        ],
+        toRecipients=slo_emails,
         ccRecipients=cc_to,
         cookies=info.context.cookies,
     )

@@ -349,10 +349,12 @@ class BudgetType:
 
     Attributes:
         amount (float): Amount of the budget.
-        description (short_str_type | None): Description of the budget. Defaults to None.
+        description (short_str_type | None): Description of the budget. 
+                                        Defaults to None.
         advance (bool): Whether the budget is the required advance or not.
                         Defaults to False.
-        billno (very_short_str_type): Bill number submitted associated with budget entry.
+        billno (very_short_str_type): Bill number submitted associated 
+                            with budget entry.
         amount_used (float): Amount actually used in the event.
     """
 

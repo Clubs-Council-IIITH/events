@@ -633,7 +633,7 @@ async def progressEvent(
 
     # handle external participants
     external_count = updated_event_instance.external_population
-    if external_count and external_count > 0:
+    if student_count and external_count and external_count > 0:
         student_count = (
             str(student_count + external_count)
             + f" (External Participants: {external_count})"
