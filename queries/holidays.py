@@ -27,7 +27,7 @@ async def holidays(
                                    Defaults to None.
 
     Returns:
-        (List[HolidayType]): A list of holidays.
+        (List[otypes.HolidayType]): A list of holidays.
 
     Raises:
         ValueError: Start date cannot be greater than end date.
@@ -59,7 +59,7 @@ async def holiday(id: str) -> HolidayType:
         id (str): The id of the holiday.
 
     Returns:
-        (HolidayType): The holiday's details.
+        (otypes.HolidayType): The holiday's details.
     """
 
     holiday = await holidaysdb.find_one({"_id": id})

@@ -40,10 +40,10 @@ async def event(eventid: str, info: Info) -> EventType:
 
     Args:
         eventid (str): The id of the event to be fetched.
-        info (Info): The context information of user for the request.
+        info (otypes.Info): The context information of user for the request.
 
     Returns:
-        (EventType): Details regarding The event with the given id.
+        (otypes.EventType): Details regarding The event with the given id.
 
     Raises:
         Exception: Can not access event. Either it does not exist or you do
@@ -112,7 +112,7 @@ async def eventid(code: str, info: Info) -> str:
 
     Args:
         code (str): The code of the event to be fetched.
-        info (Info): The context information of user for the request.
+        info (otypes.Info): The context information of user for the request.
 
     Returns:
         (str): The id of the event with the given code.
@@ -153,7 +153,7 @@ async def events(
     trim_public_events function.
 
     Args:
-        info (Info): The context information of user for the request.
+        info (otypes.Info): The context information of user for the request.
         clubid (str | None): The id of the club whose events are to be
                              fetched. Defaults to None.
         name (str | None): The name of the event to be searched according to.
@@ -167,13 +167,16 @@ async def events(
                     0 returns all upcoming and current events, while
                     value ge 0 skips that many events. Ignored if
                     paginationOn is False.
-        timings (timelot_type | None): The time period for which the events
-                                are to be fetched. Defaults to None.
-        location (List[Event_Location] | None): The locations of the events
-                                to be fetched. Defaults to None.
+        timings (otypes.timelot_type | None): The time period for which the 
+                                              events are to be fetched. 
+                                              Defaults to None.
+        location (List[mtypes.Event_Location] | None): The locations of the 
+                                                       events to be fetched. 
+                                                       Defaults to None.
 
     Returns:
-        (List[EventType]): A list of events that match the given criteria.
+        (List[otypes.EventType]): A list of events that match the given 
+                                  criteria.
 
     Raises:
         Exception: Pagination limit is required.
@@ -281,12 +284,13 @@ async def clashingEvents(
     Returns a list of clashing events for the given event id.
 
     Args:
-        info (Info): The context information of user for the request.
+        info (otypes.Info): The context information of user for the request.
         id (str): The id of the event for which clashing events are to be
                      fetched.
 
     Returns:
-        (List[EventType]): A list of events that match the given criteria.
+        (List[otypes.EventType]): A list of events that match the given 
+                                  criteria.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -333,10 +337,11 @@ async def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     Args:
         clubid (str): The id of the club whose incomplete events are to be
                       fetched.
-        info (Info): The context information of user for the request.
+        info (otypes.Info): The context information of user for the request.
 
     Returns:
-        (List[EventType]): A list of events that match the given criteria.
+        (List[otypes.EventType]): A list of events that match the given 
+                                  criteria.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -425,10 +430,11 @@ async def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
     Args:
         clubid (str): The id of the club whose pending events are to be
                       fetched. Defaults to None.
-        info (Info): The context information of user for the request.
+        info (otypes.Info): The context information of user for the request.
 
     Returns:
-        (List[EventType]): A list of events that match the given criteria.
+        (List[otypes.EventType]): A list of events that match the given 
+                                  criteria.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -506,15 +512,15 @@ async def availableRooms(
     return a list of all rooms that are available in the given timeslot
 
     Args:
-        timeslot (timelot_type): The timeslot for which the rooms are to be
-                                 fetched.
+        timeslot (otypes.timelot_type): The timeslot for which the rooms are 
+                                        to be fetched.
         eventid (str): The id of the event whose location is to be added to
                        the list of rooms. Defaults to None.
-        info (Info): The context information of user for the request.
+        info (otypes.Info): The context information of user for the request.
 
     Returns:
-        (RoomListType): A list of rooms that are available in the given
-                      timeslot.
+        (otypes.RoomListType): A list of rooms that are available in the given
+                              timeslot.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -581,12 +587,12 @@ async def downloadEventsData(
     approved events.
 
     Args:
-        details (InputDataReportDetails): The details of the events to be
-                                          fetched.
-        info (Info): The context information of user for the request.
+        details (otypes.InputDataReportDetails): The details of the events 
+                                                to be fetched.
+        info (otypes.Info): The context information of user for the request.
 
     Returns:
-        (CSVResponse): A CSVResponse containing all the events.
+        (otypes.CSVResponse): A CSVResponse containing all the events.
 
     Raises:
         Exception: You do not have permission to access this resource.

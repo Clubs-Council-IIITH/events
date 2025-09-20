@@ -19,10 +19,10 @@ async def eventBills(eventid: str, info: Info) -> Bills_Status:
 
     Args:
         eventid (str): The id of the event
-        info (Info): The user details
+        info (otypes.Info): The user details
 
     Returns:
-        (Bills_Status): The bills status of the event
+        (mtypes.Bills_Status): The bills status of the event
 
     Raises:
         ValueError: User not authenticated
@@ -86,11 +86,11 @@ async def allEventsBills(info: Info) -> List[BillsStatusType]:
     approved events that have a budget and bills status.
 
     Args:
-        info (Info): The user details
+        info (otypes.Info): The user details
 
     Returns:
-        (List[BillsStatusType]): The list of bills status of all past approved
-                               events
+        (List[otypes.BillsStatusType]): The list of bills status of all past
+                               approved events.
 
     Raises:
         ValueError: User not authenticated
