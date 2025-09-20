@@ -22,15 +22,15 @@ very_short_str_type = Annotated[
 ]
 short_str_type = Annotated[
     str,
-    StringConstraints(max_length=1000),
+    StringConstraints(min_length=1, max_length=1000),
 ]
 medium_str_type = Annotated[
     str,
-    StringConstraints(max_length=5000),
+    StringConstraints(min_length=1, max_length=5000),
 ]
 long_str_type = Annotated[
     str,
-    StringConstraints(max_length=10000),
+    StringConstraints(min_length=1, max_length=10000),
 ]
 
 
