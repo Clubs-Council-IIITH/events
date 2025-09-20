@@ -1,7 +1,3 @@
-"""
-Query Resolvers related to finances
-"""
-
 from datetime import datetime
 from typing import List
 

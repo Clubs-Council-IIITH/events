@@ -1,14 +1,20 @@
 """
-Mutation Resolvers
+## Flow of Event Management
 
-initially, the event is `incomplete`
-after the club fills all the details, they progress it
-cc chooses to progress the state status, the budget status and the room status
-if budget status is unapproved, the event is `pending_budget`, else skip to next
-after budget is approved (through any track),
-if room status is unapproved, the event is `pending_room`, else skip to next
-after room is approved (through any track), the event is `approved`
-once the event is over, the club or cc can change the state to `completed`
+- Initially, the event is `incomplete`.
+
+- After the club fills all the details, they progress it.
+
+- CC chooses to progress the state status, the budget status and the room status.
+
+- If budget status is unapproved, the event is `pending_budget`, else skip to next.
+
+- After budget is approved (through any track), if room status is unapproved, 
+the event is `pending_room`, else skip to next.
+
+- After room is approved (through any track), the event is `approved`.
+
+- Once the event is over, the club or CC can change the state to `completed`.
 """  # noqa: E501
 
 import os

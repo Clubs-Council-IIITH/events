@@ -1,7 +1,3 @@
-"""
-Mutation Resolvers for Holidays
-"""
-
 import strawberry
 from fastapi.encoders import jsonable_encoder
 

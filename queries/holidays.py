@@ -1,7 +1,3 @@
-"""
-Query Resolvers for holidays
-"""
-
 from datetime import date
 from typing import List
 

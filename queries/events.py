@@ -1,7 +1,3 @@
-"""
-Query Resolvers for Events
-"""
-
 import csv
 import io
 from typing import Any, List

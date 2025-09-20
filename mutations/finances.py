@@ -1,7 +1,3 @@
-"""
-Mutation Resolvers for the finances of an event
-"""
-
 from datetime import datetime
 
 import strawberry
