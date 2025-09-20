@@ -629,7 +629,7 @@ async def progressEvent(
     else:
         mail_location = ", ".join(
             [
-                getattr(Event_Full_Location, loc, None)
+                getattr(Event_Full_Location, loc, "Unknown location")
                 if loc != "other"
                 else (updated_event_instance.otherLocation or "other")
                 for loc in updated_event_instance.location
@@ -637,7 +637,7 @@ async def progressEvent(
         )
         mail_locationAlternate = ", ".join(
             [
-                getattr(Event_Full_Location, loc, None)
+                getattr(Event_Full_Location, loc, "Unknown location")
                 if loc != "other"
                 else (updated_event_instance.otherLocationAlternate or "other")
                 for loc in updated_event_instance.locationAlternate
