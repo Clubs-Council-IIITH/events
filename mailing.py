@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 from httpx import AsyncClient
 
@@ -9,12 +10,12 @@ inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
 # API call to send mail notification
 async def triggerMail(
-    uid,
-    subject,
-    body,
-    cookies,
-    toRecipients,
-    ccRecipients=[],
+    uid: str,
+    subject: str,
+    body: str,
+    cookies: dict | None = None,
+    toRecipients: List[str] = [],
+    ccRecipients: List[str] = [],
 ) -> None:
     """
     Method triggers a mutation request, resolved by the sendMail resolver from

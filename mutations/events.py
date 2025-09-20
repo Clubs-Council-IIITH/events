@@ -1,14 +1,22 @@
-"""
-Mutation Resolvers
+# pyright: reportAttributeAccessIssue=false
 
-initially, the event is `incomplete`
-after the club fills all the details, they progress it
-cc chooses to progress the state status, the budget status and the room status
-if budget status is unapproved, the event is `pending_budget`, else skip to next
-after budget is approved (through any track),
-if room status is unapproved, the event is `pending_room`, else skip to next
-after room is approved (through any track), the event is `approved`
-once the event is over, the club or cc can change the state to `completed`
+"""
+## Flow of Event Management
+
+- Initially, the event is `incomplete`.
+
+- After the club fills all the details, they progress it.
+
+- CC chooses to progress the state status, the budget status and the room status.
+
+- If budget status is unapproved, the event is `pending_budget`, else skip to next.
+
+- After budget is approved (through any track), if room status is unapproved,
+the event is `pending_room`, else skip to next.
+
+- After room is approved (through any track), the event is `approved`.
+
+- Once the event is over, the club or CC can change the state to `completed`.
 """  # noqa: E501
 
 import os
@@ -71,11 +79,12 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     Method to create an event by a club,CC.
 
     Args:
-        details (InputEventDetails): The details of the event to be created.
-        info (Info): The context of the request for user info.
+        details (otypes.InputEventDetails): The details of the event to be
+                                    created.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
-        (EventType): returns all details regarding the event created.
+        (otypes.EventType): returns all details regarding the event created.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -122,7 +131,10 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         ]
     if details.otherLocation is not None and "other" in details.location:
         event_instance.otherLocation = details.otherLocation
-    if details.otherLocationAlternate is not None and "other" in details.locationAlternate:
+    if (
+        details.otherLocationAlternate is not None
+        and "other" in details.locationAlternate
+    ):
         event_instance.otherLocationAlternate = details.otherLocationAlternate
     if details.description is not None:
         event_instance.description = details.description.strip()
@@ -230,11 +242,12 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     It does not remove previous approvals.
 
     Args:
-        details (InputEditEventDetails): The details of the event to be edited.
-        info (Info): The context of the request for user info.
+        details (otypes.InputEditEventDetails): The details of the event to be
+                                       edited.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
-        (EventType): The edited event.
+        (otypes.EventType): The edited event.
 
     Raises:
         Exception: Not Authenticated!
@@ -301,9 +314,17 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["locationAlternate"] = [
             Event_Location(loc) for loc in details.locationAlternate
         ]
-    if details.otherLocation is not None and "other" in details.otherLocation and updatable:
+    if (
+        details.otherLocation is not None
+        and "other" in details.otherLocation
+        and updatable
+    ):
         updates["otherLocation"] = details.otherLocation
-    if details.otherLocationAlternate is not None and "other" in details.otherLocationAlternate and updatable:
+    if (
+        details.otherLocationAlternate is not None
+        and "other" in details.otherLocationAlternate
+        and updatable
+    ):
         updates["otherLocationAlternate"] = details.otherLocationAlternate
     if details.collabclubs is not None and updatable:
         updates["collabclubs"] = details.collabclubs
@@ -408,14 +429,17 @@ async def progressEvent(
 
     Args:
         eventid (str): event id
-        info (Info): info object
-        cc_progress_budget (bool | None, optional): progress budget. Defaults to None.
-        cc_progress_room (bool | None, optional): progress room. Defaults to None.
+        info (otypes.Info): info object
+        cc_progress_budget (bool | None, optional): progress budget.
+                                            Defaults to None.
+        cc_progress_room (bool | None, optional): progress room.
+                                         Defaults to None.
         cc_approver (str | None, optional): cc approver. Defaults to None.
-        slc_members_for_email (list[str] | None, optional): list of SLC members for email. Defaults to None.
+        slc_members_for_email (list[str] | None, optional): list of SLC members
+                                                   for email. Defaults to None.
 
     Returns:
-        (EventType): event object
+        (otypes.EventType): event object
 
     Raises:
         Exception: Club does not exist.
@@ -605,7 +629,7 @@ async def progressEvent(
     else:
         mail_location = ", ".join(
             [
-                getattr(Event_Full_Location, loc, None)
+                getattr(Event_Full_Location, loc, "Unknown location")
                 if loc != "other"
                 else (updated_event_instance.otherLocation or "other")
                 for loc in updated_event_instance.location
@@ -613,7 +637,7 @@ async def progressEvent(
         )
         mail_locationAlternate = ", ".join(
             [
-                getattr(Event_Full_Location, loc, None)
+                getattr(Event_Full_Location, loc, "Unknown location")
                 if loc != "other"
                 else (updated_event_instance.otherLocationAlternate or "other")
                 for loc in updated_event_instance.locationAlternate
@@ -622,7 +646,7 @@ async def progressEvent(
 
     # handle external participants
     external_count = updated_event_instance.external_population
-    if external_count and external_count > 0:
+    if student_count and external_count and external_count > 0:
         student_count = (
             str(student_count + external_count)
             + f" (External Participants: {external_count})"
@@ -847,10 +871,10 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
 
     Args:
         eventid (str): The ID of the event to be deleted.
-        info (Info): The context of the request for user info.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
-        (EventType): The state set to deleted event.
+        (otypes.EventType): The state set to deleted event.
 
     Raises:
         Exception: Not Authenticated!
@@ -976,10 +1000,10 @@ async def rejectEvent(
     Args:
         eventid (str): The event id of the evnt that is being rejected.
         reason (str): The reason for rejection.
-        info (Info): The context of the request for user info.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
-        (EventType): The event that was rejected.
+        (otypes.EventType): The event that was rejected.
 
     Raises:
         Exception: Not Authenticated!
@@ -1062,9 +1086,11 @@ async def updateEventsCid(
     update all events of old_cid to new_cid by CC.
 
     Args:
-        old_cid: old cid of the club
-        new_cid: new cid of the club
-        inter_communication_secret: secret for authentication. Default is None.
+        info (otypes.Info): The context of the request for user info.
+        old_cid (str): old cid of the club
+        new_cid (str): new cid of the club
+        inter_communication_secret (str | None): secret for authentication.
+                                                Default is None.
 
     Returns:
         (int): number of events updated

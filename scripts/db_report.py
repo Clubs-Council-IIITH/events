@@ -1,6 +1,6 @@
 import csv
 from datetime import datetime, timezone
-from os import getenv, makedirs
+from os import makedirs
 
 import matplotlib.pyplot as plt
 from pymongo import MongoClient
