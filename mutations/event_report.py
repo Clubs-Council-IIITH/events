@@ -1,3 +1,4 @@
+# pyright: reportAttributeAccessIssue=false
 from datetime import datetime, timedelta
 
 import strawberry

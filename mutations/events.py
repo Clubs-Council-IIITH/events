@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+
 """
 ## Flow of Event Management
 
@@ -9,7 +11,7 @@
 
 - If budget status is unapproved, the event is `pending_budget`, else skip to next.
 
-- After budget is approved (through any track), if room status is unapproved, 
+- After budget is approved (through any track), if room status is unapproved,
 the event is `pending_room`, else skip to next.
 
 - After room is approved (through any track), the event is `approved`.
@@ -77,7 +79,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     Method to create an event by a club,CC.
 
     Args:
-        details (otypes.InputEventDetails): The details of the event to be 
+        details (otypes.InputEventDetails): The details of the event to be
                                     created.
         info (otypes.Info): The context of the request for user info.
 
@@ -129,7 +131,10 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         ]
     if details.otherLocation is not None and "other" in details.location:
         event_instance.otherLocation = details.otherLocation
-    if details.otherLocationAlternate is not None and "other" in details.locationAlternate:
+    if (
+        details.otherLocationAlternate is not None
+        and "other" in details.locationAlternate
+    ):
         event_instance.otherLocationAlternate = details.otherLocationAlternate
     if details.description is not None:
         event_instance.description = details.description.strip()
@@ -237,7 +242,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     It does not remove previous approvals.
 
     Args:
-        details (otypes.InputEditEventDetails): The details of the event to be 
+        details (otypes.InputEditEventDetails): The details of the event to be
                                        edited.
         info (otypes.Info): The context of the request for user info.
 
@@ -309,9 +314,17 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         updates["locationAlternate"] = [
             Event_Location(loc) for loc in details.locationAlternate
         ]
-    if details.otherLocation is not None and "other" in details.otherLocation and updatable:
+    if (
+        details.otherLocation is not None
+        and "other" in details.otherLocation
+        and updatable
+    ):
         updates["otherLocation"] = details.otherLocation
-    if details.otherLocationAlternate is not None and "other" in details.otherLocationAlternate and updatable:
+    if (
+        details.otherLocationAlternate is not None
+        and "other" in details.otherLocationAlternate
+        and updatable
+    ):
         updates["otherLocationAlternate"] = details.otherLocationAlternate
     if details.collabclubs is not None and updatable:
         updates["collabclubs"] = details.collabclubs
@@ -417,12 +430,12 @@ async def progressEvent(
     Args:
         eventid (str): event id
         info (otypes.Info): info object
-        cc_progress_budget (bool | None, optional): progress budget. 
+        cc_progress_budget (bool | None, optional): progress budget.
                                             Defaults to None.
-        cc_progress_room (bool | None, optional): progress room. 
+        cc_progress_room (bool | None, optional): progress room.
                                          Defaults to None.
         cc_approver (str | None, optional): cc approver. Defaults to None.
-        slc_members_for_email (list[str] | None, optional): list of SLC members 
+        slc_members_for_email (list[str] | None, optional): list of SLC members
                                                    for email. Defaults to None.
 
     Returns:
@@ -1076,7 +1089,7 @@ async def updateEventsCid(
         info (otypes.Info): The context of the request for user info.
         old_cid (str): old cid of the club
         new_cid (str): new cid of the club
-        inter_communication_secret (str | None): secret for authentication. 
+        inter_communication_secret (str | None): secret for authentication.
                                                 Default is None.
 
     Returns:
