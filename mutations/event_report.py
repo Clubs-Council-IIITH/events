@@ -18,11 +18,11 @@ async def addEventReport(
     Adds an event report after completion of the event
 
     Args:
-        details (InputEventReport): The details of the event report to be added.
-        info (Info): The context information of user for the request.
+        details (otypes.InputEventReport): The details of the event report to be added.
+        info (otypes.Info): The context information of user for the request.
 
     Returns:
-        (EventReportType): The details of the added event report.
+        (otypes.EventReportType): The details of the added event report.
 
     Raises:
         ValueError: User not authenticated
@@ -100,11 +100,11 @@ async def editEventReport(
     Edits an event report after completion of the event
 
     Args:
-        details (InputEventReport): The details of the event report to be edited.
-        info (Info): The context information of user for the request.
+        details (otypes.InputEventReport): The details of the event report to be edited.
+        info (otypes.Info): The context information of user for the request.
 
     Returns:
-        (EventReportType): The details of the edited event report.
+        (otypes.EventReportType): The details of the edited event report.
 
     Raises:
         ValueError: User not authenticated

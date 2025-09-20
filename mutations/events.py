@@ -71,11 +71,12 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     Method to create an event by a club,CC.
 
     Args:
-        details (InputEventDetails): The details of the event to be created.
-        info (Info): The context of the request for user info.
+        details (otypes.InputEventDetails): The details of the event to be 
+                                    created.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
-        (EventType): returns all details regarding the event created.
+        (otypes.EventType): returns all details regarding the event created.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -230,11 +231,12 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     It does not remove previous approvals.
 
     Args:
-        details (InputEditEventDetails): The details of the event to be edited.
-        info (Info): The context of the request for user info.
+        details (otypes.InputEditEventDetails): The details of the event to be 
+                                       edited.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
-        (EventType): The edited event.
+        (otypes.EventType): The edited event.
 
     Raises:
         Exception: Not Authenticated!
@@ -408,14 +410,17 @@ async def progressEvent(
 
     Args:
         eventid (str): event id
-        info (Info): info object
-        cc_progress_budget (bool | None, optional): progress budget. Defaults to None.
-        cc_progress_room (bool | None, optional): progress room. Defaults to None.
+        info (otypes.Info): info object
+        cc_progress_budget (bool | None, optional): progress budget. 
+                                            Defaults to None.
+        cc_progress_room (bool | None, optional): progress room. 
+                                         Defaults to None.
         cc_approver (str | None, optional): cc approver. Defaults to None.
-        slc_members_for_email (list[str] | None, optional): list of SLC members for email. Defaults to None.
+        slc_members_for_email (list[str] | None, optional): list of SLC members 
+                                                   for email. Defaults to None.
 
     Returns:
-        (EventType): event object
+        (otypes.EventType): event object
 
     Raises:
         Exception: Club does not exist.
@@ -847,10 +852,10 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
 
     Args:
         eventid (str): The ID of the event to be deleted.
-        info (Info): The context of the request for user info.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
-        (EventType): The state set to deleted event.
+        (otypes.EventType): The state set to deleted event.
 
     Raises:
         Exception: Not Authenticated!
@@ -976,10 +981,10 @@ async def rejectEvent(
     Args:
         eventid (str): The event id of the evnt that is being rejected.
         reason (str): The reason for rejection.
-        info (Info): The context of the request for user info.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
-        (EventType): The event that was rejected.
+        (otypes.EventType): The event that was rejected.
 
     Raises:
         Exception: Not Authenticated!
@@ -1062,9 +1067,11 @@ async def updateEventsCid(
     update all events of old_cid to new_cid by CC.
 
     Args:
-        old_cid: old cid of the club
-        new_cid: new cid of the club
-        inter_communication_secret: secret for authentication. Default is None.
+        info (otypes.Info): The context of the request for user info.
+        old_cid (str): old cid of the club
+        new_cid (str): new cid of the club
+        inter_communication_secret (str | None): secret for authentication. 
+                                                Default is None.
 
     Returns:
         (int): number of events updated

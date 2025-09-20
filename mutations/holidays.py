@@ -18,11 +18,11 @@ async def createHoliday(
     Creates a new holiday, for SLO and CC
 
     Args:
-        details (InputHolidayDetails): The details of the holiday to be created.
-        info (Info): The context of the request for user info.
+        details (otypes.InputHolidayDetails): The details of the holiday to be created.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
-        (HolidayType): The created holiday.
+        (otypes.HolidayType): The created holiday.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -60,11 +60,11 @@ async def editHoliday(
 
     Args:
         id (str): The id of the holiday to be edited.
-        details (InputHolidayDetails): The details to which the holiday is to be updated.
-        info (Info): The context of the request for user info.
+        details (otypes.InputHolidayDetails): The details to which the holiday is to be updated.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
-        (HolidayType): The edited holiday.
+        (otypes.HolidayType): The edited holiday.
 
     Raises:
         Exception: You do not have permission to access this resource.
@@ -101,7 +101,7 @@ async def deleteHoliday(id: str, info: Info) -> bool:
 
     Args:
         id (str): The id of the holiday to be deleted.
-        info (Info): The context of the request for user info.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
         (bool): True if the holiday was deleted successfully, False otherwise.
