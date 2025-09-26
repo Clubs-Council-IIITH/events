@@ -139,6 +139,7 @@ async def events(
     limit: int | None = None,
     skip: int = 0,
     timings: timelot_type | None = None,
+    pastEventsLimit: int | None = None,
     location: List[Event_Location] | None = None,
 ) -> List[EventType]:
     """
@@ -171,6 +172,8 @@ async def events(
                                 are to be fetched. Defaults to None.
         location (List[Event_Location] | None): The locations of the events
                                 to be fetched. Defaults to None.
+        pastEventsLimit (int | None): Time Limit for the past events to
+                                      be fetched in months. Defaults to None.
 
     Returns:
         (List[EventType]): A list of events that match the given criteria.
@@ -258,6 +261,7 @@ async def events(
         skip=skip,
         limit=limit,
         timings=timings_str,
+        pastEventsLimit=pastEventsLimit,
     )
 
     # hides few fields from public viewers

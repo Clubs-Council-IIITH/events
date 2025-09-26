@@ -327,6 +327,7 @@ async def eventsWithSorting(
     skip=0,
     limit: int | None = None,
     timings: List[str] | None = None,
+    pastEventsLimit: int | None = None,
 ) -> List[dict]:
     """
     Provides a list of events based on the searchspace provided.
@@ -354,6 +355,8 @@ async def eventsWithSorting(
         limit (int): number of events to return. Defaults to None.
         timings (timelot_type | None): The time period for which the events
                                 are to be fetched. Defaults to None.
+        pastEventsLimit (int | None): Time Limit for the past events to
+                                      be fetched in months. Defaults to None.
 
     Returns:
         (List[dict]): list of events
@@ -413,10 +416,25 @@ async def eventsWithSorting(
         **searchspace,
         "datetimeperiod.0": {"$gt": current_datetime},
     }
-    past_events_query = {
-        **searchspace,
-        "datetimeperiod.1": {"$lt": current_datetime},
-    }
+    
+    if pastEventsLimit is not None:
+        limit_datetime = datetime.now(timezone).replace(
+            month=((datetime.now(timezone).month - pastEventsLimit - 1) % 12) + 1
+        )
+        if datetime.now(timezone).month <= pastEventsLimit:
+            limit_datetime = limit_datetime.replace(
+                year=datetime.now(timezone).year - 1
+            )
+        limit_datetime = limit_datetime.strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        past_events_query = {
+            **searchspace,
+            "datetimeperiod.1": {"$lt": current_datetime, "$gte": limit_datetime},
+        }
+    else:
+        past_events_query = {
+            **searchspace,
+            "datetimeperiod.1": {"$lt": current_datetime},
+        }
 
     if pagination:
         if skip < 0:
