@@ -221,6 +221,10 @@ async def events(
         raise Exception("Limit can not be greater than 50.")
     if restrictAccess and (not paginationOn or pastEventsLimit is None):
         pastEventsLimit = 4
+    if pastEventsLimit is not None and pastEventsLimit <= 0:
+        raise Exception("pastEventsLimit must be greater than 0.")
+    if pastEventsLimit is not None and pastEventsLimit > 6:
+        raise Exception("pastEventsLimit can not be greater than 6.")
 
     searchspace: dict[str, Any] = {}
     if clubid is not None:
