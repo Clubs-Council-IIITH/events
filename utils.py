@@ -329,7 +329,7 @@ def subtract_months(dt, months):
         month += 12
         year -= 1
 
-    return dt.replace(year=year, month=month)
+    return dt.replace(year=year, month=month, day=1)
 
 
 async def eventsWithSorting(
