@@ -146,12 +146,22 @@ async def events(
     Returns a list of events as a search result that match the given criteria.
 
     If public is set to True, then only public/approved events are returned.
+    
     If clubid is set, then only events of that club are returned.
+    
     If clubid is not set, then all events the user is authorized to see are
     returned.
-    a not logged in user has same visibility as public set to True.
+    
+    A non-logged in user has same visibility as public set to True.
+    
     If public set to True, then few fields of the event are hidden using the
     trim_public_events function.
+
+    For public queries, either paginationOn must be True or pastEventsLimit
+    must be set. If paginationOn is True, then limit must be set.
+    If paginationOn is False and pastEventsLimit is None, then
+    pastEventsLimit is set to 4 months for public users and users with no
+    special roles.
 
     Args:
         info (Info): The context information of user for the request.
@@ -207,6 +217,10 @@ async def events(
 
     if not limit and paginationOn:
         raise Exception("Pagination limit is required.")
+    if limit is not None and limit > 50:
+        raise Exception("Limit can not be greater than 50.")
+    if restrictAccess and (not paginationOn or pastEventsLimit is None):
+        pastEventsLimit = 4
 
     searchspace: dict[str, Any] = {}
     if clubid is not None:
