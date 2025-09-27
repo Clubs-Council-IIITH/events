@@ -319,6 +319,19 @@ async def getRoleEmails(role: str) -> List[str]:
         return []
 
 
+def subtract_months(dt, months):
+    """Move a datetime back by the specified number of months."""
+    year = dt.year
+    month = dt.month - months
+
+    # Handle year rollover
+    while month <= 0:
+        month += 12
+        year -= 1
+
+    return dt.replace(year=year, month=month)
+
+
 async def eventsWithSorting(
     searchspace,
     name: str | None = None,
@@ -416,25 +429,17 @@ async def eventsWithSorting(
         **searchspace,
         "datetimeperiod.0": {"$gt": current_datetime},
     }
-    
+    past_events_query = {
+        **searchspace,
+        "datetimeperiod.1": {"$lt": current_datetime},
+    }
+
     if pastEventsLimit is not None:
-        limit_datetime = datetime.now(timezone).replace(
-            month=((datetime.now(timezone).month - pastEventsLimit - 1) % 12) + 1
+        limit_datetime = subtract_months(
+            datetime.now(timezone), pastEventsLimit
         )
-        if datetime.now(timezone).month <= pastEventsLimit:
-            limit_datetime = limit_datetime.replace(
-                year=datetime.now(timezone).year - 1
-            )
         limit_datetime = limit_datetime.strftime("%Y-%m-%dT%H:%M:%S+00:00")
-        past_events_query = {
-            **searchspace,
-            "datetimeperiod.1": {"$lt": current_datetime, "$gte": limit_datetime},
-        }
-    else:
-        past_events_query = {
-            **searchspace,
-            "datetimeperiod.1": {"$lt": current_datetime},
-        }
+        past_events_query["datetimeperiod.1"]["$gte"] = limit_datetime
 
     if pagination:
         if skip < 0:
