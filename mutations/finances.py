@@ -123,7 +123,7 @@ async def updateBillsStatus(
 @strawberry.mutation
 async def addBill(details: InputBillsUpload, info: Info) -> bool:
     """
-    Submits a bill for an approved event and notifies the Student Life OfFix the docsstrings to specify the custom types correctly, like mtypes.Event_Location in place of Event_Location (modulename.type)fice (SLO).
+    Submits a bill for an approved event and notifies the Student Life Office (SLO).
 
     Args:
         details (otypes.InputBillsUpload): Contains event ID and filename of the uploaded bill.
