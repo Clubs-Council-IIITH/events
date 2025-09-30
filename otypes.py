@@ -256,14 +256,14 @@ class InputEditEventDetailsBaseModel(BaseModel):
         otherLocationAlternate (mtypes.very_short_str_type): 'Other' alternate
                                                       location of the event.
                                                      Default is None.
-        description (mtypes.medium_str_type): Description of the event. 
+        description (mtypes.medium_str_type): Description of the event.
                                             Default is None.
         clubid (str): clubID of the club organizing the event. Default is None.
         mode (mtypes.Event_Mode): Mode of the event.Default is hybrid.
         poster (str): Poster of the event. Default is None.
         datetimeperiod (List[datetime]): List of date and time of start and
                                          end of the event. Default is None.
-        audience (List[mtypes.Audience]): List of audience 
+        audience (List[mtypes.Audience]): List of audience
                                         categories for the event.
                                    Default is None.
         link (mtypes.HttpUrlString): Link to the event. Default is None.
@@ -275,7 +275,7 @@ class InputEditEventDetailsBaseModel(BaseModel):
                                          expected to attend the event.
                                      Default is None.
         external_population (Optional[mtypes.event_popu_type]): Population
-                                                         expected from outside 
+                                                         expected from outside
                                                          attending the event.
         budget (List[BudgetInput]): List of budgets for the event.
                                     Default is None.
