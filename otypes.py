@@ -100,6 +100,9 @@ class RoomInfo:
 class RoomListType:
     """
     Type for returning a list of locations with the availability
+
+    Attributes:
+        locations (List[mtypes.RoomInfo]): List of locations with availability.
     """
 
     locations: List[RoomInfo]
@@ -110,6 +113,13 @@ class BillsStatusType:
     """
     Type for returning event id, event name, club id and bills status of
     the event.
+
+    Attributes:
+        eventid (str): ID of the event.
+        eventname (mtypes.very_short_str_type): Name of the event.
+        clubid (str): ID of the club organizing the event.
+        bills_status (mtypes.Bills_Status): Bills status of the event.
+        eventReportSubmitted (mtypes.short_str_type): Status of event report.
     """
 
     eventid: str
@@ -123,6 +133,11 @@ class BillsStatusType:
 class CSVResponse:
     """
     Type for returning the csv file, success/error message.
+
+    Attributes:
+        csvFile (mtypes.short_str_type): The csv file as a string.
+        successMessage (mtypes.short_str_type): The success message.
+        errorMessage (mtypes.short_str_type): The error message.
     """
 
     csvFile: str
@@ -192,9 +207,9 @@ class InputEventDetailsBaseModel(BaseModel):
 
     name: very_short_str_type
     location: List[Event_Location] | None = None
-    otherLocation: str | None = None  # very_short_str_type
+    otherLocation: very_short_str_type | None = None  # very_short_str_type
     locationAlternate: List[Event_Location] | None = None
-    otherLocationAlternate: str | None = None  # very_short_str_type
+    otherLocationAlternate: very_short_str_type | None = None  # very_short_str_type
     description: medium_str_type | None = None
     clubid: str
     collabclubs: List[str] | None = None
@@ -227,6 +242,41 @@ class InputEditEventDetailsBaseModel(BaseModel):
     """
     Input similar to InputEventDetailsBaseModel but along with the event
     id(self-generated) attribute.
+
+    Attributes:
+        name (mtypes.very_short_str_type): Name of the event. Default is None.
+        eventid (str): ID of the event.
+        collabclubs (List[str]): List of clubIDs of collaborating clubs.
+                                 Default is None.
+        location (List[mtypes.Event_Location]): List of locations of the event.
+                                         Default is None.
+        otherLocation (mtypes.very_short_str_type): 'Other' location of the event.
+                                             Default is None.
+        locationAlternate (List[mtypes.Event_Location]): List of alternate locations
+                                                  of the event. This is optional. Default is None.
+        otherLocationAlternate (mtypes.very_short_str_type): 'Other' alternate location
+                                                     of the event. Default is None.
+        description (mtypes.medium_str_type): Description of the event. Default is None.
+        clubid (str): clubID of the club organizing the event. Default is None.
+        mode (mtypes.Event_Mode): Mode of the event. Default is hybrid(both offline and online).
+        poster (str): Poster of the event. Default is None.
+        datetimeperiod (List[datetime]): List of date and time of start and
+                                         end of the event. Default is None.
+        audience (List[mtypes.Audience]): List of audience categories for the event.
+                                   Default is None.
+        link (mtypes.HttpUrlString): Link to the event. Default is None.
+        equipment (mtypes.short_str_type): Equipment for the event. Default is None.
+        additional (mtypes.short_str_type): Additional information of the event.
+                                    Default is None.
+        population (mtypes.event_popu_type): Population expected to attend the event.
+                                     Default is None.
+        external_population (Optional[mtypes.event_popu_type]): Population expected from
+                                                       outside the campus attending the event.
+        budget (List[BudgetInput]): List of budgets for the event.
+                                    Default is None.
+        sponsor (List[SponsorInput]): List of sponsors for the event.
+                                    Default is None.
+        poc (str): Point of contact for the event. Default is None.
     """
 
     name: very_short_str_type | None = None
@@ -268,6 +318,13 @@ class InputDataReportDetails:
     """
     Input used for taking info required to bring a list of events along
     with required fields.
+    
+    Attributes:
+        clubid (str | None): ID of the club. Default is None.
+        dateperiod (List[date] | None): List of dates for filtering events.
+                                       Default is None.
+        fields (List[mtypes.short_str_type]): List of fields to be included in the response.
+        status (mtypes.short_str_type): Status of the event.
     """
 
     clubid: str | None
