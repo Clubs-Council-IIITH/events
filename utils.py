@@ -353,7 +353,7 @@ async def eventsWithSorting(
                     Defaults to 0. Value lt 0 returns all upcoming and
                     current events, while value ge 0 skips that many events.
         limit (int): number of events to return. Defaults to None.
-        timings (otypes.timelot_type | None): The time period for which the 
+        timings (otypes.timelot_type | None): The time period for which the
                                 events are to be fetched. Defaults to None.
 
     Returns:

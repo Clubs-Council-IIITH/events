@@ -163,15 +163,15 @@ async def events(
                     0 returns all upcoming and current events, while
                     value ge 0 skips that many events. Ignored if
                     paginationOn is False.
-        timings (otypes.timelot_type | None): The time period for which the 
-                                              events are to be fetched. 
+        timings (otypes.timelot_type | None): The time period for which the
+                                              events are to be fetched.
                                               Defaults to None.
-        location (List[mtypes.Event_Location] | None): The locations of the 
-                                                       events to be fetched. 
+        location (List[mtypes.Event_Location] | None): The locations of the
+                                                       events to be fetched.
                                                        Defaults to None.
 
     Returns:
-        (List[otypes.EventType]): A list of events that match the given 
+        (List[otypes.EventType]): A list of events that match the given
                                   criteria.
 
     Raises:
@@ -285,7 +285,7 @@ async def clashingEvents(
                      fetched.
 
     Returns:
-        (List[otypes.EventType]): A list of events that match the given 
+        (List[otypes.EventType]): A list of events that match the given
                                   criteria.
 
     Raises:
@@ -338,7 +338,7 @@ async def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
         info (otypes.Info): The context information of user for the request.
 
     Returns:
-        (List[otypes.EventType]): A list of events that match the given 
+        (List[otypes.EventType]): A list of events that match the given
                                   criteria.
 
     Raises:
@@ -430,7 +430,7 @@ async def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
         info (otypes.Info): The context information of user for the request.
 
     Returns:
-        (List[otypes.EventType]): A list of events that match the given 
+        (List[otypes.EventType]): A list of events that match the given
                                   criteria.
 
     Raises:
@@ -505,7 +505,7 @@ async def availableRooms(
     return a list of all rooms that are available in the given timeslot
 
     Args:
-        timeslot (otypes.timelot_type): The timeslot for which the rooms are 
+        timeslot (otypes.timelot_type): The timeslot for which the rooms are
                                         to be fetched.
         eventid (str): The id of the event whose location is to be added to
                        the list of rooms. Defaults to None.
@@ -580,7 +580,7 @@ async def downloadEventsData(
     approved events.
 
     Args:
-        details (otypes.InputDataReportDetails): The details of the events 
+        details (otypes.InputDataReportDetails): The details of the events
                                                 to be fetched.
         info (otypes.Info): The context information of user for the request.
 
