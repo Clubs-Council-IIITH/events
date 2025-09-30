@@ -1,7 +1,3 @@
-"""
-Mutation Resolvers for the finances of an event
-"""
-
 from datetime import datetime
 
 import strawberry
@@ -41,11 +37,11 @@ async def updateBillsStatus(
     triggering an email to the organizing club.
 
     Args:
-        details (InputBillsStatus): The details of the bills status to be updated.
-        info (Info): The info object containing the user information.
+        details (otypes.InputBillsStatus): The details of the bills status to be updated.
+        info (otypes.Info): The info object containing the user information.
 
     Returns:
-        (Bills_Status): The updated bills status of the event.
+        (mtypes.Bills_Status): The updated bills status of the event.
 
     Raises:
         ValueError: You do not have permission to access this resource.
@@ -130,8 +126,8 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
     Submits a bill for an approved event and notifies the Student Life Office (SLO).
 
     Args:
-        details (InputBillsUpload): Contains event ID and filename of the uploaded bill.
-        info (Info): Context object containing user information and cookies.
+        details (otypes.InputBillsUpload): Contains event ID and filename of the uploaded bill.
+        info (otypes.Info): Context object containing user information and cookies.
 
     Returns:
         bool: True if the bill was successfully added and notifications sent.
@@ -261,9 +257,7 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
         mail_uid,
         mail_subject,
         mail_body,
-        toRecipients=[
-            slo_emails,
-        ],
+        toRecipients=slo_emails,
         ccRecipients=cc_to,
         cookies=info.context.cookies,
     )

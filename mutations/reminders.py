@@ -18,7 +18,7 @@ async def remindSLO(info: Info, eventid: str) -> bool:
 
     Args:
         eventid (str): The ID of the event.
-        info (Info): The context of the request for user info.
+        info (otypes.Info): The context of the request for user info.
 
     Returns:
         (bool): Success or Failiure

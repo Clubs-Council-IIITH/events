@@ -9,6 +9,7 @@ from httpx import AsyncClient
 
 from db import eventsdb
 from mtypes import timezone
+from otypes import timelot_type
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
@@ -150,7 +151,7 @@ async def getClubCode(clubid: str) -> str | None:
 async def getClubDetails(
     clubid: str,
     cookies,
-) -> List[dict]:
+) -> dict:
     """
     This method makes a query to the clubs service resolved by the club
     method, used to get a club's name from its clubid.
@@ -182,7 +183,7 @@ async def getClubDetails(
             )
         return response.json()["data"]["club"]
     except Exception:
-        return []
+        return {}
 
 
 async def getEventCode(clubid, starttime) -> str:
@@ -326,7 +327,7 @@ async def eventsWithSorting(
     pagination=False,
     skip=0,
     limit: int | None = None,
-    timings: List[str] | None = None,
+    timings: timelot_type | None = None,
 ) -> List[dict]:
     """
     Provides a list of events based on the searchspace provided.
@@ -352,8 +353,8 @@ async def eventsWithSorting(
                     Defaults to 0. Value lt 0 returns all upcoming and
                     current events, while value ge 0 skips that many events.
         limit (int): number of events to return. Defaults to None.
-        timings (timelot_type | None): The time period for which the events
-                                are to be fetched. Defaults to None.
+        timings (otypes.timelot_type | None): The time period for which the
+                                events are to be fetched. Defaults to None.
 
     Returns:
         (List[dict]): list of events
@@ -436,7 +437,7 @@ async def eventsWithSorting(
                 await eventsdb.find(past_events_query)
                 .sort("datetimeperiod.1", -1)
                 .skip(skip)
-                .limit(limit)
+                .limit(limit or 0)
                 .to_list(length=None)
             )
             events = past_events

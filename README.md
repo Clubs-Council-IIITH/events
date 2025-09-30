@@ -13,8 +13,7 @@ This microservice is built using **FastAPI**, **Strawberry (GraphQL)**, and **Mo
 
 ## Usage
 
-This is a microservice and the full docker setup can be found in the [`services`](https://github.com/Clubs-Council-IIITH/services) repo. To use it
-please visit `setup` repo
+This is a microservice and the full docker setup can be found in the [`services`](https://github.com/Clubs-Council-IIITH/services) repo. To use it please visit [`setup`](https://github.com/Clubs-Council-IIITH/setup) repo.
 
 1. Go to [Clubs-Council-IIITH Services Repository](https://github.com/Clubs-Council-IIITH/setup).
 2. Follow the setup instructions provided there.

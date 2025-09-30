@@ -36,16 +36,18 @@ class EventReport(BaseModel):
 
     Attributes:
         eventid (str): The ID of the event.
-        summary (str): A summary of the event.
-        attendance (int): The number of attendees.
-        external_attendance (Optional[int]): The number of external
-                    attendees if allowed.
-        prizes (List[PrizesType]): The list prizes awarded in the event.
-        prizes_breakdown (str): A breakdown of the prizes awarded.
-        winners (str): The winners of the event.
-        photos_link (HttpUrlString): The link to the event's photos.
-        feedback_cc (str): Feedback on the event by CC.
-        feedback_college (str): Feedback on the event by the college.
+        summary (mtypes.medium_str_type): A summary of the event.
+        attendance (mtypes.event_popu_type): The number of attendees.
+        external_attendance (Optional[mtypes.event_popu_type]): The number of
+                    external attendees if allowed.
+        prizes (List[mtypes.PrizesType]): The list prizes awarded in the event.
+        prizes_breakdown (mtypes.long_str_type): A breakdown of the prizes
+                                       awarded.
+        winners (mtypes.long_str_type): The winners of the event.
+        photos_link (mtypes.HttpUrlString): The link to the event's photos.
+        feedback_cc (mtypes.medium_str_type): Feedback on the event by CC.
+        feedback_college (mtypes.medium_str_type): Feedback on the event by
+                                         the college.
         submitted_by (str): The user who submitted the report.
         submitted_time (datetime): The time the report was submitted.
     """
@@ -71,39 +73,45 @@ class Event(BaseModel):
     Model for an event.
 
     Attributes:
-        id (PyObjectId): The ID of the event's document.
+        id (mtypes.PyObjectId): The ID of the event's document.
         code (str): The code of the event. Defaults to None.
         clubid (str): The Club ID of the club hosting the event.
         collabclubs (List[str]): The Club IDs of the collaborating clubs.
-        club_category (ClubBodyCategoryType): Category of the club for
+        club_category (mtypes.ClubBodyCategoryType): Category of the club for
                        which the event is. Defaults to a club.
-        name (very_short_str_type): The name of the event.
-        description (medium_str_type): A description of the event.
+        name (mtypes.very_short_str_type): The name of the event.
+        description (mtypes.medium_str_type): A description of the event.
                                        Defaults to `No description available.`.
         datetimeperiod (Tuple[datetime, datetime]): The start and end times
                                                     of the event.
         poster (str): The URL of the event's poster. Defaults to None.
-        audience (List[Audience]): The list audience for the event.
-        link (HttpUrlString): The link to the event's page. Defaults to None.
-        mode (Event_Mode): The mode of the event. Defaults to hybrid.
-        location (List[Event_Location]): The list of locations for the event.
-        otherLocation (very_short_str_type): The 'Other' location of the event. Defaults to None.
-        locationAlternate (List[Event_Location]): The list of alternate
+        audience (List[mtypes.Audience]): The list audience for the event.
+        link (mtypes.HttpUrlString): The link to the event's page.
+                            Defaults to None.
+        mode (mtypes.Event_Mode): The mode of the event. Defaults to hybrid.
+        location (List[mtypes.Event_Location]): The list of locations for
+                                       the event.
+        otherLocation (mtypes.very_short_str_type): The 'Other' location of
+                                            the event. Defaults to None.
+        locationAlternate (List[mtypes.Event_Location]): The list of alternate
                                                   locations for the event.
-        otherLocationAlternate (very_short_str_type): The 'Other' alternate location of the
-                                      event. Defaults to None.
-        equipment (short_str_type): The equipment required for the event.
-                                    Defaults to None.
-        additional (short_str_type): Additional information about the event.
-                                     Defaults to None.
-        population (event_popu_type): The estimated population for the event.
-                                      Defaults to None.
-        external_popluation (Optional[event_popu_type]): This is an optionl
-            field specifying the number of external participants in the event.
+        otherLocationAlternate (mtypes.very_short_str_type): The 'Other'
+                                                    alternate location of
+                                                    the event. Defaults to
+                                                    None.
+        equipment (mtypes.short_str_type): The equipment required for
+                                   the event. Defaults to None.
+        additional (mtypes.short_str_type): Additional information about
+                                    the event. Defaults to None.
+        population (mtypes.event_popu_type): The estimated population for
+                                     the event. Defaults to None.
+        external_popluation (Optional[mtypes.event_popu_type]): This is an
+            optionl field specifying the number of external participants in
+            the event.
         poc (str): The point of contact for the event. Defaults to None.
-        status (Event_Status): The approval and approver details.
-        budget (List[BudgetInput]): The list of budgets for the event.
-        bills_status (Bills_Status): The status of the budget.
+        status (mtypes.Event_Status): The approval and approver details.
+        budget (List[mtypes.BudgetType]): The list of budgets for the event.
+        bills_status (mtypes.Bills_Status): The status of the budget.
         event_report_submitted (bool): Whether the event report after
                                        completion has been submitted.
                                        Defaults to False.
@@ -159,10 +167,10 @@ class Holiday(BaseModel):
     Model for a holiday.
 
     Attributes:
-        id (PyObjectId): The ID of the holiday's document.
-        name (very_short_str_type): The name of the holiday.
+        id (mtypes.PyObjectId): The ID of the holiday's document.
+        name (mtypes.very_short_str_type): The name of the holiday.
         date (date): The date of the holiday.
-        description (medium_str_type): A description of the holiday.
+        description (mtypes.medium_str_type): A description of the holiday.
                                        Defaults to None.
         created_time (datetime): The time the holiday was created.
     """
