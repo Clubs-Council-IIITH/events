@@ -320,6 +320,19 @@ async def getRoleEmails(role: str) -> List[str]:
         return []
 
 
+def subtract_months(dt, months):
+    """Move a datetime back by the specified number of months."""
+    year = dt.year
+    month = dt.month - months
+
+    # Handle year rollover
+    while month <= 0:
+        month += 12
+        year -= 1
+
+    return dt.replace(year=year, month=month, day=1)
+
+
 async def eventsWithSorting(
     searchspace,
     name: str | None = None,
@@ -328,6 +341,7 @@ async def eventsWithSorting(
     skip=0,
     limit: int | None = None,
     timings: timelot_type | None = None,
+    pastEventsLimit: int | None = None,
 ) -> List[dict]:
     """
     Provides a list of events based on the searchspace provided.
@@ -355,6 +369,8 @@ async def eventsWithSorting(
         limit (int): number of events to return. Defaults to None.
         timings (otypes.timelot_type | None): The time period for which the
                                 events are to be fetched. Defaults to None.
+        pastEventsLimit (int | None): Time Limit for the past events to
+                                      be fetched in months. Defaults to None.
 
     Returns:
         (List[dict]): list of events
@@ -418,6 +434,13 @@ async def eventsWithSorting(
         **searchspace,
         "datetimeperiod.1": {"$lt": current_datetime},
     }
+
+    if pastEventsLimit is not None:
+        limit_datetime = subtract_months(
+            datetime.now(timezone), pastEventsLimit
+        )
+        limit_datetime = limit_datetime.strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        past_events_query["datetimeperiod.1"]["$gte"] = limit_datetime
 
     if pagination:
         if skip < 0:

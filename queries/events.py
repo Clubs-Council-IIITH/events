@@ -135,18 +135,29 @@ async def events(
     limit: int | None = None,
     skip: int = 0,
     timings: timelot_type | None = None,
+    pastEventsLimit: int | None = None,
     location: List[Event_Location] | None = None,
 ) -> List[EventType]:
     """
     Returns a list of events as a search result that match the given criteria.
 
     If public is set to True, then only public/approved events are returned.
+    
     If clubid is set, then only events of that club are returned.
+    
     If clubid is not set, then all events the user is authorized to see are
     returned.
-    a not logged in user has same visibility as public set to True.
+    
+    A non-logged in user has same visibility as public set to True.
+    
     If public set to True, then few fields of the event are hidden using the
     trim_public_events function.
+
+    For public queries, either paginationOn must be True or pastEventsLimit
+    must be set. If paginationOn is True, then limit must be set.
+    If paginationOn is False and pastEventsLimit is None, then
+    pastEventsLimit is set to 4 months for public users and users with no
+    special roles.
 
     Args:
         info (otypes.Info): The context information of user for the request.
@@ -169,6 +180,8 @@ async def events(
         location (List[mtypes.Event_Location] | None): The locations of the
                                                        events to be fetched.
                                                        Defaults to None.
+        pastEventsLimit (int | None): Time Limit for the past events to
+                                      be fetched in months. Defaults to None.
 
     Returns:
         (List[otypes.EventType]): A list of events that match the given
@@ -203,6 +216,14 @@ async def events(
 
     if not limit and paginationOn:
         raise Exception("Pagination limit is required.")
+    if limit is not None and limit > 50:
+        raise Exception("Limit can not be greater than 50.")
+    if restrictAccess and (not paginationOn and pastEventsLimit is None):
+        pastEventsLimit = 4
+    if pastEventsLimit is not None and pastEventsLimit <= 0:
+        raise Exception("pastEventsLimit must be greater than 0.")
+    if pastEventsLimit is not None and pastEventsLimit > 6:
+        raise Exception("pastEventsLimit can not be greater than 6.")
 
     searchspace: dict[str, Any] = {}
     if clubid is not None:
@@ -257,6 +278,7 @@ async def events(
         skip=skip,
         limit=limit,
         timings=timings_str,
+        pastEventsLimit=pastEventsLimit,
     )
 
     # hides few fields from public viewers
