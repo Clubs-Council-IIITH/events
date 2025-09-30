@@ -142,14 +142,14 @@ async def events(
     Returns a list of events as a search result that match the given criteria.
 
     If public is set to True, then only public/approved events are returned.
-    
+
     If clubid is set, then only events of that club are returned.
-    
+
     If clubid is not set, then all events the user is authorized to see are
     returned.
-    
+
     A non-logged in user has same visibility as public set to True.
-    
+
     If public set to True, then few fields of the event are hidden using the
     trim_public_events function.
 
