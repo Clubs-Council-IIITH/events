@@ -5,11 +5,7 @@ from typing import Dict, List, Optional, Tuple, TypeAlias
 
 import strawberry
 from graphql import GraphQLError
-from pydantic import (
-    BaseModel,
-    TypeAdapter,
-    ValidationError,
-)
+from pydantic import BaseModel, TypeAdapter, ValidationError
 from strawberry.fastapi import BaseContext
 from strawberry.types import Info as _Info
 from strawberry.types.info import RootValueType
@@ -86,6 +82,10 @@ class EventType:
 class RoomInfo:
     """
     Class for returning the location and availability of a room.
+
+    Attributes:
+        location (mtypes.Event_Location): The location of the room.
+        available (bool): Whether the room is available or not.
     """
 
     location: Event_Location
@@ -96,6 +96,9 @@ class RoomInfo:
 class RoomListType:
     """
     Type for returning a list of locations with the availability
+
+    Attributes:
+        locations (List[mtypes.RoomInfo]): List of locations with availability.
     """
 
     locations: List[RoomInfo]
@@ -106,6 +109,13 @@ class BillsStatusType:
     """
     Type for returning event id, event name, club id and bills status of
     the event.
+
+    Attributes:
+        eventid (str): ID of the event.
+        eventname (mtypes.very_short_str_type): Name of the event.
+        clubid (str): ID of the club organizing the event.
+        bills_status (mtypes.Bills_Status): Bills status of the event.
+        eventReportSubmitted (mtypes.short_str_type): Status of event report.
     """
 
     eventid: str
@@ -119,6 +129,11 @@ class BillsStatusType:
 class CSVResponse:
     """
     Type for returning the csv file, success/error message.
+
+    Attributes:
+        csvFile (mtypes.short_str_type): The csv file as a string.
+        successMessage (mtypes.short_str_type): The success message.
+        errorMessage (mtypes.short_str_type): The error message.
     """
 
     csvFile: str
@@ -152,32 +167,33 @@ class InputEventDetailsBaseModel(BaseModel):
     Base Model Class for taking the details of an event.
 
     Attributes:
-        name (str): Name of the event.
-        location (List[Event_Location]): List of locations of the event.
+        name (mtypes.very_short_str_type): Name of the event.
+        location (List[mtypes.Event_Location]): List of locations of the event.
                                          Default is None.
-        otherLocation (str): 'Other' location of the event. Default is None.
-        locationAlternate (List[Event_Location]): List of alternate locations
-                                                  of the event. This is optional. Default is None.
-        otherLocationAlternate (str): 'Other' alternate location of the event.
-                                     Default is None.
-        description (str): Description of the event. Default is None.
+        otherLocation (mtypes.very_short_str_type): 'Other' location of the event.
+                                             Default is None.
+        locationAlternate (List[mtypes.Event_Location]): List of alternate locations
+                                                  of the event.Default is None.
+        otherLocationAlternate (mtypes.very_short_str_type): 'Other' alternate location
+                                                     of the event. Default is None.
+        description (mtypes.medium_str_type): Description of the event. Default is None.
         clubid (str): clubID of the club organizing the event.
         collabclubs (List[str]): List of clubIDs of collaborating clubs.
                                  Default is None.
-        mode (Event_Mode): Mode of the event. Default is hybrid.
+        mode (mtypes.Event_Mode): Mode of the event. Default is hybrid.
         poster (str): Poster of the event. Default is None.
         datetimeperiod (List[datetime]): List of date and time of start and
                                          end of the event.
-        audience (List[Audience]): List of audience categories for the event.
+        audience (List[mtypes.Audience]): List of audience categories for the event.
                                    Default is None.
-        link (str): Link to the event. Default is None.
-        equipment (str): Equipment for the event. Default is None.
-        additional (str): Additional information of the event.
-                          Default is None.
-        population (int): Population expected to attend the event.
-                          Default is None.
-        external_population (Optional[int]): Population expected from
-                          outside the campus attending the event.
+        link (mtypes.HttpUrlString): Link to the event. Default is None.
+        equipment (mtypes.short_str_type): Equipment for the event. Default is None.
+        additional (mtypes.short_str_type): Additional information of the event.
+                                    Default is None.
+        population (mtypes.event_popu_type): Population expected to attend the event.
+                                     Default is None.
+        external_population (Optional[mtypes.event_popu_type]): Population expected
+                                    from outside attending the event.
         budget (List[BudgetInput]): List of budgets of the event.
                                     Default is None.
         sponsor (List[SponsorInput]): List of sponsor of the event.
@@ -187,9 +203,11 @@ class InputEventDetailsBaseModel(BaseModel):
 
     name: very_short_str_type
     location: List[Event_Location] | None = None
-    otherLocation: str | None = None  # very_short_str_type
+    otherLocation: very_short_str_type | None = None  # very_short_str_type
     locationAlternate: List[Event_Location] | None = None
-    otherLocationAlternate: str | None = None  # very_short_str_type
+    otherLocationAlternate: very_short_str_type | None = (
+        None  # very_short_str_type
+    )
     description: medium_str_type | None = None
     clubid: str
     collabclubs: List[str] | None = None
@@ -222,6 +240,48 @@ class InputEditEventDetailsBaseModel(BaseModel):
     """
     Input similar to InputEventDetailsBaseModel but along with the event
     id(self-generated) attribute.
+
+    Attributes:
+        name (mtypes.very_short_str_type): Name of the event. Default is None.
+        eventid (str): ID of the event.
+        collabclubs (List[str]): List of clubIDs of collaborating clubs.
+                                 Default is None.
+        location (List[mtypes.Event_Location]): List of locations of the event.
+                                         Default is None.
+        otherLocation (mtypes.very_short_str_type): 'Other' location
+                                    of the event.Default is None.
+        locationAlternate (List[mtypes.Event_Location]): List of alternate
+                                                  locations of the event.
+                                                    Default is None.
+        otherLocationAlternate (mtypes.very_short_str_type): 'Other' alternate
+                                                      location of the event.
+                                                     Default is None.
+        description (mtypes.medium_str_type): Description of the event.
+                                            Default is None.
+        clubid (str): clubID of the club organizing the event. Default is None.
+        mode (mtypes.Event_Mode): Mode of the event.Default is hybrid.
+        poster (str): Poster of the event. Default is None.
+        datetimeperiod (List[datetime]): List of date and time of start and
+                                         end of the event. Default is None.
+        audience (List[mtypes.Audience]): List of audience
+                                        categories for the event.
+                                   Default is None.
+        link (mtypes.HttpUrlString): Link to the event. Default is None.
+        equipment (mtypes.short_str_type): Equipment for the event.
+                                         Default is None.
+        additional (mtypes.short_str_type): Additional information of event.
+                                    Default is None.
+        population (mtypes.event_popu_type): Population
+                                         expected to attend the event.
+                                     Default is None.
+        external_population (Optional[mtypes.event_popu_type]): Population
+                                                         expected from outside
+                                                         attending the event.
+        budget (List[BudgetInput]): List of budgets for the event.
+                                    Default is None.
+        sponsor (List[SponsorInput]): List of sponsors for the event.
+                                    Default is None.
+        poc (str): Point of contact for the event. Default is None.
     """
 
     name: very_short_str_type | None = None
@@ -263,6 +323,13 @@ class InputDataReportDetails:
     """
     Input used for taking info required to bring a list of events along
     with required fields.
+
+    Attributes:
+        clubid (str | None): ID of the club. Default is None.
+        dateperiod (List[date] | None): List of dates for filtering events.
+                                       Default is None.
+        fields (List[mtypes.short_str_type]): List of fields in the response.
+        status (mtypes.short_str_type): Status of the event.
     """
 
     clubid: str | None
@@ -285,6 +352,11 @@ class InputBillsStatus:
     """
     Input for taking event id, state of the bill and slo comment during
     the approval/rejection of bills.
+
+    Attributes:
+        eventid (str): ID of the event.
+        state (mtypes.Bills_State_Status): State of the bill.
+        slo_comment (mtypes.short_str_type): Comment of SLO. Default is None.
     """
 
     eventid: str
@@ -309,6 +381,11 @@ class InputBillsUpload:
     """
     Input for taking event id, and filename of the bill generated by
     getSignedUploadURL function.
+
+    Attributes:
+        eventid (str): ID of the event.
+        filename (mtypes.very_short_str_type): Filename of the bill.
+        budget (List[BudgetInput]): List of budgets for the event.
     """
 
     eventid: str
@@ -327,6 +404,7 @@ class InputBillsUpload:
 
 # custom data type for start and end of event
 timelot_type = Tuple[datetime, datetime]
+"""A custom data type for start and end of event"""
 
 # Holidays Types
 
@@ -335,6 +413,12 @@ timelot_type = Tuple[datetime, datetime]
 class InputHolidayDetails:
     """
     Input for taking the details of a holiday.
+
+    Attributes:
+        date (date): Date of the holiday.
+        name (mtypes.very_short_str_type): Name of the holiday.
+        description (mtypes.medium_str_type): Description of the holiday.
+                                      Default is None.
     """
 
     date: date

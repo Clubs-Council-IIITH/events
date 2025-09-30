@@ -15,23 +15,27 @@ from pydantic_core import core_schema
 from typing_extensions import Annotated, Any
 
 event_popu_type = Annotated[int, Field(ge=0)]
+"""event population type, non-negative integer"""
 
 very_short_str_type = Annotated[
-    str,
-    StringConstraints(min_length=1, max_length=200),
+    str, StringConstraints(min_length=1, max_length=200)
 ]
+"""very short string type with min length 1 and max length 200"""
 short_str_type = Annotated[
     str,
     StringConstraints(max_length=1000),
 ]
+"""short string type with max length 1000"""
 medium_str_type = Annotated[
     str,
     StringConstraints(max_length=5000),
 ]
+"""medium string type with max length 5000"""
 long_str_type = Annotated[
     str,
     StringConstraints(max_length=10000),
 ]
+""" long string type with max length 10000"""
 
 
 # Audience for the Event
@@ -345,10 +349,12 @@ class BudgetType:
 
     Attributes:
         amount (float): Amount of the budget.
-        description (short_str_type | None): Description of the budget. Defaults to None.
+        description (short_str_type | None): Description of the budget.
+                                        Defaults to None.
         advance (bool): Whether the budget is the required advance or not.
                         Defaults to False.
-        billno (very_short_str_type): Bill number submitted associated with budget entry.
+        billno (very_short_str_type): Bill number submitted associated
+                            with budget entry.
         amount_used (float): Amount actually used in the event.
     """
 
@@ -494,6 +500,8 @@ HttpUrlString = Annotated[
         lambda value: str(http_url_adapter.validate_python(value))
     ),
 ]
+"""Type for storing and validating URLs"""
 
 # takes the time from IST timezone
 timezone = pytz.timezone("Asia/Kolkata")
+"""IST timezone"""
