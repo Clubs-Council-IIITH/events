@@ -40,8 +40,6 @@ async def addEventReport(
         raise ValueError("User not authenticated")
 
     user_role = user["role"]
-    if user_role not in ["club"]:
-        raise ValueError("User not authorized")
 
     eventid = details.eventid
     if not eventid:
@@ -57,7 +55,7 @@ async def addEventReport(
     )
     if not event:
         raise ValueError("Event not found")
-    if user_role == "club" and event["clubid"] != user["uid"]:
+    if event["clubid"] != user["uid"]:
         raise ValueError("User not authorized")
 
     searchspace = {
