@@ -39,8 +39,6 @@ async def addEventReport(
     if not user:
         raise ValueError("User not authenticated")
 
-    user_role = user["role"]
-
     eventid = details.eventid
     if not eventid:
         raise ValueError("Event ID is required")
