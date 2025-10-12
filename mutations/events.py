@@ -685,7 +685,6 @@ async def progressEvent(
         sponsor_table.field_names = [
             "Name",
             "Amount",
-            "Previously Sponsored",
             "Comment",
         ]
         for item in updated_event_instance.sponsor:
@@ -693,7 +692,6 @@ async def progressEvent(
                 [
                     item.name,
                     item.amount,
-                    "Yes" if item.previously_sponsored else "No",
                     item.comment,
                 ],
                 divider=True,
@@ -702,11 +700,10 @@ async def progressEvent(
             item.amount for item in updated_event_instance.sponsor
         )
         sponsor_table.add_row(
-            ["", "Total sponsor", total_sponsor, ""], divider=True
+            ["Total sponsor", total_sponsor, ""], divider=True
         )
         sponsor_table.max_width["Name"] = 10
         sponsor_table.max_width["Amount"] = 8
-        sponsor_table.max_width["Previously Sponsored"] = 5
         sponsor_table.max_width["Comment"] = 20
         sponsor_table.align["Amount"] = "r"
 
