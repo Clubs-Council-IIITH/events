@@ -8,7 +8,9 @@ from otypes import EventReportType, Info
 @strawberry.field
 async def eventReport(eventid: str, info: Info) -> EventReportType:
     """
-    Get the event report of an event for cc, slo and club
+    This field retrieves the event report of an event for CC, SLO, and Club 
+    users.
+    Only authenticated users with appropriate roles can access the report.
 
     Args:
         eventid (str): The id of the event

@@ -169,7 +169,7 @@ class Holiday(BaseModel):
     Attributes:
         id (mtypes.PyObjectId): The ID of the holiday's document.
         name (mtypes.very_short_str_type): The name of the holiday.
-        date (date): The date of the holiday.
+        date (datetime.date): The date of the holiday.
         description (mtypes.medium_str_type): A description of the holiday.
                                        Defaults to None.
         created_time (datetime): The time the holiday was created.

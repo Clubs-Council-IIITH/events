@@ -98,7 +98,7 @@ class RoomListType:
     Type for returning a list of locations with the availability
 
     Attributes:
-        locations (List[mtypes.RoomInfo]): List of locations with availability.
+        locations (List[otypes.RoomInfo]): List of locations with availability.
     """
 
     locations: List[RoomInfo]
@@ -415,7 +415,7 @@ class InputHolidayDetails:
     Input for taking the details of a holiday.
 
     Attributes:
-        date (date): Date of the holiday.
+        date (datetime.date): Date of the holiday.
         name (mtypes.very_short_str_type): Name of the holiday.
         description (mtypes.medium_str_type): Description of the holiday.
                                       Default is None.
