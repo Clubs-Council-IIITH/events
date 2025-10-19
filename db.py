@@ -46,18 +46,18 @@ event_reportsdb = db.event_reports
 
 async def create_index() -> None:
     """
-    Create MongoDB indexes for events-related collections 
+    Create MongoDB indexes for events-related collections
     if they don't already exist.
-    
+
     This function creates the following indexes:
 
-    - 'one_holiday_on_day': A unique index on the 'date' field in the holidays 
+    - 'one_holiday_on_day': A unique index on the 'date' field in the holidays
         collection to ensure only one holiday can exist per day.
 
-    - 'unique_event_code': A unique index on the 'code' field in the events 
+    - 'unique_event_code': A unique index on the 'code' field in the events
         collection to ensure event codes are unique.
 
-    - 'unique_event_id': A unique index on the 'event_id' field in the 
+    - 'unique_event_id': A unique index on the 'event_id' field in the
         event_reports collection to ensure there's only one report per event
 
     Returns:
