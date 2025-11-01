@@ -691,6 +691,7 @@ async def downloadEventsData(
         "status": "Status",
         "equipment": "Equipment",
         "additional": "Additional Requests",
+        "event_report_submitted": "Event Report Submitted",
     }
 
     # Prepare CSV content
@@ -754,6 +755,11 @@ async def downloadEventsData(
 
                 if value:
                     value = getattr(Event_Full_State_Status, value)
+            elif field == "event_report_submitted":
+                if value is None:
+                    value = "No Event Report Required"
+                else:
+                    value = "Yes" if value else "No"
 
             if value in [None, "", []]:
                 value = "No " + mapped_field
