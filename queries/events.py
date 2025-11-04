@@ -626,7 +626,7 @@ async def downloadEventsData(
 
     if details.clubid:
         clubid = details.clubid
-        if details.clubid == "allclubs":
+        if details.clubid == "allclubs" and user["role"] in ["cc", "slo"]:
             clubid = None
         if user is not None:
             if clubid is not None:
@@ -705,6 +705,10 @@ async def downloadEventsData(
     if details.status != "approved":
         fieldnames.append(header_mapping["status"])
 
+    club_names = dict()
+    for club in allclubs:
+        club_names[club["cid"]] = club["name"]
+
     csv_writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
     csv_writer.writeheader()
 
@@ -725,14 +729,15 @@ async def downloadEventsData(
                     else value[1].split("T")[0]
                 )
             elif field == "clubid":
-                value = next(
-                    (
-                        club["name"]
-                        for club in allclubs
-                        if club["cid"] == value
-                    ),
-                    "",
-                )
+                value = club_names.get(value, None)
+
+                collab_clubs = event.get("collabclubs", [])
+                collab_club_names = [value] if value else []
+                for cid in collab_clubs:
+                    club_name = club_names.get(cid, None)
+                    if club_name:
+                        collab_club_names.append(club_name)
+                value = ", ".join(collab_club_names)
             elif field == "location":
                 value = event.get(field, [])
                 if len(value) >= 1:
