@@ -712,12 +712,8 @@ async def progressEvent(
     ist_offset = timedelta(hours=5, minutes=30)
     start_dt = updated_event_instance.datetimeperiod[0] + ist_offset
     end_dt = updated_event_instance.datetimeperiod[1] + ist_offset
-    event_start_time = (
-        start_dt.strftime("%A, %d-%m-%Y %H:%M")
-    )
-    event_end_time = (
-        end_dt.strftime("%A, %d-%m-%Y %H:%M")
-    )
+    event_start_time = start_dt.strftime("%A, %d-%m-%Y %H:%M")
+    event_end_time = end_dt.strftime("%A, %d-%m-%Y %H:%M")
 
     poc_details, poc_phone = poc
     poc_name = poc_details["firstName"] + " " + poc_details["lastName"]
