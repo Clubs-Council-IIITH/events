@@ -626,8 +626,11 @@ async def downloadEventsData(
 
     if details.clubid:
         clubid = details.clubid
-        if details.clubid == "allclubs" and user["role"] in ["cc", "slo"]:
-            clubid = None
+        if details.clubid == "allclubs":
+            if user["role"] in ["cc", "slo"]:
+                clubid = None
+            else:
+                clubid = user["uid"]
         if user is not None:
             if clubid is not None:
                 searchspace["$or"] = [
