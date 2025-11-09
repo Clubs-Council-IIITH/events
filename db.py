@@ -14,11 +14,11 @@ Attributes:
     MONGO_DATABASE (str): MongoDB database name from environment variable.
                         Defaults to "default".
     client (pymongo.AsyncMongoClient): MongoDB client.
-    db (pymongo.database.Database): MongoDB database.
-    eventsdb (pymongo.collection.Collection): MongoDB collection for events.
-    holidaysdb (pymongo.collection.Collection): MongoDB collection for
+    db (pymongo.asynchronous.database.AsyncDatabase): MongoDB database.
+    eventsdb (pymongo.asynchronous.collection.AsyncCollection): MongoDB collection for events.
+    holidaysdb (pymongo.asynchronous.collection.AsyncCollection): MongoDB collection for
                                             holidays.
-    event_reportsdb (pymongo.collection.Collection): MongoDB collection for
+    event_reportsdb (pymongo.asynchronous.collection.AsyncCollection): MongoDB collection for
                                                 event reports.
 """
 
