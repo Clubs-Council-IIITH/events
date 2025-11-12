@@ -304,30 +304,27 @@ async def events(
 async def calendarEvents(
     info: Info,
     clubid: str | None = None,
-    public: bool | None = None,
     pastEventsLimit: int | None = None,
 ) -> List[EventType]:
     """
-    Returns a list of all events for calendar display
+    Fetches events for the calendar view based on user permissions and filters.
 
-    If public is set to True, then only public/approved events are returned.
+    If a clubid is provided, the function returns events belonging to that club or its collaborating clubs.
 
-    If clubid is set, then only events of that club are returned.
+    If clubid is not specified, it retrieves all events the current user is authorized to view.
 
-    If clubid is not set, then all events the user is authorized to see are returned.
-
-    A non-logged in user has same visibility as public set to True.
-
-    If public set to True, then few fields of the event are hidden using the
-    trim_public_events function.
-
-    If pastEventsLimit is set, returns all events within that many months in the past. 
-    If not set, returns all events.
+    Non-logged-in users can only access public and approved events.
     
+    When pastEventsLimit is specified, the results are restricted to events that occurred within that many months in the past.
+
+    Access control is role-based:
+        public users can view only approved, non-internal events
+        SLC and SLO, CC roles have full visibility into all events
+        clubs can access their own or collaborative events, including certain pending states.
+   
     Args:
         info (otypes.Info): User context
         clubid (str | None): Optional club filter
-        public (bool | None): Restrict to public events only
         pastEventsLimit (int | None): Time Limit for the past events to be displayed in months. Defaults to None.
 
     Returns:
@@ -336,6 +333,7 @@ async def calendarEvents(
     Raises:
         ValueError: User not authenticated
         ValueError: User not authorized
+        ValueError: If `pastEventsLimit` is provided and is not greater than zero.
     """
     user = info.context.user
 
@@ -343,8 +341,7 @@ async def calendarEvents(
     restrictFullAccess = True
     clubAccess = False
 
-    # role-based access
-    if user is not None and (public is None or public is False):
+    if user is not None:
         if user["role"] in ["cc", "slc", "slo"]:
             restrictAccess = False
             if user["role"] in ["cc"]:
@@ -397,7 +394,7 @@ async def calendarEvents(
         pastEventsLimit=pastEventsLimit
     )
 
-    if restrictAccess or public:
+    if restrictAccess:
         for event in events:
             trim_public_events(event)
 
