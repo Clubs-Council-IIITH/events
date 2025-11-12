@@ -185,6 +185,8 @@ async def events(
                                                        Defaults to None.
         pastEventsLimit (int | None): Time Limit for the past events to
                                       be fetched in months. Defaults to None.
+        excludeCompleted (bool): Whether to exclude completed events. Defaults to
+                                 False.
 
     Returns:
         (List[otypes.EventType]): A list of events that match the given
@@ -289,6 +291,112 @@ async def events(
     )
 
     # hides few fields from public viewers
+    if restrictAccess or public:
+        for event in events:
+            trim_public_events(event)
+
+    return [
+        EventType.from_pydantic(Event.model_validate(event))
+        for event in events
+    ]
+
+@strawberry.field
+async def calendarEvents(
+    info: Info,
+    clubid: str | None = None,
+    public: bool | None = None,
+    pastEventsLimit: int | None = None,
+) -> List[EventType]:
+    """
+    Returns a list of all events for calendar display
+
+    If public is set to True, then only public/approved events are returned.
+
+    If clubid is set, then only events of that club are returned.
+
+    If clubid is not set, then all events the user is authorized to see are returned.
+
+    A non-logged in user has same visibility as public set to True.
+
+    If public set to True, then few fields of the event are hidden using the
+    trim_public_events function.
+
+    If pastEventsLimit is set, returns all events within that many months in the past. 
+    If not set, returns all events.
+    
+    Args:
+        info (otypes.Info): User context
+        clubid (str | None): Optional club filter
+        public (bool | None): Restrict to public events only
+        pastEventsLimit (int | None): Time Limit for the past events to be displayed in months. Defaults to None.
+
+    Returns:
+        (List[EventType]): Events for the calendar view
+
+    Raises:
+        ValueError: User not authenticated
+        ValueError: User not authorized
+    """
+    user = info.context.user
+
+    restrictAccess = True
+    restrictFullAccess = True
+    clubAccess = False
+
+    # role-based access
+    if user is not None and (public is None or public is False):
+        if user["role"] in ["cc", "slc", "slo"]:
+            restrictAccess = False
+            if user["role"] in ["cc"]:
+                restrictFullAccess = False
+        elif user["role"] == "club":
+            clubAccess = True
+            restrictAccess = False
+            if user["uid"] == clubid:
+                restrictFullAccess = False
+
+    assert not (restrictAccess and not restrictFullAccess), (
+        "restrictAccess and not restrictFullAccess can not be True at the same time."  # noqa: E501
+    )
+
+    searchspace: dict[str, Any] = {}
+    if clubid is not None:
+        searchspace["$or"] = [
+            {"clubid": clubid},
+            {"collabclubs": {"$in": [clubid]}},
+        ]
+    else:
+        allclubs = await getClubs(info.context.cookies)
+        list_allclubs = list()
+        for club in allclubs:
+            list_allclubs.append(club["cid"])
+        searchspace["clubid"] = {"$in": list_allclubs}
+
+    if restrictAccess:
+        searchspace["status.state"] = {
+            "$in": [Event_State_Status.approved.value]
+        }
+        searchspace["audience"] = {"$nin": ["internal"]}
+    elif restrictFullAccess:
+        statuses = [
+            Event_State_Status.approved.value,
+            Event_State_Status.pending_budget.value,
+            Event_State_Status.pending_room.value,
+        ]
+        if clubAccess:
+            searchspace["audience"] = {"$nin": ["internal"]}
+            statuses.append(Event_State_Status.pending_cc.value)
+            statuses.append(Event_State_Status.incomplete.value)
+        searchspace["status.state"] = {"$in": statuses}
+
+    if pastEventsLimit is not None and pastEventsLimit <= 0:
+        raise ValueError("pastEventsLimit must be greater than 0.")
+        
+    events = await eventsWithSorting(
+        searchspace=searchspace,
+        pastEventsLimit=pastEventsLimit
+    )
+
     if restrictAccess or public:
         for event in events:
             trim_public_events(event)
@@ -789,6 +897,7 @@ async def downloadEventsData(
 queries = [
     event,
     events,
+    calendarEvents,
     clashingEvents,
     eventid,
     incompleteEvents,

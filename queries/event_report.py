@@ -72,6 +72,13 @@ async def isEventReportsSubmitted(clubid: str, info: Info) -> bool:
     Args:
         clubid (str): The id of the club
         info (otypes.Info): The user details
+
+    Returns:
+        (bool): True if all event reports have been submitted, False otherwise
+
+    Raises:
+        ValueError: User not authenticated
+        ValueError: User not authorized
     """
     user = info.context.user
     if not user:
@@ -87,7 +94,7 @@ async def isEventReportsSubmitted(clubid: str, info: Info) -> bool:
     events = await eventsdb.find(
         {
             "clubid": clubid,
-            "status.state": {"$nin": ["deleted"]},
+            "status.state": {"$in": ["approved"]},
             "datetimeperiod.1": {"$lt": report_check_lt, "$gt": report_check_gt},
             "event_report_submitted": {"$ne": True},
         }

@@ -484,7 +484,7 @@ async def progressEvent(
         pending_reports = await eventsdb.find(
             {
                 "clubid": event_instance.clubid,
-                "status.state": {"$nin": ["deleted"]},
+                "status.state": {"$in": ["approved"]},
                 "datetimeperiod.1": {"$lt": report_check_lt, "$gt": report_check_gt},
                 "event_report_submitted": {"$ne": True},
             }
