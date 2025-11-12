@@ -2,7 +2,9 @@ import csv
 import io
 from typing import Any, List
 
+import pytz
 import strawberry
+from datetime import datetime
 
 from db import eventsdb
 
@@ -137,6 +139,7 @@ async def events(
     timings: timelot_type | None = None,
     pastEventsLimit: int | None = None,
     location: List[Event_Location] | None = None,
+    excludeCompleted: bool = False,
 ) -> List[EventType]:
     """
     Returns a list of events as a search result that match the given criteria.
@@ -269,6 +272,10 @@ async def events(
             timings[0].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
             timings[1].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
         ]
+
+    if excludeCompleted:
+        now = (datetime.now(pytz.UTC)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        searchspace["datetimeperiod.1"] = {"$gte": now}
 
     events = await eventsWithSorting(
         searchspace,

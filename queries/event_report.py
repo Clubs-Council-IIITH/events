@@ -1,4 +1,6 @@
+import pytz
 import strawberry
+from datetime import datetime, timedelta
 
 from db import event_reportsdb, eventsdb
 from models import EventReport
@@ -62,5 +64,36 @@ async def eventReport(eventid: str, info: Info) -> EventReportType:
         EventReport.model_validate(event_report)
     )
 
+@strawberry.field
+async def isEventReportsSubmitted(clubid: str, info: Info) -> bool:
+    """
+    This field checks if all event reports have been submitted for a club.
 
-queries = [eventReport]
+    Args:
+        clubid (str): The id of the club
+        info (otypes.Info): The user details
+    """
+    user = info.context.user
+    if not user:
+        raise ValueError("User not authenticated")
+
+    user_role = user["role"]
+    if user_role not in ["cc", "slo", "club"]:
+        raise ValueError("User not authorized")
+
+    report_check_lt = (datetime.now(pytz.UTC) - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    report_check_gt = pytz.UTC.localize(datetime(2025, 11, 15)).strftime("%Y-%m-%dT%H:%M:%S+00:00") 
+
+    events = await eventsdb.find(
+        {
+            "clubid": clubid,
+            "status.state": {"$nin": ["deleted"]},
+            "datetimeperiod.1": {"$lt": report_check_lt, "$gt": report_check_gt},
+            "event_report_submitted": {"$ne": True},
+        }
+    ).to_list(length=None)
+
+    
+    return not len(events) > 0
+
+queries = [eventReport, isEventReportsSubmitted]

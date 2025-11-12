@@ -479,11 +479,12 @@ async def progressEvent(
         
         # Check if the completed events report is submitted 
         report_check_lt = (datetime.now(pytz.UTC) - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
-        report_check_gt = pytz.UTC.localize(datetime(2025, 11, 10)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        report_check_gt = pytz.UTC.localize(datetime(2025, 11, 15)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
         pending_reports = await eventsdb.find(
             {
                 "clubid": event_instance.clubid,
+                "status.state": {"$nin": ["deleted"]},
                 "datetimeperiod.1": {"$lt": report_check_lt, "$gt": report_check_gt},
                 "event_report_submitted": {"$ne": True},
             }
