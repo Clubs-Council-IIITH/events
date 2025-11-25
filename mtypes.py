@@ -1,6 +1,6 @@
 from enum import StrEnum, auto
+from zoneinfo import ZoneInfo
 
-import pytz
 import strawberry
 from bson import ObjectId
 from pydantic import (
@@ -503,5 +503,5 @@ HttpUrlString = Annotated[
 """Type for storing and validating URLs"""
 
 # takes the time from IST timezone
-timezone = pytz.timezone("Asia/Kolkata")
+timezone = ZoneInfo("Asia/Kolkata")
 """IST timezone"""
