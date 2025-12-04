@@ -155,7 +155,7 @@ async def events(
 
     For public queries, either paginationOn must be True or pastEventsLimit
     must be set. If paginationOn is True, then limit must be set.
-    If paginationOn is False and pastEventsLimit is None, then
+    If paginationOn is False, limit is None and pastEventsLimit is None, then
     pastEventsLimit is set to 4 months for public users and users with no
     special roles.
 
@@ -216,9 +216,11 @@ async def events(
 
     if not limit and paginationOn:
         raise Exception("Pagination limit is required.")
-    if limit is not None and limit > 50:
-        raise Exception("Limit can not be greater than 50.")
-    if restrictAccess and (not paginationOn and pastEventsLimit is None):
+    if limit is not None and limit > 20:
+        raise Exception("Limit can not be greater than 20.")
+    if restrictAccess and (
+        not paginationOn and pastEventsLimit is None and limit is None
+    ):
         pastEventsLimit = 4
     if pastEventsLimit is not None and pastEventsLimit <= 0:
         raise Exception("pastEventsLimit must be greater than 0.")
