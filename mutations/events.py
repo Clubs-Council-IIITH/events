@@ -187,6 +187,8 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
             )
         )
     if details.collabclubs and details.collabclubs != []:
+        if details.clubid in details.collabclubs:
+            details.collabclubs.remove(details.clubid)
         event_instance.collabclubs = details.collabclubs
 
     # Check POC Details Exist or not
@@ -327,6 +329,8 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     ):
         updates["otherLocationAlternate"] = details.otherLocationAlternate
     if details.collabclubs is not None and updatable:
+        if details.clubid in details.collabclubs:
+            details.collabclubs.remove(details.clubid)
         updates["collabclubs"] = details.collabclubs
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
         updates["poc"] = details.poc
