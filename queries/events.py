@@ -670,13 +670,15 @@ async def downloadEventsData(
                 }
             else:
                 to_exclude = [
-                    Event_State_Status.deleted.value,
                     Event_State_Status.incomplete.value,
                 ]
                 if details.status == "pending":
                     to_exclude.append(Event_State_Status.approved.value)
                 if user["role"] == "slo":
                     to_exclude.append(Event_State_Status.pending_cc.value)
+                else:
+                    to_exclude.append(Event_State_Status.deleted.value)
+                
                 searchspace["status.state"] = {
                     "$nin": to_exclude,
                 }
