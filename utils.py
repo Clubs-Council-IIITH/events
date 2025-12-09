@@ -340,7 +340,7 @@ async def eventsWithSorting(
     pagination=False,
     skip=0,
     limit: int | None = None,
-    timings: timelot_type | None = None,
+    timings: List[str] | None = None,
     pastEventsLimit: int | None = None,
 ) -> List[dict]:
     """

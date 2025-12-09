@@ -194,19 +194,19 @@ async def events(
     user = info.context.user
 
     restrictAccess = True
-    clubAccess = False
     restrictFullAccess = True
+    sloAccess = False
+    clubAccess = False
     if user is not None and (public is None or public is False):
-        if user["role"] in ["cc", "slc", "slo"]:
+        if user["role"] in ["cc", "slc", "slo", "club"]:
             restrictAccess = False
-            if user["role"] in [
-                "cc",
-            ]:
-                restrictFullAccess = False
 
-        if user["role"] == "club":
+        if user["role"] == "cc":
+            restrictFullAccess = False
+        elif user["role"] == "slo":
+            sloAccess = True
+        elif user["role"] == "club":
             clubAccess = True
-            restrictAccess = False
             if user["uid"] == clubid:
                 restrictFullAccess = False
 
@@ -253,10 +253,13 @@ async def events(
             Event_State_Status.pending_budget.value,
             Event_State_Status.pending_room.value,
         ]
+
         if clubAccess:
             searchspace["audience"] = {"$nin": ["internal"]}
             statuses.append(Event_State_Status.pending_cc.value)
             statuses.append(Event_State_Status.incomplete.value)
+        elif sloAccess:
+            statuses.append(Event_State_Status.deleted.value)
 
         searchspace["status.state"] = {
             "$in": statuses,
@@ -667,13 +670,15 @@ async def downloadEventsData(
                 }
             else:
                 to_exclude = [
-                    Event_State_Status.deleted.value,
                     Event_State_Status.incomplete.value,
                 ]
                 if details.status == "pending":
                     to_exclude.append(Event_State_Status.approved.value)
                 if user["role"] == "slo":
                     to_exclude.append(Event_State_Status.pending_cc.value)
+                else:
+                    to_exclude.append(Event_State_Status.deleted.value)
+                
                 searchspace["status.state"] = {
                     "$nin": to_exclude,
                 }
