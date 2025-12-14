@@ -216,8 +216,8 @@ async def events(
 
     if not limit and paginationOn:
         raise Exception("Pagination limit is required.")
-    if limit is not None and limit > 20:
-        raise Exception("Limit can not be greater than 20.")
+    if limit is not None and limit > 25:
+        raise Exception("Limit can not be greater than 25.")
     if restrictAccess and (
         not paginationOn and pastEventsLimit is None and limit is None
     ):
