@@ -1,6 +1,6 @@
 from enum import StrEnum, auto
+from zoneinfo import ZoneInfo
 
-import pytz
 import strawberry
 from bson import ObjectId
 from pydantic import (
@@ -168,6 +168,7 @@ class Event_Status:
         state (Event_State_Status): State of the event. Default is `incomplete`
         room (bool): Whether or not room is approved.
         budget (bool): Whether or not budget is approved.
+        creation_time (str | None): Time of creation. Defaults to None.
         submission_time (str | None): Time of submission. Defaults to None.
         cc_approver (str | None): Approver of CC. Defaults to None.
         cc_approver_time (str | None): Time of approval by CC.
@@ -188,6 +189,7 @@ class Event_Status:
     room: bool = False
     budget: bool = False
 
+    creation_time: str | None = None
     submission_time: str | None = None
 
     cc_approver: str | None = None
@@ -210,6 +212,7 @@ class Event_Status:
         state: Event_State_Status = Event_State_Status.incomplete,  # type: ignore
         room: bool = False,
         budget: bool = False,
+        creation_time: str | None = None,
         submission_time: str | None = None,
         cc_approver: str | None = None,
         cc_approver_time: str | None = None,
@@ -226,6 +229,7 @@ class Event_Status:
         self.room = room
         self.budget = budget
 
+        self.creation_time = creation_time
         self.submission_time = submission_time
 
         self.cc_approver = cc_approver
@@ -503,5 +507,5 @@ HttpUrlString = Annotated[
 """Type for storing and validating URLs"""
 
 # takes the time from IST timezone
-timezone = pytz.timezone("Asia/Kolkata")
+timezone = ZoneInfo("Asia/Kolkata")
 """IST timezone"""

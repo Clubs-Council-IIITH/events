@@ -158,7 +158,7 @@ async def events(
 
     For public queries, either paginationOn must be True or pastEventsLimit
     must be set. If paginationOn is True, then limit must be set.
-    If paginationOn is False and pastEventsLimit is None, then
+    If paginationOn is False, limit is None and pastEventsLimit is None, then
     pastEventsLimit is set to 4 months for public users and users with no
     special roles.
 
@@ -199,19 +199,19 @@ async def events(
     user = info.context.user
 
     restrictAccess = True
-    clubAccess = False
     restrictFullAccess = True
+    sloAccess = False
+    clubAccess = False
     if user is not None and (public is None or public is False):
-        if user["role"] in ["cc", "slc", "slo"]:
+        if user["role"] in ["cc", "slc", "slo", "club"]:
             restrictAccess = False
-            if user["role"] in [
-                "cc",
-            ]:
-                restrictFullAccess = False
 
-        if user["role"] == "club":
+        if user["role"] == "cc":
+            restrictFullAccess = False
+        elif user["role"] == "slo":
+            sloAccess = True
+        elif user["role"] == "club":
             clubAccess = True
-            restrictAccess = False
             if user["uid"] == clubid:
                 restrictFullAccess = False
 
@@ -221,9 +221,11 @@ async def events(
 
     if not limit and paginationOn:
         raise Exception("Pagination limit is required.")
-    if limit is not None and limit > 50:
-        raise Exception("Limit can not be greater than 50.")
-    if restrictAccess and (not paginationOn and pastEventsLimit is None):
+    if limit is not None and limit > 25:
+        raise Exception("Limit can not be greater than 25.")
+    if restrictAccess and (
+        not paginationOn and pastEventsLimit is None and limit is None
+    ):
         pastEventsLimit = 4
     if pastEventsLimit is not None and pastEventsLimit <= 0:
         raise Exception("pastEventsLimit must be greater than 0.")
@@ -256,10 +258,13 @@ async def events(
             Event_State_Status.pending_budget.value,
             Event_State_Status.pending_room.value,
         ]
+
         if clubAccess:
             searchspace["audience"] = {"$nin": ["internal"]}
             statuses.append(Event_State_Status.pending_cc.value)
             statuses.append(Event_State_Status.incomplete.value)
+        elif sloAccess:
+            statuses.append(Event_State_Status.deleted.value)
 
         searchspace["status.state"] = {
             "$in": statuses,
@@ -739,7 +744,10 @@ async def downloadEventsData(
     if details.clubid:
         clubid = details.clubid
         if details.clubid == "allclubs":
-            clubid = None
+            if user["role"] in ["cc", "slo"]:
+                clubid = None
+            else:
+                clubid = user["uid"]
         if user is not None:
             if clubid is not None:
                 searchspace["$or"] = [
@@ -774,13 +782,15 @@ async def downloadEventsData(
                 }
             else:
                 to_exclude = [
-                    Event_State_Status.deleted.value,
                     Event_State_Status.incomplete.value,
                 ]
                 if details.status == "pending":
                     to_exclude.append(Event_State_Status.approved.value)
                 if user["role"] == "slo":
                     to_exclude.append(Event_State_Status.pending_cc.value)
+                else:
+                    to_exclude.append(Event_State_Status.deleted.value)
+                
                 searchspace["status.state"] = {
                     "$nin": to_exclude,
                 }
@@ -817,6 +827,10 @@ async def downloadEventsData(
     if details.status != "approved":
         fieldnames.append(header_mapping["status"])
 
+    club_names = dict()
+    for club in allclubs:
+        club_names[club["cid"]] = club["name"]
+
     csv_writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
     csv_writer.writeheader()
 
@@ -837,14 +851,15 @@ async def downloadEventsData(
                     else value[1].split("T")[0]
                 )
             elif field == "clubid":
-                value = next(
-                    (
-                        club["name"]
-                        for club in allclubs
-                        if club["cid"] == value
-                    ),
-                    "",
-                )
+                value = club_names.get(value, None)
+
+                collab_clubs = event.get("collabclubs", [])
+                collab_club_names = [value] if value else []
+                for cid in collab_clubs:
+                    club_name = club_names.get(cid, None)
+                    if club_name:
+                        collab_club_names.append(club_name)
+                value = ", ".join(collab_club_names)
             elif field == "location":
                 value = event.get(field, [])
                 if len(value) >= 1:

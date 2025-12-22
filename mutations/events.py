@@ -188,6 +188,8 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
             )
         )
     if details.collabclubs and details.collabclubs != []:
+        if details.clubid in details.collabclubs:
+            details.collabclubs.remove(details.clubid)
         event_instance.collabclubs = details.collabclubs
 
     # Check POC Details Exist or not
@@ -210,6 +212,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
     event_instance.status.last_updated_time = time_str
     event_instance.status.last_updated_by = user["uid"]
+    event_instance.status.creation_time = time_str
 
     # generates and sets the event's code
     event_instance.code = await getEventCode(
@@ -328,6 +331,8 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     ):
         updates["otherLocationAlternate"] = details.otherLocationAlternate
     if details.collabclubs is not None and updatable:
+        if details.clubid in details.collabclubs:
+            details.collabclubs.remove(details.clubid)
         updates["collabclubs"] = details.collabclubs
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
         updates["poc"] = details.poc
@@ -510,6 +515,7 @@ async def progressEvent(
             "cc_approver": None,
             "slc_approver": None,
             "slo_approver": user["uid"] if is_admin else None,
+            "creation_time": time_str,
             "submission_time": time_str,
             "cc_approver_time": "Not Approved",
             "slc_approver_time": "Not Approved",
@@ -530,6 +536,7 @@ async def progressEvent(
             "cc_approver_time": time_str,
             "slc_approver_time": event_instance.status.slc_approver_time,
             "slo_approver_time": event_instance.status.slo_approver_time,
+            "creation_time": event_instance.status.creation_time,
             "submission_time": event_instance.status.submission_time,
         }
         if cc_progress_budget is not None:
@@ -567,6 +574,7 @@ async def progressEvent(
             "cc_approver_time": event_instance.status.cc_approver_time,
             "slc_approver_time": time_str,
             "slo_approver_time": event_instance.status.slo_approver_time,
+            "creation_time": event_instance.status.creation_time,
             "submission_time": event_instance.status.submission_time,
         }
 
@@ -591,6 +599,7 @@ async def progressEvent(
             "cc_approver_time": event_instance.status.cc_approver_time,
             "slc_approver_time": event_instance.status.slc_approver_time,
             "slo_approver_time": time_str,
+            "creation_time": event_instance.status.creation_time,
             "submission_time": event_instance.status.submission_time,
         }
 
@@ -604,6 +613,7 @@ async def progressEvent(
             "budget": event_instance.status.budget,
             "room": event_instance.status.room,
             "state": Event_State_Status.approved.value,
+            "creation_time": event_instance.status.creation_time,
             "submission_time": event_instance.status.submission_time,
             "cc_approver": event_instance.status.cc_approver,
             "slc_approver": event_instance.status.slc_approver,
