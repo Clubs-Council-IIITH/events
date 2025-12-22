@@ -1,6 +1,7 @@
-import pytz
-import strawberry
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+import strawberry
 
 from db import event_reportsdb, eventsdb
 from models import EventReport
@@ -64,6 +65,7 @@ async def eventReport(eventid: str, info: Info) -> EventReportType:
         EventReport.model_validate(event_report)
     )
 
+
 @strawberry.field
 async def isEventReportsSubmitted(clubid: str, info: Info) -> bool:
     """
@@ -88,19 +90,26 @@ async def isEventReportsSubmitted(clubid: str, info: Info) -> bool:
     if user_role not in ["cc", "slo", "club"]:
         raise ValueError("User not authorized")
 
-    report_check_lt = (datetime.now(pytz.UTC) - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
-    report_check_gt = pytz.UTC.localize(datetime(2025, 11, 15)).strftime("%Y-%m-%dT%H:%M:%S+00:00") 
+    report_check_lt = (
+        datetime.now(ZoneInfo("UTC")) - timedelta(days=7)
+    ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    report_check_gt = datetime(2025, 11, 15, tzinfo=ZoneInfo("UTC")).strftime(
+        "%Y-%m-%dT%H:%M:%S+00:00"
+    )
 
     events = await eventsdb.find(
         {
             "clubid": clubid,
             "status.state": {"$in": ["approved"]},
-            "datetimeperiod.1": {"$lt": report_check_lt, "$gt": report_check_gt},
+            "datetimeperiod.1": {
+                "$lt": report_check_lt,
+                "$gt": report_check_gt,
+            },
             "event_report_submitted": {"$ne": True},
         }
     ).to_list(length=None)
 
-    
     return not len(events) > 0
+
 
 queries = [eventReport, isEventReportsSubmitted]

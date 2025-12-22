@@ -20,8 +20,8 @@ the event is `pending_room`, else skip to next.
 """  # noqa: E501
 
 import os
-import pytz
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import strawberry
 from fastapi.encoders import jsonable_encoder
@@ -481,16 +481,23 @@ async def progressEvent(
     if event_instance.status.state == Event_State_Status.incomplete:
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
-        
-        # Check if the completed events report is submitted 
-        report_check_lt = (datetime.now(pytz.UTC) - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
-        report_check_gt = pytz.UTC.localize(datetime(2025, 11, 15)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+
+        # Check if the completed events report is submitted
+        report_check_lt = (
+            datetime.now(ZoneInfo("UTC")) - timedelta(days=7)
+        ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        report_check_gt = datetime(
+            2025, 11, 15, tzinfo=ZoneInfo("UTC")
+        ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
         pending_reports = await eventsdb.find(
             {
                 "clubid": event_instance.clubid,
                 "status.state": {"$in": ["approved"]},
-                "datetimeperiod.1": {"$lt": report_check_lt, "$gt": report_check_gt},
+                "datetimeperiod.1": {
+                    "$lt": report_check_lt,
+                    "$gt": report_check_gt,
+                },
                 "event_report_submitted": {"$ne": True},
             }
         ).to_list(length=None)
@@ -499,7 +506,7 @@ async def progressEvent(
             raise Exception(
                 "Club must submit the report for your completed events before creating a new one."
             )
-            
+
         new_state = Event_State_Status.pending_cc.value
         if is_body:
             new_state = Event_State_Status.pending_room.value

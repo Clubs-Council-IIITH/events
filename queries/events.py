@@ -1,10 +1,10 @@
 import csv
 import io
-from typing import Any, List
-
-import pytz
-import strawberry
 from datetime import datetime
+from typing import Any, List
+from zoneinfo import ZoneInfo
+
+import strawberry
 
 from db import eventsdb
 
@@ -281,7 +281,9 @@ async def events(
         ]
 
     if excludeCompleted:
-        now = (datetime.now(pytz.UTC)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        now = (datetime.now(ZoneInfo("UTC"))).strftime(
+            "%Y-%m-%dT%H:%M:%S+00:00"
+        )
         searchspace["datetimeperiod.1"] = {"$gte": now}
 
     events = await eventsWithSorting(
@@ -305,6 +307,7 @@ async def events(
         for event in events
     ]
 
+
 @strawberry.field
 async def calendarEvents(
     info: Info,
@@ -319,14 +322,14 @@ async def calendarEvents(
     If clubid is not specified, it retrieves all events the current user is authorized to view.
 
     Non-logged-in users can only access public and approved events.
-    
+
     When pastEventsLimit is specified, the results are restricted to events that occurred within that many months in the past.
 
     Access control is role-based:
         public users can view only approved, non-internal events
         SLC and SLO, CC roles have full visibility into all events
         clubs can access their own or collaborative events, including certain pending states.
-   
+
     Args:
         info (otypes.Info): User context
         clubid (str | None): Optional club filter
@@ -393,10 +396,9 @@ async def calendarEvents(
 
     if pastEventsLimit is not None and pastEventsLimit <= 0:
         raise ValueError("pastEventsLimit must be greater than 0.")
-        
+
     events = await eventsWithSorting(
-        searchspace=searchspace,
-        pastEventsLimit=pastEventsLimit
+        searchspace=searchspace, pastEventsLimit=pastEventsLimit
     )
 
     if restrictAccess:
@@ -790,7 +792,7 @@ async def downloadEventsData(
                     to_exclude.append(Event_State_Status.pending_cc.value)
                 else:
                     to_exclude.append(Event_State_Status.deleted.value)
-                
+
                 searchspace["status.state"] = {
                     "$nin": to_exclude,
                 }
