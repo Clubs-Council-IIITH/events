@@ -93,7 +93,7 @@ async def isEventReportsSubmitted(clubid: str, info: Info) -> bool:
     report_check_lt = (
         datetime.now(ZoneInfo("UTC")) - timedelta(days=7)
     ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
-    report_check_gt = datetime(2025, 11, 15, tzinfo=ZoneInfo("UTC")).strftime(
+    report_check_gt = datetime(2026, 1, 6, tzinfo=ZoneInfo("UTC")).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
 

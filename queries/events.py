@@ -401,9 +401,8 @@ async def calendarEvents(
         searchspace=searchspace, pastEventsLimit=pastEventsLimit
     )
 
-    if restrictAccess:
-        for event in events:
-            trim_public_events(event)
+    for event in events:
+        trim_public_events(event)
 
     return [
         EventType.from_pydantic(Event.model_validate(event))

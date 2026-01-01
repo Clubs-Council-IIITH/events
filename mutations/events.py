@@ -487,7 +487,7 @@ async def progressEvent(
             datetime.now(ZoneInfo("UTC")) - timedelta(days=7)
         ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
         report_check_gt = datetime(
-            2026, 1, 1, tzinfo=ZoneInfo("UTC")
+            2026, 1, 6, tzinfo=ZoneInfo("UTC")
         ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
         pending_reports = await eventsdb.find(
