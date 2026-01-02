@@ -1,6 +1,8 @@
 import csv
 import io
+from datetime import datetime
 from typing import Any, List
+from zoneinfo import ZoneInfo
 
 import strawberry
 
@@ -137,6 +139,7 @@ async def events(
     timings: timelot_type | None = None,
     pastEventsLimit: int | None = None,
     location: List[Event_Location] | None = None,
+    excludeCompleted: bool = False,
 ) -> List[EventType]:
     """
     Returns a list of events as a search result that match the given criteria.
@@ -182,6 +185,8 @@ async def events(
                                                        Defaults to None.
         pastEventsLimit (int | None): Time Limit for the past events to
                                       be fetched in months. Defaults to None.
+        excludeCompleted (bool): Whether to exclude completed events. Defaults to
+                                 False.
 
     Returns:
         (List[otypes.EventType]): A list of events that match the given
@@ -275,6 +280,12 @@ async def events(
             timings[1].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
         ]
 
+    if excludeCompleted:
+        now = (datetime.now(ZoneInfo("UTC"))).strftime(
+            "%Y-%m-%dT%H:%M:%S+00:00"
+        )
+        searchspace["datetimeperiod.1"] = {"$gte": now}
+
     events = await eventsWithSorting(
         searchspace,
         date_filter=False,
@@ -290,6 +301,108 @@ async def events(
     if restrictAccess or public:
         for event in events:
             trim_public_events(event)
+
+    return [
+        EventType.from_pydantic(Event.model_validate(event))
+        for event in events
+    ]
+
+
+@strawberry.field
+async def calendarEvents(
+    info: Info,
+    clubid: str | None = None,
+    pastEventsLimit: int | None = None,
+) -> List[EventType]:
+    """
+    Fetches events for the calendar view based on user permissions and filters.
+
+    If a clubid is provided, the function returns events belonging to that club or its collaborating clubs.
+
+    If clubid is not specified, it retrieves all events the current user is authorized to view.
+
+    Non-logged-in users can only access public and approved events.
+
+    When pastEventsLimit is specified, the results are restricted to events that occurred within that many months in the past.
+
+    Access control is role-based:
+        public users can view only approved, non-internal events
+        SLC and SLO, CC roles have full visibility into all events
+        clubs can access their own or collaborative events, including certain pending states.
+
+    Args:
+        info (otypes.Info): User context
+        clubid (str | None): Optional club filter
+        pastEventsLimit (int | None): Time Limit for the past events to be displayed in months. Defaults to None.
+
+    Returns:
+        (List[EventType]): Events for the calendar view
+
+    Raises:
+        ValueError: User not authenticated
+        ValueError: User not authorized
+        ValueError: If `pastEventsLimit` is provided and is not greater than zero.
+    """
+    user = info.context.user
+
+    restrictAccess = True
+    restrictFullAccess = True
+    clubAccess = False
+
+    if user is not None:
+        if user["role"] in ["cc", "slc", "slo"]:
+            restrictAccess = False
+            if user["role"] in ["cc"]:
+                restrictFullAccess = False
+        elif user["role"] == "club":
+            clubAccess = True
+            restrictAccess = False
+            if user["uid"] == clubid:
+                restrictFullAccess = False
+
+    assert not (restrictAccess and not restrictFullAccess), (
+        "restrictAccess and not restrictFullAccess can not be True at the same time."  # noqa: E501
+    )
+
+    searchspace: dict[str, Any] = {}
+    if clubid is not None:
+        searchspace["$or"] = [
+            {"clubid": clubid},
+            {"collabclubs": {"$in": [clubid]}},
+        ]
+    else:
+        allclubs = await getClubs(info.context.cookies)
+        list_allclubs = list()
+        for club in allclubs:
+            list_allclubs.append(club["cid"])
+        searchspace["clubid"] = {"$in": list_allclubs}
+
+    if restrictAccess:
+        searchspace["status.state"] = {
+            "$in": [Event_State_Status.approved.value]
+        }
+        searchspace["audience"] = {"$nin": ["internal"]}
+    elif restrictFullAccess:
+        statuses = [
+            Event_State_Status.approved.value,
+            Event_State_Status.pending_budget.value,
+            Event_State_Status.pending_room.value,
+        ]
+        if clubAccess:
+            searchspace["audience"] = {"$nin": ["internal"]}
+            statuses.append(Event_State_Status.pending_cc.value)
+            statuses.append(Event_State_Status.incomplete.value)
+        searchspace["status.state"] = {"$in": statuses}
+
+    if pastEventsLimit is not None and pastEventsLimit <= 0:
+        raise ValueError("pastEventsLimit must be greater than 0.")
+
+    events = await eventsWithSorting(
+        searchspace=searchspace, pastEventsLimit=pastEventsLimit
+    )
+
+    for event in events:
+        trim_public_events(event)
 
     return [
         EventType.from_pydantic(Event.model_validate(event))
@@ -678,7 +791,7 @@ async def downloadEventsData(
                     to_exclude.append(Event_State_Status.pending_cc.value)
                 else:
                     to_exclude.append(Event_State_Status.deleted.value)
-                
+
                 searchspace["status.state"] = {
                     "$nin": to_exclude,
                 }
@@ -797,6 +910,7 @@ async def downloadEventsData(
 queries = [
     event,
     events,
+    calendarEvents,
     clashingEvents,
     eventid,
     incompleteEvents,

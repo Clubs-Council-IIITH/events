@@ -21,6 +21,7 @@ the event is `pending_room`, else skip to next.
 
 import os
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import strawberry
 from fastapi.encoders import jsonable_encoder
@@ -448,6 +449,7 @@ async def progressEvent(
 
     Raises:
         Exception: Club does not exist.
+        Exception: Club must submit the report for your completed events before creating a new one.
         Exception: CC Approver is required to progress event.
         Exception: POC does not exist.
     """  # noqa: E501
@@ -479,6 +481,32 @@ async def progressEvent(
     if event_instance.status.state == Event_State_Status.incomplete:
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
             raise noaccess_error
+
+        # Check if the completed events report is submitted
+        report_check_lt = (
+            datetime.now(ZoneInfo("UTC")) - timedelta(days=7)
+        ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        report_check_gt = datetime(
+            2026, 1, 6, tzinfo=ZoneInfo("UTC")
+        ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+
+        pending_reports = await eventsdb.find(
+            {
+                "clubid": event_instance.clubid,
+                "status.state": {"$in": ["approved"]},
+                "datetimeperiod.1": {
+                    "$lt": report_check_lt,
+                    "$gt": report_check_gt,
+                },
+                "event_report_submitted": {"$ne": True},
+            }
+        ).to_list(length=None)
+
+        if pending_reports:
+            raise Exception(
+                "Club must submit the report for your completed events before creating a new one."
+            )
+
         new_state = Event_State_Status.pending_cc.value
         if is_body:
             new_state = Event_State_Status.pending_room.value
