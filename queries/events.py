@@ -185,7 +185,7 @@ async def events(
                                                        Defaults to None.
         pastEventsLimit (int | None): Time Limit for the past events to
                                       be fetched in months. Defaults to None.
-        excludeCompleted (bool): Whether to exclude completed events. Defaults 
+        excludeCompleted (bool): Whether to exclude completed events. Defaults
                                     to False.
 
     Returns:
@@ -317,27 +317,27 @@ async def calendarEvents(
     """
     Fetches events for the calendar view based on user permissions and filters.
 
-    If a clubid is provided, the function returns events belonging to that 
+    If a clubid is provided, the function returns events belonging to that
                                             club or its collaborating clubs.
 
-    If clubid is not specified, it retrieves all events the current user is 
+    If clubid is not specified, it retrieves all events the current user is
                                                     authorized to view.
 
     Non-logged-in users can only access public and approved events.
 
-    When pastEventsLimit is specified, the results are restricted to events 
+    When pastEventsLimit is specified, the results are restricted to events
                             that occurred within that many months in the past.
 
     Access control is role-based:
         public users can view only approved, non-internal events
         SLC and SLO, CC roles have full visibility into all events
-        clubs can access their own or collaborative events, including certain 
+        clubs can access their own or collaborative events, including certain
                                                                 pending states.
 
     Args:
         info (otypes.Info): User context
         clubid (str | None): Optional club filter
-        pastEventsLimit (int | None): Time Limit for the past events to be 
+        pastEventsLimit (int | None): Time Limit for the past events to be
                                         displayed in months. Defaults to None.
 
     Returns:
@@ -346,7 +346,7 @@ async def calendarEvents(
     Raises:
         ValueError: User not authenticated
         ValueError: User not authorized
-        ValueError: If `pastEventsLimit` is provided and is not greater than 
+        ValueError: If `pastEventsLimit` is provided and is not greater than
                                                                         zero.
     """
     user = info.context.user
