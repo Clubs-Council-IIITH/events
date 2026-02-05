@@ -9,7 +9,6 @@ from httpx import AsyncClient
 
 from db import eventsdb
 from mtypes import timezone
-from otypes import timelot_type
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 

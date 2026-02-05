@@ -504,7 +504,8 @@ async def progressEvent(
 
         if pending_reports:
             raise Exception(
-                "Club must submit the report for your completed events before creating a new one."
+                "Club must submit the report for your completed events "
+                "before creating a new one."
             )
 
         new_state = Event_State_Status.pending_cc.value

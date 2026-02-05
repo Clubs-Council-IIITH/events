@@ -15,11 +15,12 @@ Attributes:
                         Defaults to "default".
     client (pymongo.AsyncMongoClient): MongoDB client.
     db (pymongo.asynchronous.database.AsyncDatabase): MongoDB database.
-    eventsdb (pymongo.asynchronous.collection.AsyncCollection): MongoDB collection for events.
-    holidaysdb (pymongo.asynchronous.collection.AsyncCollection): MongoDB collection for
-                                            holidays.
-    event_reportsdb (pymongo.asynchronous.collection.AsyncCollection): MongoDB collection for
-                                                event reports.
+    eventsdb (pymongo.asynchronous.collection.AsyncCollection): MongoDB 
+                                                collection for events.
+    holidaysdb (pymongo.asynchronous.collection.AsyncCollection): MongoDB 
+                                                collection for holidays.
+    event_reportsdb (pymongo.asynchronous.collection.AsyncCollection): MongoDB 
+                                                collection for event reports.
 """
 
 from os import getenv
