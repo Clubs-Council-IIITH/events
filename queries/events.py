@@ -268,7 +268,7 @@ async def events(
         elif sloAccess:
             statuses.append(Event_State_Status.deleted.value)
         
-        if deletedEvents:
+        if deletedEvents and sloAccess:
             statuses = [Event_State_Status.deleted.value]
 
         searchspace["status.state"] = {
