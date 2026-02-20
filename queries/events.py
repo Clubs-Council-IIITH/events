@@ -140,6 +140,7 @@ async def events(
     pastEventsLimit: int | None = None,
     location: List[Event_Location] | None = None,
     excludeCompleted: bool = False,
+    deletedEvents: bool = False,
 ) -> List[EventType]:
     """
     Returns a list of events as a search result that match the given criteria.
@@ -187,7 +188,8 @@ async def events(
                                       be fetched in months. Defaults to None.
         excludeCompleted (bool): Whether to exclude completed events. Defaults
                                     to False.
-
+        deletedEvents (bool): Whether to show only deleted events. Defaults
+                            to False.
     Returns:
         (List[otypes.EventType]): A list of events that match the given
                                   criteria.
@@ -265,6 +267,9 @@ async def events(
             statuses.append(Event_State_Status.incomplete.value)
         elif sloAccess:
             statuses.append(Event_State_Status.deleted.value)
+        
+        if deletedEvents and sloAccess:
+            statuses = [Event_State_Status.deleted.value]
 
         searchspace["status.state"] = {
             "$in": statuses,
