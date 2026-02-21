@@ -1,3 +1,17 @@
+[project]
+name = "events"
+version = "1.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "apscheduler==3.11.0",
+    "fastapi==0.116.1",
+    "fiscalyear==0.4.0",
+    "httpx==0.28.1",
+    "prettytable==3.16.0",
+    "pymongo==4.14.1",
+    "strawberry-graphql[debug-server]==0.280.0",
+]
+
 [tool.ruff]
 line-length = 79
 indent-width = 4
