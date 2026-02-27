@@ -94,7 +94,7 @@ for club in clubs:
                         slo_approver_time
                         and slo_approver_time != "Not Approved"
                     ):
-                        if slo_approver_time == 'Self Approved':
+                        if slo_approver_time == "Self Approved":
                             slo_approver = event["status"].get("slo_approver")
                             approver_times.append(
                                 datetime.strptime(
@@ -118,7 +118,11 @@ for club in clubs:
                             ).replace(tzinfo=timezone.utc)
                         )
 
-                    if approver_times and "submission_time" in event["status"] and event["status"]["submission_time"]:
+                    if (
+                        approver_times
+                        and "submission_time" in event["status"]
+                        and event["status"]["submission_time"]
+                    ):
                         approval_time = max(approver_times)
                         approval_time = approval_time.replace(
                             tzinfo=timezone.utc
@@ -342,7 +346,7 @@ for event in sorted_events:
                 ).replace(tzinfo=timezone.utc)
             )
         if slo_approver_time and slo_approver_time != "Not Approved":
-            if slo_approver_time == 'Self Approved':
+            if slo_approver_time == "Self Approved":
                 slo_approver = event["status"].get("slo_approver")
                 approver_times.append(
                     datetime.strptime(
