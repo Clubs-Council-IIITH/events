@@ -37,7 +37,6 @@ long_str_type = Annotated[
 """ long string type with max length 10000"""
 
 
-# Audience for the Event
 @strawberry.enum
 class Audience(StrEnum):
     """
@@ -54,7 +53,6 @@ class Audience(StrEnum):
     internal = auto()
 
 
-# Event Bills States
 @strawberry.enum
 class Bills_State_Status(StrEnum):
     """
@@ -71,7 +69,6 @@ class Bills_State_Status(StrEnum):
     accepted = auto()
 
 
-# Event Bills State Full Names
 class Bills_Full_State_Status:
     """
     String representation of the states in Bills_State_Status
@@ -83,7 +80,6 @@ class Bills_Full_State_Status:
     accepted = "Accepted"
 
 
-# Event Bills Status
 @strawberry.type
 class Bills_Status:
     """
@@ -120,7 +116,6 @@ class Bills_Status:
         self.filename = filename
 
 
-# Event States
 @strawberry.enum
 class Event_State_Status(StrEnum):
     """
@@ -143,7 +138,6 @@ class Event_State_Status(StrEnum):
     deleted = auto()
 
 
-# Event Full State Names
 class Event_Full_State_Status:
     """
     String representation of the states in Event_State_Status
@@ -157,7 +151,6 @@ class Event_Full_State_Status:
     deleted = "Deleted"
 
 
-# Event Status
 @strawberry.type
 class Event_Status:
     """
@@ -247,7 +240,6 @@ class Event_Status:
         self.deleted_time = deleted_time
 
 
-# Event Modes
 @strawberry.enum
 class Event_Mode(StrEnum):
     """
@@ -259,7 +251,6 @@ class Event_Mode(StrEnum):
     offline = auto()
 
 
-# Event Full Location Names
 class Event_Full_Location:
     """
     String representation of the locations in Event_Location
@@ -298,7 +289,6 @@ class Event_Full_Location:
     other = "Other"
 
 
-# Event Locations
 @strawberry.enum
 class Event_Location(StrEnum):
     """
@@ -346,7 +336,7 @@ class Event_Location(StrEnum):
 
 
 @strawberry.type
-class BudgetType:
+class Budget_Type:
     """
     Class for info regarding a submitted budget
 
@@ -414,7 +404,7 @@ class BudgetType:
 
 
 @strawberry.type
-class SponsorType:
+class Sponsor_Type:
     """
     Class for info regarding a sponsor
 
@@ -443,7 +433,7 @@ class SponsorType:
 
 
 @strawberry.enum
-class ClubBodyCategoryType(StrEnum):
+class Club_Body_Category_Type(StrEnum):
     """
     Enum related to the category of the organizer for the event
     """
@@ -454,7 +444,7 @@ class ClubBodyCategoryType(StrEnum):
 
 
 @strawberry.enum
-class PrizesType(StrEnum):
+class Prizes_Type(StrEnum):
     """
     Enum for kind of prizes given to the participants in an event
     """
@@ -467,7 +457,6 @@ class PrizesType(StrEnum):
     others = auto()
 
 
-# for handling mongo ObjectIds
 class PyObjectId(ObjectId):
     """
     Class for handling MongoDB document ObjectIds for 'id' fields in Models.

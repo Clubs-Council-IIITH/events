@@ -48,13 +48,13 @@ from mailing_templates import (
 from models import Event
 from mtypes import (
     Audience,
-    BudgetType,
-    ClubBodyCategoryType,
+    Budget_Type,
+    Club_Body_Category_Type,
     Event_Full_Location,
     Event_Location,
     Event_Mode,
     Event_State_Status,
-    SponsorType,
+    Sponsor_Type,
 )
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
@@ -167,7 +167,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if details.budget is not None:
         event_instance.budget = list(
             map(
-                lambda x: BudgetType(
+                lambda x: Budget_Type(
                     amount=x.amount,
                     description=x.description,
                     advance=x.advance,
@@ -178,7 +178,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if details.sponsor is not None:
         event_instance.sponsor = list(
             map(
-                lambda x: SponsorType(
+                lambda x: Sponsor_Type(
                     name=x.name,
                     amount=x.amount,
                     previously_sponsored=x.previously_sponsored,
@@ -220,11 +220,11 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     )
 
     if club_details["category"] == "body":
-        event_instance.club_category = ClubBodyCategoryType.body
+        event_instance.club_category = Club_Body_Category_Type.body
     elif club_details["category"] == "admin":
-        event_instance.club_category = ClubBodyCategoryType.admin
+        event_instance.club_category = Club_Body_Category_Type.admin
     else:
-        event_instance.club_category = ClubBodyCategoryType.club
+        event_instance.club_category = Club_Body_Category_Type.club
 
     created_id = (
         await eventsdb.insert_one(jsonable_encoder(event_instance))
@@ -370,7 +370,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         # updates["status.budget"] = False or user["role"] == "cc"
         updates["budget"] = list(
             map(
-                lambda x: BudgetType(
+                lambda x: Budget_Type(
                     amount=x.amount,
                     description=x.description,
                     advance=x.advance,
@@ -381,7 +381,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.sponsor is not None and updatable:
         updates["sponsor"] = list(
             map(
-                lambda x: SponsorType(
+                lambda x: Sponsor_Type(
                     name=x.name,
                     amount=x.amount,
                     previously_sponsored=x.previously_sponsored,
@@ -475,8 +475,8 @@ async def progressEvent(
     current_time = datetime.now(TIMEZONE)
     time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
 
-    is_admin = event_instance.club_category == ClubBodyCategoryType.admin
-    is_body = event_instance.club_category == ClubBodyCategoryType.body
+    is_admin = event_instance.club_category == Club_Body_Category_Type.admin
+    is_body = event_instance.club_category == Club_Body_Category_Type.body
 
     if event_instance.status.state == Event_State_Status.incomplete:
         if user["role"] != "club" or user["uid"] != event_instance.clubid:

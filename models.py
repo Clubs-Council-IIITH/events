@@ -12,15 +12,15 @@ from pydantic import (
 from mtypes import (
     Audience,
     Bills_Status,
-    BudgetType,
-    ClubBodyCategoryType,
+    Budget_Type,
+    Club_Body_Category_Type,
     Event_Location,
     Event_Mode,
     Event_Status,
     HttpUrlString,
-    PrizesType,
+    Prizes_Type,
     PyObjectId,
-    SponsorType,
+    Sponsor_Type,
     event_popu_type,
     long_str_type,
     medium_str_type,
@@ -40,7 +40,7 @@ class EventReport(BaseModel):
         attendance (mtypes.event_popu_type): The number of attendees.
         external_attendance (Optional[mtypes.event_popu_type]): The number of
                     external attendees if allowed.
-        prizes (List[mtypes.PrizesType]): The list prizes awarded in the event.
+        prizes (List[mtypes.Prizes_Type]): The list prizes awarded in the event.
         prizes_breakdown (mtypes.long_str_type): A breakdown of the prizes
                                        awarded.
         winners (mtypes.long_str_type): The winners of the event.
@@ -56,7 +56,7 @@ class EventReport(BaseModel):
     summary: medium_str_type
     attendance: event_popu_type
     external_attendance: Optional[event_popu_type] = None
-    prizes: List[PrizesType] = []
+    prizes: List[Prizes_Type] = []
     prizes_breakdown: long_str_type
     winners: long_str_type
     photos_link: HttpUrlString
@@ -77,7 +77,7 @@ class Event(BaseModel):
         code (str): The code of the event. Defaults to None.
         clubid (str): The Club ID of the club hosting the event.
         collabclubs (List[str]): The Club IDs of the collaborating clubs.
-        club_category (mtypes.ClubBodyCategoryType): Category of the club for
+        club_category (mtypes.Club_Body_Category_Type): Category of the club for
                        which the event is. Defaults to a club.
         name (mtypes.very_short_str_type): The name of the event.
         description (mtypes.medium_str_type): A description of the event.
@@ -110,7 +110,7 @@ class Event(BaseModel):
             the event.
         poc (str): The point of contact for the event. Defaults to None.
         status (mtypes.Event_Status): The approval and approver details.
-        budget (List[mtypes.BudgetType]): The list of budgets for the event.
+        budget (List[mtypes.Budget_Type]): The list of budgets for the event.
         bills_status (mtypes.Bills_Status): The status of the budget.
         event_report_submitted (bool): Whether the event report after
                                        completion has been submitted.
@@ -121,7 +121,7 @@ class Event(BaseModel):
     code: str | None = None
     clubid: str
     collabclubs: List[str] = []
-    club_category: ClubBodyCategoryType = ClubBodyCategoryType.club
+    club_category: Club_Body_Category_Type = Club_Body_Category_Type.club
 
     name: very_short_str_type
 
@@ -143,8 +143,8 @@ class Event(BaseModel):
     poc: str | None = None
 
     status: Event_Status = Event_Status()
-    budget: List[BudgetType] = []
-    sponsor: List[SponsorType] = []
+    budget: List[Budget_Type] = []
+    sponsor: List[Sponsor_Type] = []
     bills_status: Bills_Status = Bills_Status()
     event_report_submitted: bool = False
 
