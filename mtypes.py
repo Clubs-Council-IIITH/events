@@ -36,6 +36,42 @@ long_str_type = Annotated[
 ]
 """ long string type with max length 10000"""
 
+http_url_adapter = TypeAdapter(HttpUrl)
+Http_Url_String = Annotated[
+    str,
+    BeforeValidator(
+        lambda value: str(http_url_adapter.validate_python(value))
+    ),
+]
+"""Type for storing and validating URLs"""
+
+
+class PyObjectId(ObjectId):
+    """
+    Class for handling MongoDB document ObjectIds for 'id' fields in Models.
+    """
+
+    @classmethod
+    def __get_pydantic_core_schema__(cls, source_type: Any, handler):
+        return core_schema.union_schema(
+            [
+                # check if it's an instance first before doing any further work
+                core_schema.is_instance_schema(ObjectId),
+                core_schema.no_info_plain_validator_function(cls.validate),
+            ],
+            serialization=core_schema.to_string_ser_schema(),
+        )
+
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid ObjectId")
+        return ObjectId(v)
+
+    @classmethod
+    def __get_pydantic_json_schema__(cls, field_schema):
+        field_schema.update(type="string")
+
 
 @strawberry.enum
 class Audience(StrEnum):
@@ -54,66 +90,14 @@ class Audience(StrEnum):
 
 
 @strawberry.enum
-class Bills_State_Status(StrEnum):
+class Club_Body_Category_Type(StrEnum):
     """
-    Enum of status of an event's bills
-    """
-
-    # initially, the bills are `not_submitted`.
-    not_submitted = auto()
-    # right after the club submits the bills, before SLO processed it.
-    submitted = auto()
-    # after the club submits the bill, SLO processed it and rejected.
-    rejected = auto()
-    # after the club submits the bill, SLO processed it and accepted.
-    accepted = auto()
-
-
-class Bills_Full_State_Status:
-    """
-    String representation of the states in Bills_State_Status
+    Enum related to the category of the organizer for the event
     """
 
-    not_submitted = "Not Submitted"
-    submitted = "Submitted"
-    rejected = "Rejected"
-    accepted = "Accepted"
-
-
-@strawberry.type
-class Bills_Status:
-    """
-    Class used for a bill's approval/rejection status along with its time and
-    comment on approval/rejection
-
-    Attributes:
-        state (Bills_State_Status): State of the bills. Initially, the bills
-                                    are `not_submitted`.
-        updated_time (str | None): Time of approval/rejection. Defaults
-                                   to None.
-        filename (very_short_str_type | None): filename of the bill submitted
-        slo_comment (short_str_type | None): Comment of SLO. Defaults to None.
-    """
-
-    state: Bills_State_Status = Bills_State_Status.not_submitted
-    updated_time: str | None = None
-    submitted_time: str | None = None
-    filename: very_short_str_type | None = None
-    slo_comment: short_str_type | None = None
-
-    def __init__(
-        self,
-        state: Bills_State_Status = Bills_State_Status.not_submitted,
-        updated_time: str | None = None,
-        submitted_time: str | None = None,
-        filename: very_short_str_type | None = None,
-        slo_comment: short_str_type | None = None,
-    ):
-        self.state = state
-        self.updated_time = updated_time
-        self.slo_comment = slo_comment
-        self.submitted_time = submitted_time
-        self.filename = filename
+    club = auto()
+    body = auto()
+    admin = auto()
 
 
 @strawberry.enum
@@ -335,6 +319,69 @@ class Event_Location(StrEnum):
     other = auto()
 
 
+@strawberry.enum
+class Bills_State_Status(StrEnum):
+    """
+    Enum of status of an event's bills
+    """
+
+    # initially, the bills are `not_submitted`.
+    not_submitted = auto()
+    # right after the club submits the bills, before SLO processed it.
+    submitted = auto()
+    # after the club submits the bill, SLO processed it and rejected.
+    rejected = auto()
+    # after the club submits the bill, SLO processed it and accepted.
+    accepted = auto()
+
+
+class Bills_Full_State_Status:
+    """
+    String representation of the states in Bills_State_Status
+    """
+
+    not_submitted = "Not Submitted"
+    submitted = "Submitted"
+    rejected = "Rejected"
+    accepted = "Accepted"
+
+
+@strawberry.type
+class Bills_Status:
+    """
+    Class used for a bill's approval/rejection status along with its time and
+    comment on approval/rejection
+
+    Attributes:
+        state (Bills_State_Status): State of the bills. Initially, the bills
+                                    are `not_submitted`.
+        updated_time (str | None): Time of approval/rejection. Defaults
+                                   to None.
+        filename (very_short_str_type | None): filename of the bill submitted
+        slo_comment (short_str_type | None): Comment of SLO. Defaults to None.
+    """
+
+    state: Bills_State_Status = Bills_State_Status.not_submitted
+    updated_time: str | None = None
+    submitted_time: str | None = None
+    filename: very_short_str_type | None = None
+    slo_comment: short_str_type | None = None
+
+    def __init__(
+        self,
+        state: Bills_State_Status = Bills_State_Status.not_submitted,
+        updated_time: str | None = None,
+        submitted_time: str | None = None,
+        filename: very_short_str_type | None = None,
+        slo_comment: short_str_type | None = None,
+    ):
+        self.state = state
+        self.updated_time = updated_time
+        self.slo_comment = slo_comment
+        self.submitted_time = submitted_time
+        self.filename = filename
+
+
 @strawberry.type
 class Budget_Type:
     """
@@ -433,17 +480,6 @@ class Sponsor_Type:
 
 
 @strawberry.enum
-class Club_Body_Category_Type(StrEnum):
-    """
-    Enum related to the category of the organizer for the event
-    """
-
-    club = auto()
-    body = auto()
-    admin = auto()
-
-
-@strawberry.enum
 class Prizes_Type(StrEnum):
     """
     Enum for kind of prizes given to the participants in an event
@@ -455,41 +491,3 @@ class Prizes_Type(StrEnum):
     vouchers = auto()
     medals = auto()
     others = auto()
-
-
-class PyObjectId(ObjectId):
-    """
-    Class for handling MongoDB document ObjectIds for 'id' fields in Models.
-    """
-
-    @classmethod
-    def __get_pydantic_core_schema__(cls, source_type: Any, handler):
-        return core_schema.union_schema(
-            [
-                # check if it's an instance first before doing any further work
-                core_schema.is_instance_schema(ObjectId),
-                core_schema.no_info_plain_validator_function(cls.validate),
-            ],
-            serialization=core_schema.to_string_ser_schema(),
-        )
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid ObjectId")
-        return ObjectId(v)
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls, field_schema):
-        field_schema.update(type="string")
-
-
-# for storing a vaildating url's
-http_url_adapter = TypeAdapter(HttpUrl)
-HttpUrlString = Annotated[
-    str,
-    BeforeValidator(
-        lambda value: str(http_url_adapter.validate_python(value))
-    ),
-]
-"""Type for storing and validating URLs"""

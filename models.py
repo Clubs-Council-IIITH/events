@@ -17,7 +17,7 @@ from mtypes import (
     Event_Location,
     Event_Mode,
     Event_Status,
-    HttpUrlString,
+    Http_Url_String,
     Prizes_Type,
     PyObjectId,
     Sponsor_Type,
@@ -44,7 +44,7 @@ class EventReport(BaseModel):
         prizes_breakdown (mtypes.long_str_type): A breakdown of the prizes
                                        awarded.
         winners (mtypes.long_str_type): The winners of the event.
-        photos_link (mtypes.HttpUrlString): The link to the event's photos.
+        photos_link (mtypes.Http_Url_String): The link to the event's photos.
         feedback_cc (mtypes.medium_str_type): Feedback on the event by CC.
         feedback_college (mtypes.medium_str_type): Feedback on the event by
                                          the college.
@@ -59,7 +59,7 @@ class EventReport(BaseModel):
     prizes: List[Prizes_Type] = []
     prizes_breakdown: long_str_type
     winners: long_str_type
-    photos_link: HttpUrlString
+    photos_link: Http_Url_String
     feedback_cc: medium_str_type
     feedback_college: medium_str_type
     submitted_by: str
@@ -86,7 +86,7 @@ class Event(BaseModel):
                                                     of the event.
         poster (str): The URL of the event's poster. Defaults to None.
         audience (List[mtypes.Audience]): The list audience for the event.
-        link (mtypes.HttpUrlString): The link to the event's page.
+        link (mtypes.Http_Url_String): The link to the event's page.
                             Defaults to None.
         mode (mtypes.Event_Mode): The mode of the event. Defaults to hybrid.
         location (List[mtypes.Event_Location]): The list of locations for
@@ -129,7 +129,7 @@ class Event(BaseModel):
     datetimeperiod: Tuple[datetime, datetime]
     poster: str | None = None
     audience: List[Audience] = []
-    link: HttpUrlString | None = None
+    link: Http_Url_String | None = None
 
     mode: Event_Mode = Event_Mode.hybrid
     location: List[Event_Location] = []

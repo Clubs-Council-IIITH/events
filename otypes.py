@@ -186,7 +186,7 @@ class InputEventDetailsBaseModel(BaseModel):
                                          end of the event.
         audience (List[mtypes.Audience]): List of audience categories for the event.
                                    Default is None.
-        link (mtypes.HttpUrlString): Link to the event. Default is None.
+        link (mtypes.Http_Url_String): Link to the event. Default is None.
         equipment (mtypes.short_str_type): Equipment for the event. Default is None.
         additional (mtypes.short_str_type): Additional information of the event.
                                     Default is None.
@@ -266,7 +266,7 @@ class InputEditEventDetailsBaseModel(BaseModel):
         audience (List[mtypes.Audience]): List of audience
                                         categories for the event.
                                    Default is None.
-        link (mtypes.HttpUrlString): Link to the event. Default is None.
+        link (mtypes.Http_Url_String): Link to the event. Default is None.
         equipment (mtypes.short_str_type): Equipment for the event.
                                          Default is None.
         additional (mtypes.short_str_type): Additional information of event.
