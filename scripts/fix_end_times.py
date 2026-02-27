@@ -14,7 +14,7 @@ fix = True
 if __name__ == "__main__":
     events = eventsdb.find()
     for event in events:
-        # Check if the difference between the start time and the end time is 2 minutes
+        # Check if the difference between the start and the end time is 2 mins
         start_time1 = datetime.fromisoformat(
             event["datetimeperiod"][0].split("+")[0]
         )
