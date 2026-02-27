@@ -16,7 +16,6 @@ from mtypes import (
     Bills_State_Status,
     Bills_Status,
     Event_State_Status,
-    timezone,
 )
 from otypes import Info, InputBillsStatus, InputBillsUpload
 from utils import (
@@ -25,6 +24,7 @@ from utils import (
     get_event_finances_link,
     get_event_link,
     get_role_emails,
+    timezone,
 )
 
 

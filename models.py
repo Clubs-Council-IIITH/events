@@ -25,9 +25,9 @@ from mtypes import (
     long_str_type,
     medium_str_type,
     short_str_type,
-    timezone,
     very_short_str_type,
 )
+from utils import timezone
 
 
 class EventReport(BaseModel):

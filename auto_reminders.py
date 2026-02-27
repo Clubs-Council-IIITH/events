@@ -11,12 +11,13 @@ from mailing_templates import (
     EVENT_REPORT_REMINDER_SUBJECT,
 )
 from models import Event
-from mtypes import Bills_State_Status, Event_State_Status, timezone
+from mtypes import Bills_State_Status, Event_State_Status
 from utils import (
     get_bot_cookie,
     get_club_details,
     get_event_link,
     get_role_emails,
+    timezone,
 )
 
 

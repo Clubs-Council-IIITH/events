@@ -55,7 +55,6 @@ from mtypes import (
     Event_Mode,
     Event_State_Status,
     SponsorType,
-    timezone,
 )
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
@@ -66,6 +65,7 @@ from utils import (
     get_member,
     get_role_emails,
     get_user,
+    timezone,
 )
 
 inter_communication_secret_global = os.getenv("INTER_COMMUNICATION_SECRET")

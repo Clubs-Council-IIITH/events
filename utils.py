@@ -3,14 +3,18 @@ import os
 import re
 from datetime import datetime
 from typing import List
+from zoneinfo import ZoneInfo
 
 import fiscalyear
 from httpx import AsyncClient
 
 from db import eventsdb
-from mtypes import timezone
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
+
+# takes the time from IST timezone
+timezone = ZoneInfo("Asia/Kolkata")
+"""IST timezone"""
 
 # start month of financial year
 FISCAL_START_MONTH = 4

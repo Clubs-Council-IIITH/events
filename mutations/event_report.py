@@ -6,9 +6,9 @@ from fastapi.encoders import jsonable_encoder
 
 from db import event_reportsdb, eventsdb
 from models import EventReport
-from mtypes import Event_State_Status, timezone
+from mtypes import Event_State_Status
 from otypes import EventReportType, Info, InputEventReport
-from utils import get_member
+from utils import get_member, timezone
 
 
 @strawberry.mutation

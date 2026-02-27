@@ -1,5 +1,4 @@
 from enum import StrEnum, auto
-from zoneinfo import ZoneInfo
 
 import strawberry
 from bson import ObjectId
@@ -505,7 +504,3 @@ HttpUrlString = Annotated[
     ),
 ]
 """Type for storing and validating URLs"""
-
-# takes the time from IST timezone
-timezone = ZoneInfo("Asia/Kolkata")
-"""IST timezone"""
