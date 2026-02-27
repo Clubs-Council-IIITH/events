@@ -40,7 +40,8 @@ class EventReport(BaseModel):
         attendance (mtypes.event_popu_type): The number of attendees.
         external_attendance (Optional[mtypes.event_popu_type]): The number of
                     external attendees if allowed.
-        prizes (List[mtypes.Prizes_Type]): The list prizes awarded in the event.
+        prizes (List[mtypes.Prizes_Type]): The list prizes awarded in the 
+                                        event.
         prizes_breakdown (mtypes.long_str_type): A breakdown of the prizes
                                        awarded.
         winners (mtypes.long_str_type): The winners of the event.
@@ -77,8 +78,8 @@ class Event(BaseModel):
         code (str): The code of the event. Defaults to None.
         clubid (str): The Club ID of the club hosting the event.
         collabclubs (List[str]): The Club IDs of the collaborating clubs.
-        club_category (mtypes.Club_Body_Category_Type): Category of the club for
-                       which the event is. Defaults to a club.
+        club_category (mtypes.Club_Body_Category_Type): Category of the club
+                       for which the event is. Defaults to a club.
         name (mtypes.very_short_str_type): The name of the event.
         description (mtypes.medium_str_type): A description of the event.
                                        Defaults to `No description available.`.
