@@ -1,11 +1,9 @@
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
-
 import strawberry
 
 from db import event_reportsdb, eventsdb
 from models import EventReport
 from otypes import EventReportType, Info
+from utils import get_pending_reports_count
 
 
 @strawberry.field
@@ -90,26 +88,8 @@ async def isEventReportsSubmitted(clubid: str, info: Info) -> bool:
     if user_role not in ["cc", "slo", "club"]:
         raise ValueError("User not authorized")
 
-    report_check_lt = (
-        datetime.now(ZoneInfo("UTC")) - timedelta(days=7)
-    ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
-    report_check_gt = datetime(2026, 1, 6, tzinfo=ZoneInfo("UTC")).strftime(
-        "%Y-%m-%dT%H:%M:%S+00:00"
-    )
-
-    events = await eventsdb.find(
-        {
-            "clubid": clubid,
-            "status.state": {"$in": ["approved"]},
-            "datetimeperiod.1": {
-                "$lt": report_check_lt,
-                "$gt": report_check_gt,
-            },
-            "event_report_submitted": {"$ne": True},
-        }
-    ).to_list(length=None)
-
-    return not len(events) > 0
+    pending_reports = await get_pending_reports_count(clubid)
+    return pending_reports == 0
 
 
 queries = [eventReport, isEventReportsSubmitted]

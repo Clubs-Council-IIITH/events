@@ -1,8 +1,9 @@
 import html
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
+from zoneinfo import ZoneInfo
 
 import fiscalyear
 from httpx import AsyncClient
@@ -518,6 +519,37 @@ def trim_public_events(event: dict) -> dict:
     }
 
     return event
+
+
+async def get_pending_reports_count(clubid: str) -> int:
+    """
+    Method to get the count of pending event reports for a club.
+
+    Args:
+        clubid (str): club id
+
+    Returns:
+        (int): count of pending event reports
+    """
+    report_check_lt = (
+        datetime.now(ZoneInfo("UTC")) - timedelta(days=7)
+    ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    report_check_gt = datetime(2026, 1, 6, tzinfo=ZoneInfo("UTC")).strftime(
+        "%Y-%m-%dT%H:%M:%S+00:00"
+    )
+
+    pending_reports_count = await eventsdb.count_documents(
+        {
+            "clubid": clubid,
+            "status.state": {"$in": ["approved"]},
+            "datetimeperiod.1": {
+                "$lt": report_check_lt,
+                "$gt": report_check_gt,
+            },
+            "event_report_submitted": {"$ne": True},
+        }
+    )
+    return pending_reports_count
 
 
 # method used to convert text to html
