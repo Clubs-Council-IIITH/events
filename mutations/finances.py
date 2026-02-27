@@ -21,10 +21,10 @@ from mtypes import (
 from otypes import Info, InputBillsStatus, InputBillsUpload
 from utils import (
     delete_file,
-    getClubDetails,
-    getEventFinancesLink,
-    getEventLink,
-    getRoleEmails,
+    get_club_details,
+    get_event_finances_link,
+    get_event_link,
+    get_role_emails,
 )
 
 
@@ -73,7 +73,7 @@ async def updateBillsStatus(
         raise ValueError("Event not found.")
 
     mail_to = (
-        await getClubDetails(event["clubid"], info.context.cookies)
+        await get_club_details(event["clubid"], info.context.cookies)
     ).get("email", None)
     if not mail_to:
         raise ValueError("Club email not found")
@@ -95,7 +95,7 @@ async def updateBillsStatus(
     if not event:
         raise ValueError("Event not found")
 
-    cc_to = await getRoleEmails("cc")
+    cc_to = await get_role_emails("cc")
 
     mail_uid = user["uid"]
     mail_subject = EVENT_BILL_STATUS_SUBJECT.safe_substitute(
@@ -105,7 +105,7 @@ async def updateBillsStatus(
         event=event["name"],
         bill_status=getattr(Bills_Full_State_Status, details.state),
         comment=details.slo_comment,
-        eventlink=getEventLink(event["code"]),
+        eventlink=get_event_link(event["code"]),
     )
     await triggerMail(
         mail_uid,
@@ -229,10 +229,10 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
     )
 
     clubname = (
-        await getClubDetails(event["clubid"], info.context.cookies)
+        await get_club_details(event["clubid"], info.context.cookies)
     ).get("name", None)
-    cc_to = await getRoleEmails("cc")
-    slo_emails = await getRoleEmails("slo")
+    cc_to = await get_role_emails("cc")
+    slo_emails = await get_role_emails("slo")
 
     if not slo_emails:
         raise Exception("No SLO emails found to send a reminder.")
@@ -250,7 +250,7 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
         event_date=event_instance.datetimeperiod[0].strftime("%d-%m-%Y %H:%M"),
         total_budget=total_budget,
         total_budget_used=total_budget_used,
-        eventfinancelink=getEventFinancesLink(event_instance.id),
+        eventfinancelink=get_event_finances_link(event_instance.id),
     )
 
     await triggerMail(

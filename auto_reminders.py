@@ -12,7 +12,12 @@ from mailing_templates import (
 )
 from models import Event
 from mtypes import Bills_State_Status, Event_State_Status, timezone
-from utils import get_bot_cookie, getClubDetails, getEventLink, getRoleEmails
+from utils import (
+    get_bot_cookie,
+    get_club_details,
+    get_event_link,
+    get_role_emails,
+)
 
 
 async def check_for_bill_status():
@@ -53,7 +58,7 @@ async def check_for_bill_status():
         event_instance = Event.model_validate(event)
 
         try:
-            clubDetails = await getClubDetails(event_instance.clubid, None)
+            clubDetails = await get_club_details(event_instance.clubid, None)
 
             if len(clubDetails.keys()) == 0:
                 print(f"Club does not exist for event {event_instance.code}")
@@ -77,7 +82,7 @@ async def check_for_bill_status():
             mail_body = EVENT_BILL_REMINDER_BODY.safe_substitute(
                 club=clubname,
                 event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
+                eventlink=get_event_link(event_instance.code),
                 total_budget=total_budget,
             )
 
@@ -86,7 +91,7 @@ async def check_for_bill_status():
                 mail_subject,
                 mail_body,
                 toRecipients=[mail_club],
-                ccRecipients=await getRoleEmails("cc"),
+                ccRecipients=await get_role_emails("cc"),
                 cookies=bot_cookie,
             )
 
@@ -132,7 +137,7 @@ async def check_for_ended_events():
         event_instance = Event.model_validate(event)
 
         try:
-            clubDetails = await getClubDetails(event_instance.clubid, None)
+            clubDetails = await get_club_details(event_instance.clubid, None)
 
             if len(clubDetails.keys()) == 0:
                 print(f"Club does not exist for event {event_instance.code}")
@@ -150,7 +155,7 @@ async def check_for_ended_events():
             mail_body = EVENT_REPORT_REMINDER_BODY.safe_substitute(
                 club=clubname,
                 event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
+                eventlink=get_event_link(event_instance.code),
             )
 
             await triggerMail(

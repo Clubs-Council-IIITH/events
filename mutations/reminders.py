@@ -8,7 +8,7 @@ from mailing_templates import (
 )
 from models import Event
 from otypes import Info
-from utils import getEventLink, getRoleEmails
+from utils import get_event_link, get_role_emails
 
 
 @strawberry.mutation
@@ -36,7 +36,7 @@ async def remindSLO(info: Info, eventid: str) -> bool:
         raise Exception("Event not found.")
 
     event_instance = Event.model_validate(event_ref)
-    slo_emails = await getRoleEmails("slo")
+    slo_emails = await get_role_emails("slo")
 
     if not slo_emails:
         raise Exception("No SLO emails found to send a reminder.")
@@ -55,7 +55,7 @@ async def remindSLO(info: Info, eventid: str) -> bool:
         location=", ".join(event_instance.location)
         if event_instance.location
         else "N/A",
-        eventlink=getEventLink(event_instance.code),
+        eventlink=get_event_link(event_instance.code),
     )
 
     # send email

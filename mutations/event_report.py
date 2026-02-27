@@ -8,7 +8,7 @@ from db import event_reportsdb, eventsdb
 from models import EventReport
 from mtypes import Event_State_Status, timezone
 from otypes import EventReportType, Info, InputEventReport
-from utils import getMember
+from utils import get_member
 
 
 @strawberry.mutation
@@ -68,7 +68,7 @@ async def addEventReport(
     # Check if submitted_by is valid
     cid = event["clubid"]
     uid = details.submitted_by
-    if not await getMember(cid, uid, info.context.cookies):
+    if not await get_member(cid, uid, info.context.cookies):
         raise ValueError("Submitted by is not a valid member")
 
     report_dict = jsonable_encoder(details.to_pydantic())

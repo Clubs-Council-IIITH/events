@@ -60,12 +60,12 @@ from mtypes import (
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
     delete_file,
-    getClubDetails,
-    getEventCode,
-    getEventLink,
-    getMember,
-    getRoleEmails,
-    getUser,
+    get_club_details,
+    get_event_code,
+    get_event_link,
+    get_member,
+    get_role_emails,
+    get_user,
 )
 
 inter_communication_secret_global = os.getenv("INTER_COMMUNICATION_SECRET")
@@ -110,7 +110,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         raise Exception("Start time cannot be after end time.")
 
     # Check if the club exists
-    club_details = await getClubDetails(details.clubid, info.context.cookies)
+    club_details = await get_club_details(details.clubid, info.context.cookies)
     if len(club_details.keys()) == 0:
         raise Exception("Club does not exist.")
 
@@ -193,7 +193,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.collabclubs = details.collabclubs
 
     # Check POC Details Exist or not
-    if not await getMember(
+    if not await get_member(
         details.clubid, details.poc, cookies=info.context.cookies
     ):
         raise Exception("Member Details for POC does not exist")
@@ -215,7 +215,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     event_instance.status.creation_time = time_str
 
     # generates and sets the event's code
-    event_instance.code = await getEventCode(
+    event_instance.code = await get_event_code(
         details.clubid, details.datetimeperiod[0]
     )
 
@@ -337,7 +337,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
         updates["poc"] = details.poc
         # Check POC Details Exist or not
-        if not await getMember(
+        if not await get_member(
             details.clubid, details.poc, cookies=info.context.cookies
         ):
             raise Exception("Member Details for POC does not exist")
@@ -462,7 +462,7 @@ async def progressEvent(
     event_instance = Event.model_validate(event_ref)
 
     mail_uid = user["uid"]
-    clubDetails = await getClubDetails(
+    clubDetails = await get_club_details(
         event_instance.clubid, info.context.cookies
     )
     if len(clubDetails.keys()) == 0:
@@ -637,7 +637,7 @@ async def progressEvent(
     updation["deleted_time"] = event_instance.status.deleted_time
     updation["deleted_by"] = event_instance.status.deleted_by
 
-    poc = await getUser(event_instance.poc, info.context.cookies)
+    poc = await get_user(event_instance.poc, info.context.cookies)
     if not poc:
         raise Exception("POC does not exist.")
 
@@ -653,7 +653,7 @@ async def progressEvent(
     ## trigger mail notification
     # Data Preparation for the mailing
     mail_event_title = updated_event_instance.name
-    mail_eventlink = getEventLink(updated_event_instance.code)
+    mail_eventlink = get_event_link(updated_event_instance.code)
     mail_description = updated_event_instance.description
     if mail_description == "":
         mail_description = "N/A"
@@ -777,7 +777,7 @@ async def progressEvent(
     mail_to = []
     cc_to = []
     if updated_event_instance.status.state == Event_State_Status.pending_cc:
-        mail_to = await getRoleEmails("cc")
+        mail_to = await get_role_emails("cc")
 
         # Mail to club also for the successful submission of the event
         mail_to_club = [
@@ -817,8 +817,8 @@ async def progressEvent(
         updated_event_instance.status.state
         == Event_State_Status.pending_budget
     ):
-        cc_to = await getRoleEmails("cc") + await getRoleEmails("slo")
-        slc_emails = await getRoleEmails("slc")
+        cc_to = await get_role_emails("cc") + await get_role_emails("slo")
+        slc_emails = await get_role_emails("slc")
 
         if slc_members_for_email is not None:
             mail_to = []
@@ -845,8 +845,8 @@ async def progressEvent(
     elif (
         updated_event_instance.status.state == Event_State_Status.pending_room
     ):
-        cc_to = await getRoleEmails("cc") + ([mail_club] if is_body else [])
-        mail_to = await getRoleEmails("slo")
+        cc_to = await get_role_emails("cc") + ([mail_club] if is_body else [])
+        mail_to = await get_role_emails("slo")
         mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
             event_id=updated_event_instance.code,
             club=clubname,
@@ -936,7 +936,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
         "%d-%m-%Y %I:%M %p"
     )
 
-    clubDetails = await getClubDetails(
+    clubDetails = await get_club_details(
         event_instance.clubid, info.context.cookies
     )
     if len(clubDetails.keys()) == 0:
@@ -967,14 +967,14 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
             mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
                 club=clubname,
                 event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
+                eventlink=get_event_link(event_instance.code),
                 deleted_by="Clubs Council",
             )
         elif user["role"] == "slo":
             mail_to = [
                 mail_club,
             ]
-            cc_to = await getRoleEmails("cc")
+            cc_to = await get_role_emails("cc")
             mail_subject = DELETE_EVENT_SUBJECT.safe_substitute(
                 event_id=event_instance.code,
                 event=event_instance.name,
@@ -982,7 +982,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
             mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
                 club=clubname,
                 event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
+                eventlink=get_event_link(event_instance.code),
                 deleted_by="Student Life Office",
             )
 
@@ -995,7 +995,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
                 cookies=info.context.cookies,
             )
         elif user["role"] == "club":
-            mail_to = await getRoleEmails("cc")
+            mail_to = await get_role_emails("cc")
             mail_subject = DELETE_EVENT_SUBJECT.safe_substitute(
                 event_id=event_instance.code,
                 event=event_instance.name,
@@ -1003,7 +1003,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
             mail_body = DELETE_EVENT_BODY_FOR_CC.safe_substitute(
                 club=clubname,
                 event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
+                eventlink=get_event_link(event_instance.code),
             )
 
             await triggerMail(
@@ -1055,7 +1055,7 @@ async def rejectEvent(
 
     event_instance = Event.model_validate(event_ref)
 
-    clubDetails = await getClubDetails(
+    clubDetails = await get_club_details(
         event_instance.clubid, info.context.cookies
     )
     if len(clubDetails.keys()) == 0:
@@ -1088,7 +1088,7 @@ async def rejectEvent(
     mail_body = REJECT_EVENT_BODY_FOR_CLUB.safe_substitute(
         club=clubname,
         event=event_instance.name,
-        eventlink=getEventLink(event_instance.code),
+        eventlink=get_event_link(event_instance.code),
         reason=reason,
         deleted_by="Clubs Council",
     )
