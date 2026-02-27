@@ -8,7 +8,7 @@ from db import event_reportsdb, eventsdb
 from models import EventReport
 from mtypes import Event_State_Status
 from otypes import EventReportType, Info, InputEventReport
-from utils import get_member, timezone
+from utils import TIMEZONE, get_member
 
 
 @strawberry.mutation
@@ -46,7 +46,7 @@ async def addEventReport(
         {
             "_id": eventid,
             "datetimeperiod.1": {
-                "$lt": datetime.now(timezone).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                "$lt": datetime.now(TIMEZONE).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
             },
             "status.state": Event_State_Status.approved.value,
         }
@@ -129,7 +129,7 @@ async def editEventReport(
         {
             "_id": eventid,
             "datetimeperiod.1": {
-                "$lt": datetime.now(timezone).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                "$lt": datetime.now(TIMEZONE).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
             },
             "status.state": Event_State_Status.approved.value,
         }

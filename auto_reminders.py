@@ -13,11 +13,11 @@ from mailing_templates import (
 from models import Event
 from mtypes import Bills_State_Status, Event_State_Status
 from utils import (
+    TIMEZONE,
     get_bot_cookie,
     get_club_details,
     get_event_link,
     get_role_emails,
-    timezone,
 )
 
 
@@ -34,7 +34,7 @@ async def check_for_bill_status():
     """
     # find events ended in past 4 days, that have
     # bill status not submitted and event is complete
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     week_ago = current_time - timedelta(days=7)
 
     pending_bills = await eventsdb.find(
@@ -113,7 +113,7 @@ async def check_for_ended_events():
     Returns:
     None
     """  # noqa: E501
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     one_day_ago = current_time - timedelta(days=1)
 
     # find events that ended today
@@ -177,7 +177,7 @@ def init_event_reminder_system():
     """
     Initializes the event reminder system using AsyncIOScheduler.
     """
-    scheduler = AsyncIOScheduler(timezone=timezone)
+    scheduler = AsyncIOScheduler(timezone=TIMEZONE)
     scheduler.add_job(check_for_ended_events, "cron", hour=0, minute=0)
     scheduler.add_job(
         check_for_bill_status, "cron", day_of_week="sun", hour=12, minute=0

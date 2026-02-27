@@ -13,7 +13,7 @@ from db import eventsdb
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
 # takes the time from IST timezone
-timezone = ZoneInfo("Asia/Kolkata")
+TIMEZONE = ZoneInfo("Asia/Kolkata")
 """IST timezone"""
 
 # start month of financial year
@@ -373,7 +373,7 @@ async def events_with_sorting(
     Returns:
         (List[dict]): list of events
     """
-    current_datetime = datetime.now(timezone).strftime(
+    current_datetime = datetime.now(TIMEZONE).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
 
@@ -435,7 +435,7 @@ async def events_with_sorting(
 
     if pastEventsLimit is not None:
         limit_datetime = subtract_months(
-            datetime.now(timezone), pastEventsLimit
+            datetime.now(TIMEZONE), pastEventsLimit
         )
         limit_datetime = limit_datetime.strftime("%Y-%m-%dT%H:%M:%S+00:00")
         past_events_query["datetimeperiod.1"]["$gte"] = limit_datetime

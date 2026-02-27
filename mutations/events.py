@@ -58,6 +58,7 @@ from mtypes import (
 )
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
+    TIMEZONE,
     delete_file,
     get_club_details,
     get_event_code,
@@ -65,7 +66,6 @@ from utils import (
     get_member,
     get_role_emails,
     get_user,
-    timezone,
 )
 
 inter_communication_secret_global = os.getenv("INTER_COMMUNICATION_SECRET")
@@ -208,7 +208,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.status.state = Event_State_Status.incomplete
 
     # get current time
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
     event_instance.status.last_updated_time = time_str
     event_instance.status.last_updated_by = user["uid"]
@@ -294,7 +294,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         "status.room": event_ref["status"]["room"],
         # if user["role"] == "cc"
         # else False,
-        "status.last_updated_time": datetime.now(timezone).strftime(
+        "status.last_updated_time": datetime.now(TIMEZONE).strftime(
             "%d-%m-%Y %I:%M %p"
         ),
         "status.last_updated_by": user["uid"],
@@ -472,7 +472,7 @@ async def progressEvent(
         clubname = clubDetails["name"]
 
     # get current time
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
 
     is_admin = event_instance.club_category == ClubBodyCategoryType.admin
@@ -932,7 +932,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
     updation["budget"] = False
     updation["room"] = False
     updation["deleted_by"] = user["uid"]
-    updation["deleted_time"] = datetime.now(timezone).strftime(
+    updation["deleted_time"] = datetime.now(TIMEZONE).strftime(
         "%d-%m-%Y %I:%M %p"
     )
 

@@ -27,7 +27,7 @@ from mtypes import (
     short_str_type,
     very_short_str_type,
 )
-from utils import timezone
+from utils import TIMEZONE
 
 
 class EventReport(BaseModel):
@@ -64,7 +64,7 @@ class EventReport(BaseModel):
     feedback_college: medium_str_type
     submitted_by: str
     submitted_time: datetime = Field(
-        default_factory=lambda: datetime.now(timezone), frozen=True
+        default_factory=lambda: datetime.now(TIMEZONE), frozen=True
     )
 
 
@@ -180,7 +180,7 @@ class Holiday(BaseModel):
     date: date
     description: medium_str_type | None = None
     created_time: datetime = Field(
-        default_factory=lambda: datetime.now(timezone), frozen=True
+        default_factory=lambda: datetime.now(TIMEZONE), frozen=True
     )
 
     model_config = ConfigDict(

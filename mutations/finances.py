@@ -19,12 +19,12 @@ from mtypes import (
 )
 from otypes import Info, InputBillsStatus, InputBillsUpload
 from utils import (
+    TIMEZONE,
     delete_file,
     get_club_details,
     get_event_finances_link,
     get_event_link,
     get_role_emails,
-    timezone,
 )
 
 
@@ -55,7 +55,7 @@ async def updateBillsStatus(
         raise ValueError("You do not have permission to access this resource.")
 
     # Get current time
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     time_str = current_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     event = await eventsdb.find_one(
@@ -141,7 +141,7 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
     if user is None or user.get("role") not in ["club"]:
         raise ValueError("You do not have permission to access this resource.")
 
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     time_str = current_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     event = await eventsdb.find_one(
