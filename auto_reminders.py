@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from db import eventsdb
-from mailing import triggerMail
+from mailing import trigger_mail
 from mailing_templates import (
     EVENT_BILL_REMINDER_BODY,
     EVENT_BILL_REMINDER_SUBJECT,
@@ -87,7 +87,7 @@ async def check_for_bill_status():
                 total_budget=total_budget,
             )
 
-            await triggerMail(
+            await trigger_mail(
                 "events_autoemailing",
                 mail_subject,
                 mail_body,
@@ -159,7 +159,7 @@ async def check_for_ended_events():
                 eventlink=get_event_link(event_instance.code),
             )
 
-            await triggerMail(
+            await trigger_mail(
                 "events_autoemailing",
                 mail_subject,
                 mail_body,

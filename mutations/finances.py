@@ -3,7 +3,7 @@ from datetime import datetime
 import strawberry
 
 from db import eventsdb
-from mailing import triggerMail
+from mailing import trigger_mail
 from mailing_templates import (
     BILL_SUBMISSION_BODY_FOR_SLO,
     BILL_SUBMISSION_SUBJECT,
@@ -107,7 +107,7 @@ async def updateBillsStatus(
         comment=details.slo_comment,
         eventlink=get_event_link(event["code"]),
     )
-    await triggerMail(
+    await trigger_mail(
         mail_uid,
         mail_subject,
         mail_body,
@@ -253,7 +253,7 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
         eventfinancelink=get_event_finances_link(event_instance.id),
     )
 
-    await triggerMail(
+    await trigger_mail(
         mail_uid,
         mail_subject,
         mail_body,

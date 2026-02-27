@@ -28,7 +28,7 @@ from fastapi.encoders import jsonable_encoder
 from prettytable import PrettyTable
 
 from db import eventsdb
-from mailing import triggerMail
+from mailing import trigger_mail
 from mailing_templates import (
     APPROVED_EVENT_BODY_FOR_CLUB,
     CLUB_EVENT_SUBJECT,
@@ -805,7 +805,7 @@ async def progressEvent(
             poc_phone=poc_phone,
         )
 
-        await triggerMail(
+        await trigger_mail(
             mail_uid,
             mail_subject_club,
             mail_body_club,
@@ -883,7 +883,7 @@ async def progressEvent(
         )
 
     if len(mail_to):
-        await triggerMail(
+        await trigger_mail(
             mail_uid,
             mail_subject,
             mail_body,
@@ -986,7 +986,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
                 deleted_by="Student Life Office",
             )
 
-            await triggerMail(
+            await trigger_mail(
                 user["uid"],
                 mail_subject,
                 mail_body,
@@ -1006,7 +1006,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
                 eventlink=get_event_link(event_instance.code),
             )
 
-            await triggerMail(
+            await trigger_mail(
                 user["uid"],
                 mail_subject,
                 mail_body,
@@ -1094,7 +1094,7 @@ async def rejectEvent(
     )
 
     # Mail to the club regarding the rejected event
-    await triggerMail(
+    await trigger_mail(
         user["uid"],
         mail_subject,
         mail_body,

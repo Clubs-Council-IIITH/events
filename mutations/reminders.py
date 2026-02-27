@@ -1,7 +1,7 @@
 import strawberry
 
 from db import eventsdb
-from mailing import triggerMail
+from mailing import trigger_mail
 from mailing_templates import (
     REMIND_SLO_APPROVAL_BODY,
     REMIND_SLO_APPROVAL_SUBJECT,
@@ -59,7 +59,7 @@ async def remindSLO(info: Info, eventid: str) -> bool:
     )
 
     # send email
-    await triggerMail(
+    await trigger_mail(
         mail_uid,
         mail_subject,
         mail_body,
