@@ -25,5 +25,6 @@ WORKDIR /app
 COPY --from=python_cache /opt/venv /opt/venv
 COPY . .
 
+
 RUN strawberry export-schema main > schema.graphql
 ENTRYPOINT [ "./entrypoint.sh" ]
