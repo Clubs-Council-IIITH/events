@@ -9,7 +9,7 @@ to run:
 import fiscalyear
 
 from db import eventsdb
-from utils import getClubCode, FISCAL_START_MONTH
+from utils import FISCAL_START_MONTH, get_club_code
 
 fiscalyear.START_MONTH = FISCAL_START_MONTH
 
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     codes = set()
     for event in events:
         idx = 1
-        club_code = getClubCode(event["clubid"])
+        club_code = get_club_code(event["clubid"])
 
         year = fiscalyear.FiscalDateTime.fromisoformat(
             event["datetimeperiod"][0].split("+")[0]
