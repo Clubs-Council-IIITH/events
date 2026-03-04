@@ -60,56 +60,22 @@ PyObjectIdType = strawberry.scalar(
 """A scalar Type for serializing PyObjectId, used for id field"""
 
 
-@strawberry.experimental.pydantic.type(model=EventReport)
+@strawberry.experimental.pydantic.type(model=EventReport, all_fields=True)
 class EventReportType:
     """
     Type for returning the event's report.
     """
-    eventid: strawberry.auto
-    summary: strawberry.auto
-    attendance: strawberry.auto
-    external_attendance: strawberry.auto
-    prizes: strawberry.auto
-    prizes_breakdown: strawberry.auto
-    winners: strawberry.auto
-    photos_link: strawberry.auto
-    feedback_cc: strawberry.auto
-    feedback_college: strawberry.auto
-    submitted_by: strawberry.auto
-    submitted_time: strawberry.auto
+
+    pass
 
 
-@strawberry.experimental.pydantic.type(model=Event)
+@strawberry.experimental.pydantic.type(model=Event, all_fields=True)
 class EventType:
     """
     Type for returning all the details regarding an event.
     """
-    id: strawberry.auto
-    code: strawberry.auto
-    clubid: strawberry.auto
-    collabclubs: strawberry.auto
-    club_category: strawberry.auto
-    name: strawberry.auto
-    description: strawberry.auto
-    datetimeperiod: strawberry.auto
-    poster: strawberry.auto
-    audience: strawberry.auto
-    link: strawberry.auto
-    mode: strawberry.auto
-    location: strawberry.auto
-    otherLocation: strawberry.auto
-    locationAlternate: strawberry.auto
-    otherLocationAlternate: strawberry.auto
-    equipment: strawberry.auto
-    additional: strawberry.auto
-    population: strawberry.auto
-    external_population: strawberry.auto
-    poc: strawberry.auto
-    status: strawberry.auto
-    budget: strawberry.auto
-    sponsor: strawberry.auto
-    bills_status: strawberry.auto
-    event_report_submitted: strawberry.auto
+
+    pass
 
 
 @strawberry.type
@@ -259,31 +225,15 @@ class InputEventDetailsBaseModel(BaseModel):
     poc: str
 
 
-@strawberry.experimental.pydantic.input(model=InputEventDetailsBaseModel)
+@strawberry.experimental.pydantic.input(
+    model=InputEventDetailsBaseModel, all_fields=True
+)
 class InputEventDetails:
     """
     Input for taking all fields of the InputEventDetailsBaseModel class.
     """
-    name: strawberry.auto
-    location: strawberry.auto
-    otherLocation: strawberry.auto
-    locationAlternate: strawberry.auto
-    otherLocationAlternate: strawberry.auto
-    description: strawberry.auto
-    clubid: strawberry.auto
-    collabclubs: strawberry.auto
-    mode: strawberry.auto
-    poster: strawberry.auto
-    datetimeperiod: strawberry.auto
-    audience: strawberry.auto
-    link: strawberry.auto
-    equipment: strawberry.auto
-    additional: strawberry.auto
-    population: strawberry.auto
-    external_population: strawberry.auto
-    budget: strawberry.auto
-    sponsor: strawberry.auto
-    poc: strawberry.auto
+
+    pass
 
 
 class InputEditEventDetailsBaseModel(BaseModel):
@@ -357,32 +307,15 @@ class InputEditEventDetailsBaseModel(BaseModel):
     poc: str | None = None
 
 
-@strawberry.experimental.pydantic.input(model=InputEditEventDetailsBaseModel)
+@strawberry.experimental.pydantic.input(
+    model=InputEditEventDetailsBaseModel, all_fields=True
+)
 class InputEditEventDetails:
     """
     Input for taking all fields of the InputEditEventDetailsBaseModel class.
     """
-    name: strawberry.auto
-    eventid: strawberry.auto
-    collabclubs: strawberry.auto
-    location: strawberry.auto
-    otherLocation: strawberry.auto
-    locationAlternate: strawberry.auto
-    otherLocationAlternate: strawberry.auto
-    description: strawberry.auto
-    clubid: strawberry.auto
-    mode: strawberry.auto
-    poster: strawberry.auto
-    datetimeperiod: strawberry.auto
-    audience: strawberry.auto
-    link: strawberry.auto
-    equipment: strawberry.auto
-    additional: strawberry.auto
-    population: strawberry.auto
-    external_population: strawberry.auto
-    budget: strawberry.auto
-    sponsor: strawberry.auto
-    poc: strawberry.auto
+
+    pass
 
 
 @strawberry.input
@@ -405,23 +338,13 @@ class InputDataReportDetails:
     status: str
 
 
-@strawberry.experimental.pydantic.input(model=EventReport)
+@strawberry.experimental.pydantic.input(model=EventReport, all_fields=True)
 class InputEventReport:
     """
     Input for taking all the fields of the EventReport model.
     """
-    eventid: strawberry.auto
-    summary: strawberry.auto
-    attendance: strawberry.auto
-    external_attendance: strawberry.auto
-    prizes: strawberry.auto
-    prizes_breakdown: strawberry.auto
-    winners: strawberry.auto
-    photos_link: strawberry.auto
-    feedback_cc: strawberry.auto
-    feedback_college: strawberry.auto
-    submitted_by: strawberry.auto
-    submitted_time: strawberry.auto
+
+    pass
 
 
 @strawberry.input
@@ -521,13 +444,10 @@ class InputHolidayDetails:
                 )
 
 
-@strawberry.experimental.pydantic.type(model=Holiday)
+@strawberry.experimental.pydantic.type(model=Holiday, all_fields=True)
 class HolidayType:
     """
     Type for returning all the details regarding a holiday.
     """
-    id: strawberry.auto
-    name: strawberry.auto
-    date: strawberry.auto
-    description: strawberry.auto
-    created_time: strawberry.auto
+
+    pass
