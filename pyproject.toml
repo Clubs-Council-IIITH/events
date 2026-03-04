@@ -3,15 +3,15 @@ name = "events-subgraph"
 version = "1.0.0"
 readme = "README.md"
 
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 dependencies = [
-    "apscheduler==3.11.0",
-    "fastapi==0.116.1",
+    "apscheduler==3.11.2",
+    "fastapi==0.135.1",
     "fiscalyear==0.4.0",
     "httpx==0.28.1",
-    "prettytable==3.16.0",
-    "pymongo==4.14.1",
-    "strawberry-graphql[debug-server]==0.280.0",
+    "prettytable==3.17.0",
+    "pymongo==4.16.0",
+    "strawberry-graphql[cli,fastapi]==0.308.2",
 ]
 
 [tool.ruff]
