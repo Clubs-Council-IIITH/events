@@ -1,5 +1,5 @@
 # cache dependencies
-FROM python:3.13-slim AS python_cache
+FROM python:3.14-slim AS python_cache
 COPY --from=ghcr.io/astral-sh/uv:0.10 /uv /uvx /bin/
 
 ENV UV_LINK_MODE=copy
@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
 
 # build and start
-FROM python:3.13-slim AS build
+FROM python:3.14-slim AS build
 EXPOSE 80
 
 ENV VIRTUAL_ENV=/opt/venv
