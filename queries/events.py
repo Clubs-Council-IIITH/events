@@ -267,7 +267,7 @@ async def events(
             statuses.append(Event_State_Status.incomplete.value)
         elif sloAccess:
             statuses.append(Event_State_Status.deleted.value)
-        
+
         if deletedEvents and sloAccess:
             statuses = [Event_State_Status.deleted.value]
 
