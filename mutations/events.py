@@ -21,7 +21,6 @@ the event is `pending_room`, else skip to next.
 
 import os
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 import strawberry
 from fastapi.encoders import jsonable_encoder
@@ -60,6 +59,7 @@ from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
     TIMEZONE,
     delete_file,
+    get_pending_reports_count,
     get_club_details,
     get_event_code,
     get_event_link,
@@ -483,26 +483,7 @@ async def progressEvent(
             raise noaccess_error
 
         # Check if the completed events report is submitted
-        report_check_lt = (
-            datetime.now(ZoneInfo("UTC")) - timedelta(days=7)
-        ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
-        report_check_gt = datetime(
-            2026, 1, 6, tzinfo=ZoneInfo("UTC")
-        ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
-
-        pending_reports = await eventsdb.find(
-            {
-                "clubid": event_instance.clubid,
-                "status.state": {"$in": ["approved"]},
-                "datetimeperiod.1": {
-                    "$lt": report_check_lt,
-                    "$gt": report_check_gt,
-                },
-                "event_report_submitted": {"$ne": True},
-            }
-        ).to_list(length=None)
-
-        if pending_reports:
+        if await get_pending_reports_count(event_instance.clubid):
             raise Exception(
                 "Club must submit the report for your completed events "
                 "before creating a new one."
