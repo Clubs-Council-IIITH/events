@@ -11,6 +11,8 @@ MONGO_DATABASE = "dev"
 client = MongoClient(MONGO_URI)
 db = client[MONGO_DATABASE]
 
+#  TODO: change the timezone from utc to ist
+
 try:
     startYear = int(input("Enter the start year: "))
     endYear = int(input("Enter the end year: "))
