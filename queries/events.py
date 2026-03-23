@@ -24,7 +24,7 @@ from otypes import (
     RoomListType,
     timelot_type,
 )
-from utils import events_with_sorting, get_clubs, trim_public_events, TIMEZONE
+from utils import TIMEZONE, events_with_sorting, get_clubs, trim_public_events
 
 
 @strawberry.field
@@ -285,9 +285,7 @@ async def events(
         ]
 
     if excludeCompleted:
-        now = (datetime.now(TIMEZONE)).strftime(
-            "%Y-%m-%dT%H:%M:%S+00:00"
-        )
+        now = (datetime.now(TIMEZONE)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
         searchspace["datetimeperiod.1"] = {"$gte": now}
 
     events = await events_with_sorting(

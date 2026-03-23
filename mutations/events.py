@@ -59,11 +59,11 @@ from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
     TIMEZONE,
     delete_file,
-    get_pending_reports_count,
     get_club_details,
     get_event_code,
     get_event_link,
     get_member,
+    get_pending_reports_count,
     get_role_emails,
     get_user,
 )

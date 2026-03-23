@@ -40,7 +40,7 @@ class EventReport(BaseModel):
         attendance (mtypes.event_popu_type): The number of attendees.
         external_attendance (Optional[mtypes.event_popu_type]): The number of
                     external attendees if allowed.
-        prizes (List[mtypes.Prizes_Type]): The list prizes awarded in the 
+        prizes (List[mtypes.Prizes_Type]): The list prizes awarded in the
                                         event.
         prizes_breakdown (mtypes.long_str_type): A breakdown of the prizes
                                        awarded.

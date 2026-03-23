@@ -528,9 +528,9 @@ async def get_pending_reports_count(clubid: str) -> int:
     Returns:
         (int): count of pending event reports
     """
-    report_check_lt = (
-        datetime.now(TIMEZONE) - timedelta(days=7)
-    ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    report_check_lt = (datetime.now(TIMEZONE) - timedelta(days=7)).strftime(
+        "%Y-%m-%dT%H:%M:%S+00:00"
+    )
     report_check_gt = datetime(2026, 1, 6, tzinfo=TIMEZONE).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
