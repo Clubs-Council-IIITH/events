@@ -3,7 +3,7 @@ from datetime import datetime
 import strawberry
 
 from db import eventsdb
-from mailing import triggerMail
+from mailing import trigger_mail
 from mailing_templates import (
     BILL_SUBMISSION_BODY_FOR_SLO,
     BILL_SUBMISSION_SUBJECT,
@@ -16,15 +16,15 @@ from mtypes import (
     Bills_State_Status,
     Bills_Status,
     Event_State_Status,
-    timezone,
 )
 from otypes import Info, InputBillsStatus, InputBillsUpload
 from utils import (
+    TIMEZONE,
     delete_file,
-    getClubDetails,
-    getEventFinancesLink,
-    getEventLink,
-    getRoleEmails,
+    get_club_details,
+    get_event_finances_link,
+    get_event_link,
+    get_role_emails,
 )
 
 
@@ -55,7 +55,7 @@ async def updateBillsStatus(
         raise ValueError("You do not have permission to access this resource.")
 
     # Get current time
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     time_str = current_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     event = await eventsdb.find_one(
@@ -73,7 +73,7 @@ async def updateBillsStatus(
         raise ValueError("Event not found.")
 
     mail_to = (
-        await getClubDetails(event["clubid"], info.context.cookies)
+        await get_club_details(event["clubid"], info.context.cookies)
     ).get("email", None)
     if not mail_to:
         raise ValueError("Club email not found")
@@ -95,7 +95,7 @@ async def updateBillsStatus(
     if not event:
         raise ValueError("Event not found")
 
-    cc_to = await getRoleEmails("cc")
+    cc_to = await get_role_emails("cc")
 
     mail_uid = user["uid"]
     mail_subject = EVENT_BILL_STATUS_SUBJECT.safe_substitute(
@@ -105,9 +105,9 @@ async def updateBillsStatus(
         event=event["name"],
         bill_status=getattr(Bills_Full_State_Status, details.state),
         comment=details.slo_comment,
-        eventlink=getEventLink(event["code"]),
+        eventlink=get_event_link(event["code"]),
     )
-    await triggerMail(
+    await trigger_mail(
         mail_uid,
         mail_subject,
         mail_body,
@@ -141,7 +141,7 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
     if user is None or user.get("role") not in ["club"]:
         raise ValueError("You do not have permission to access this resource.")
 
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     time_str = current_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     event = await eventsdb.find_one(
@@ -229,10 +229,10 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
     )
 
     clubname = (
-        await getClubDetails(event["clubid"], info.context.cookies)
+        await get_club_details(event["clubid"], info.context.cookies)
     ).get("name", None)
-    cc_to = await getRoleEmails("cc")
-    slo_emails = await getRoleEmails("slo")
+    cc_to = await get_role_emails("cc")
+    slo_emails = await get_role_emails("slo")
 
     if not slo_emails:
         raise Exception("No SLO emails found to send a reminder.")
@@ -250,10 +250,10 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
         event_date=event_instance.datetimeperiod[0].strftime("%d-%m-%Y %H:%M"),
         total_budget=total_budget,
         total_budget_used=total_budget_used,
-        eventfinancelink=getEventFinancesLink(event_instance.id),
+        eventfinancelink=get_event_finances_link(event_instance.id),
     )
 
-    await triggerMail(
+    await trigger_mail(
         mail_uid,
         mail_subject,
         mail_body,

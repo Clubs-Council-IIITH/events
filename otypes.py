@@ -15,11 +15,11 @@ from mtypes import (
     Audience,
     Bills_State_Status,
     Bills_Status,
-    BudgetType,
+    Budget_Type,
     Event_Location,
     Event_Mode,
     PyObjectId,
-    SponsorType,
+    Sponsor_Type,
     event_popu_type,
     medium_str_type,
     short_str_type,
@@ -145,18 +145,18 @@ class CSVResponse:
 
 
 @strawberry.input
-class BudgetInput(BudgetType):
+class BudgetInput(Budget_Type):
     """
-    Input for taking all fields of the BudgetType class.
+    Input for taking all fields of the Budget_Type class.
     """
 
     pass
 
 
 @strawberry.input
-class SponsorInput(SponsorType):
+class SponsorInput(Sponsor_Type):
     """
-    Input for taking all fields of the SponsorType class.
+    Input for taking all fields of the Sponsor_Type class.
     """
 
     pass
@@ -186,7 +186,7 @@ class InputEventDetailsBaseModel(BaseModel):
                                          end of the event.
         audience (List[mtypes.Audience]): List of audience categories for the event.
                                    Default is None.
-        link (mtypes.HttpUrlString): Link to the event. Default is None.
+        link (mtypes.Http_Url_String): Link to the event. Default is None.
         equipment (mtypes.short_str_type): Equipment for the event. Default is None.
         additional (mtypes.short_str_type): Additional information of the event.
                                     Default is None.
@@ -266,7 +266,7 @@ class InputEditEventDetailsBaseModel(BaseModel):
         audience (List[mtypes.Audience]): List of audience
                                         categories for the event.
                                    Default is None.
-        link (mtypes.HttpUrlString): Link to the event. Default is None.
+        link (mtypes.Http_Url_String): Link to the event. Default is None.
         equipment (mtypes.short_str_type): Equipment for the event.
                                          Default is None.
         additional (mtypes.short_str_type): Additional information of event.

@@ -9,9 +9,12 @@ import fiscalyear
 from httpx import AsyncClient
 
 from db import eventsdb
-from mtypes import timezone
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
+
+# takes the time from IST timezone
+TIMEZONE = ZoneInfo("Asia/Kolkata")
+"""IST timezone"""
 
 # start month of financial year
 FISCAL_START_MONTH = 4
@@ -20,7 +23,7 @@ FISCAL_START_MONTH = 4
 fiscalyear.START_MONTH = FISCAL_START_MONTH
 
 
-async def getMember(cid, uid, cookies=None) -> dict | None:
+async def get_member(cid, uid, cookies=None) -> dict | None:
     """
     This function makes a query to the Members service resolved by the
     member method, fetches info about a member.
@@ -57,7 +60,7 @@ async def getMember(cid, uid, cookies=None) -> dict | None:
         return None
 
 
-async def getUser(uid, cookies=None) -> tuple[dict, dict] | None:
+async def get_user(uid, cookies=None) -> tuple[dict, dict] | None:
     """
     Function makes a query to the Users service resolved by the userProfile
     method, fetches info about a user.
@@ -98,7 +101,7 @@ async def getUser(uid, cookies=None) -> tuple[dict, dict] | None:
         return None
 
 
-async def getClubs(cookies=None) -> List[dict]:
+async def get_clubs(cookies=None) -> List[dict]:
     """
     Function to call a query to the Clubs service resolved by the allClubs
     method, fetches info about all clubs.
@@ -131,7 +134,7 @@ async def getClubs(cookies=None) -> List[dict]:
 
 
 # method gets club code from club id
-async def getClubCode(clubid: str) -> str | None:
+async def get_club_code(clubid: str) -> str | None:
     """
     Fetches the code of the club whose club id is given.
 
@@ -141,14 +144,14 @@ async def getClubCode(clubid: str) -> str | None:
     Returns:
         (str | None): club code or None if club not found
     """
-    allclubs = await getClubs()
+    allclubs = await get_clubs()
     for club in allclubs:
         if club["cid"] == clubid:
             return club["code"]
     return None
 
 
-async def getClubDetails(
+async def get_club_details(
     clubid: str,
     cookies,
 ) -> dict:
@@ -186,7 +189,7 @@ async def getClubDetails(
         return {}
 
 
-async def getEventCode(clubid, starttime) -> str:
+async def get_event_code(clubid, starttime) -> str:
     """
     generate event code based on starttime and organizing club
 
@@ -201,7 +204,7 @@ async def getEventCode(clubid, starttime) -> str:
         ValueError: Invalid clubid
     """
 
-    club_code = await getClubCode(clubid)
+    club_code = await get_club_code(clubid)
     if club_code is None:
         raise ValueError("Invalid clubid")
 
@@ -236,9 +239,7 @@ async def getEventCode(clubid, starttime) -> str:
     return f"{club_code}{code_year}{event_count:03d}"  # format: CODE20XX00Y
 
 
-# method produces link to event (based on code as input)
-# It returns a link to the event page
-def getEventLink(code) -> str:
+def get_event_link(code) -> str:
     """
     Produces a link to the event page based on the event code.
 
@@ -252,9 +253,7 @@ def getEventLink(code) -> str:
     return f"{host}/manage/events/code/{code}"
 
 
-# method to get the event finances page link for SLO
-# It returns a link to the event finances page
-def getEventFinancesLink(id) -> str:
+def get_event_finances_link(id) -> str:
     """
     Produces a link to the event finances page based on the event id.
 
@@ -268,8 +267,7 @@ def getEventFinancesLink(id) -> str:
     return f"{host}/manage/finances/{id}"
 
 
-# get email IDs of all members belonging to a role
-async def getRoleEmails(role: str) -> List[str]:
+async def get_role_emails(role: str) -> List[str]:
     """
     Brings all the emails of members belonging to a role
 
@@ -333,7 +331,7 @@ def subtract_months(dt, months):
     return dt.replace(year=year, month=month, day=1)
 
 
-async def eventsWithSorting(
+async def events_with_sorting(
     searchspace,
     name: str | None = None,
     date_filter=False,
@@ -375,7 +373,7 @@ async def eventsWithSorting(
     Returns:
         (List[dict]): list of events
     """
-    current_datetime = datetime.now(timezone).strftime(
+    current_datetime = datetime.now(TIMEZONE).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
 
@@ -437,7 +435,7 @@ async def eventsWithSorting(
 
     if pastEventsLimit is not None:
         limit_datetime = subtract_months(
-            datetime.now(timezone), pastEventsLimit
+            datetime.now(TIMEZONE), pastEventsLimit
         )
         limit_datetime = limit_datetime.strftime("%Y-%m-%dT%H:%M:%S+00:00")
         past_events_query["datetimeperiod.1"]["$gte"] = limit_datetime
@@ -487,7 +485,6 @@ async def eventsWithSorting(
     return events
 
 
-# method hides data from public viewers who view information of an event
 def trim_public_events(event: dict) -> dict:
     """
     Hides certain data fields from public viewers who view information of
@@ -532,9 +529,9 @@ async def get_pending_reports_count(clubid: str) -> int:
         (int): count of pending event reports
     """
     report_check_lt = (
-        datetime.now(ZoneInfo("UTC")) - timedelta(days=7)
+        datetime.now(TIMEZONE) - timedelta(days=7)
     ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
-    report_check_gt = datetime(2026, 1, 6, tzinfo=ZoneInfo("UTC")).strftime(
+    report_check_gt = datetime(2026, 1, 6, tzinfo=TIMEZONE).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
 
@@ -579,7 +576,6 @@ def convert_to_html(text) -> str:
     return f"<pre>{text}</pre>"
 
 
-# method used to delete a file from the file server
 async def delete_file(filename) -> str:
     """
     Method used to delete a file from the file service.

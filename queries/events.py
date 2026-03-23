@@ -2,7 +2,6 @@ import csv
 import io
 from datetime import datetime
 from typing import Any, List
-from zoneinfo import ZoneInfo
 
 import strawberry
 
@@ -25,7 +24,7 @@ from otypes import (
     RoomListType,
     timelot_type,
 )
-from utils import eventsWithSorting, getClubs, trim_public_events
+from utils import events_with_sorting, get_clubs, trim_public_events, TIMEZONE
 
 
 @strawberry.field
@@ -51,7 +50,7 @@ async def event(eventid: str, info: Info) -> EventType:
     user = info.context.user
     event = await eventsdb.find_one({"_id": eventid})
 
-    allclubs = await getClubs(info.context.cookies)
+    allclubs = await get_clubs(info.context.cookies)
     list_allclubs = list()
     for club in allclubs:
         list_allclubs.append(club["cid"])
@@ -241,7 +240,7 @@ async def events(
             {"collabclubs": {"$in": [clubid]}},
         ]
     else:
-        allclubs = await getClubs(info.context.cookies)
+        allclubs = await get_clubs(info.context.cookies)
         list_allclubs = list()
         for club in allclubs:
             list_allclubs.append(club["cid"])
@@ -286,12 +285,12 @@ async def events(
         ]
 
     if excludeCompleted:
-        now = (datetime.now(ZoneInfo("UTC"))).strftime(
+        now = (datetime.now(TIMEZONE)).strftime(
             "%Y-%m-%dT%H:%M:%S+00:00"
         )
         searchspace["datetimeperiod.1"] = {"$gte": now}
 
-    events = await eventsWithSorting(
+    events = await events_with_sorting(
         searchspace,
         date_filter=False,
         pagination=paginationOn,
@@ -382,7 +381,7 @@ async def calendarEvents(
             {"collabclubs": {"$in": [clubid]}},
         ]
     else:
-        allclubs = await getClubs(info.context.cookies)
+        allclubs = await get_clubs(info.context.cookies)
         list_allclubs = list()
         for club in allclubs:
             list_allclubs.append(club["cid"])
@@ -408,7 +407,7 @@ async def calendarEvents(
     if pastEventsLimit is not None and pastEventsLimit <= 0:
         raise ValueError("pastEventsLimit must be greater than 0.")
 
-    events = await eventsWithSorting(
+    events = await events_with_sorting(
         searchspace=searchspace, pastEventsLimit=pastEventsLimit
     )
 
@@ -465,7 +464,7 @@ async def clashingEvents(
         ]
         searchspace["location"] = {"$in": event["location"]}
 
-    events = await eventsWithSorting(
+    events = await events_with_sorting(
         searchspace,
         date_filter=False,
         timings=event["datetimeperiod"],
@@ -539,7 +538,7 @@ async def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
 #             {"collabclubs": {"$in": [clubid]}},
 #         ]
 #     else:
-#         allclubs = getClubs(info.context.cookies)
+#         allclubs = get_clubs(info.context.cookies)
 #         list_allclubs = list()
 #         for club in allclubs:
 #             list_allclubs.append(club["cid"])
@@ -750,7 +749,7 @@ async def downloadEventsData(
         raise Exception("Invalid status")
 
     all_events = list()
-    allclubs = await getClubs(info.context.cookies)
+    allclubs = await get_clubs(info.context.cookies)
     searchspace: dict[str, Any] = {}
 
     if details.clubid:
@@ -807,7 +806,9 @@ async def downloadEventsData(
                     "$nin": to_exclude,
                 }
 
-            all_events = await eventsWithSorting(searchspace, date_filter=True)
+            all_events = await events_with_sorting(
+                searchspace, date_filter=True
+            )
 
     header_mapping = {
         "code": "Event Code",
