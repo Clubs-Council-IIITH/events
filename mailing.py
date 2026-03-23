@@ -9,7 +9,7 @@ inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
 
 # API call to send mail notification
-async def triggerMail(
+async def trigger_mail(
     uid: str,
     subject: str,
     body: str,

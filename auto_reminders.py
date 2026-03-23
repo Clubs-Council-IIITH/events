@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from db import eventsdb
-from mailing import triggerMail
+from mailing import trigger_mail
 from mailing_templates import (
     EVENT_BILL_REMINDER_BODY,
     EVENT_BILL_REMINDER_SUBJECT,
@@ -11,8 +11,14 @@ from mailing_templates import (
     EVENT_REPORT_REMINDER_SUBJECT,
 )
 from models import Event
-from mtypes import Bills_State_Status, Event_State_Status, timezone
-from utils import get_bot_cookie, getClubDetails, getEventLink, getRoleEmails
+from mtypes import Bills_State_Status, Event_State_Status
+from utils import (
+    TIMEZONE,
+    get_bot_cookie,
+    get_club_details,
+    get_event_link,
+    get_role_emails,
+)
 
 
 async def check_for_bill_status():
@@ -28,7 +34,7 @@ async def check_for_bill_status():
     """
     # find events ended in past 4 days, that have
     # bill status not submitted and event is complete
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     week_ago = current_time - timedelta(days=7)
 
     pending_bills = await eventsdb.find(
@@ -53,7 +59,7 @@ async def check_for_bill_status():
         event_instance = Event.model_validate(event)
 
         try:
-            clubDetails = await getClubDetails(event_instance.clubid, None)
+            clubDetails = await get_club_details(event_instance.clubid, None)
 
             if len(clubDetails.keys()) == 0:
                 print(f"Club does not exist for event {event_instance.code}")
@@ -77,16 +83,16 @@ async def check_for_bill_status():
             mail_body = EVENT_BILL_REMINDER_BODY.safe_substitute(
                 club=clubname,
                 event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
+                eventlink=get_event_link(event_instance.code),
                 total_budget=total_budget,
             )
 
-            await triggerMail(
+            await trigger_mail(
                 "events_autoemailing",
                 mail_subject,
                 mail_body,
                 toRecipients=[mail_club],
-                ccRecipients=await getRoleEmails("cc"),
+                ccRecipients=await get_role_emails("cc"),
                 cookies=bot_cookie,
             )
 
@@ -107,7 +113,7 @@ async def check_for_ended_events():
     Returns:
     None
     """  # noqa: E501
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     one_day_ago = current_time - timedelta(days=1)
 
     # find events that ended today
@@ -132,7 +138,7 @@ async def check_for_ended_events():
         event_instance = Event.model_validate(event)
 
         try:
-            clubDetails = await getClubDetails(event_instance.clubid, None)
+            clubDetails = await get_club_details(event_instance.clubid, None)
 
             if len(clubDetails.keys()) == 0:
                 print(f"Club does not exist for event {event_instance.code}")
@@ -150,10 +156,10 @@ async def check_for_ended_events():
             mail_body = EVENT_REPORT_REMINDER_BODY.safe_substitute(
                 club=clubname,
                 event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
+                eventlink=get_event_link(event_instance.code),
             )
 
-            await triggerMail(
+            await trigger_mail(
                 "events_autoemailing",
                 mail_subject,
                 mail_body,
@@ -171,7 +177,7 @@ def init_event_reminder_system():
     """
     Initializes the event reminder system using AsyncIOScheduler.
     """
-    scheduler = AsyncIOScheduler(timezone=timezone)
+    scheduler = AsyncIOScheduler(timezone=TIMEZONE)
     scheduler.add_job(check_for_ended_events, "cron", hour=0, minute=0)
     scheduler.add_job(
         check_for_bill_status, "cron", day_of_week="sun", hour=12, minute=0

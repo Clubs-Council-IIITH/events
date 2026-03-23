@@ -4,8 +4,9 @@ from typing import List
 import strawberry
 
 from db import eventsdb
-from mtypes import Bills_Status, Event_State_Status, timezone
+from mtypes import Bills_Status, Event_State_Status
 from otypes import BillsStatusType, Info
+from utils import TIMEZONE
 
 
 @strawberry.field
@@ -55,7 +56,7 @@ async def eventBills(eventid: str, info: Info) -> Bills_Status:
                   have access to it or it is not approved."
         )
 
-    if event["datetimeperiod"][1] > datetime.now(timezone).strftime(
+    if event["datetimeperiod"][1] > datetime.now(TIMEZONE).strftime(
         "%Y-%m-%dT%H:%M:%S.%fZ"
     ):
         raise ValueError(f"{event['name']} has not ended yet.")
@@ -105,7 +106,7 @@ async def allEventsBills(info: Info) -> List[BillsStatusType]:
     searchspace = {
         "status.state": Event_State_Status.approved.value,
         "datetimeperiod.1": {
-            "$lt": datetime.now(timezone).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            "$lt": datetime.now(TIMEZONE).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         },
         "bills_status": {"$exists": True},
         "budget": {
