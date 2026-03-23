@@ -27,7 +27,7 @@ from fastapi.encoders import jsonable_encoder
 from prettytable import PrettyTable
 
 from db import eventsdb
-from mailing import triggerMail
+from mailing import trigger_mail
 from mailing_templates import (
     APPROVED_EVENT_BODY_FOR_CLUB,
     CLUB_EVENT_SUBJECT,
@@ -47,25 +47,25 @@ from mailing_templates import (
 from models import Event
 from mtypes import (
     Audience,
-    BudgetType,
-    ClubBodyCategoryType,
+    Budget_Type,
+    Club_Body_Category_Type,
     Event_Full_Location,
     Event_Location,
     Event_Mode,
     Event_State_Status,
-    SponsorType,
-    timezone,
+    Sponsor_Type,
 )
 from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
+    TIMEZONE,
     delete_file,
     get_pending_reports_count,
-    getClubDetails,
-    getEventCode,
-    getEventLink,
-    getMember,
-    getRoleEmails,
-    getUser,
+    get_club_details,
+    get_event_code,
+    get_event_link,
+    get_member,
+    get_role_emails,
+    get_user,
 )
 
 inter_communication_secret_global = os.getenv("INTER_COMMUNICATION_SECRET")
@@ -110,7 +110,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         raise Exception("Start time cannot be after end time.")
 
     # Check if the club exists
-    club_details = await getClubDetails(details.clubid, info.context.cookies)
+    club_details = await get_club_details(details.clubid, info.context.cookies)
     if len(club_details.keys()) == 0:
         raise Exception("Club does not exist.")
 
@@ -167,7 +167,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if details.budget is not None:
         event_instance.budget = list(
             map(
-                lambda x: BudgetType(
+                lambda x: Budget_Type(
                     amount=x.amount,
                     description=x.description,
                     advance=x.advance,
@@ -178,7 +178,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if details.sponsor is not None:
         event_instance.sponsor = list(
             map(
-                lambda x: SponsorType(
+                lambda x: Sponsor_Type(
                     name=x.name,
                     amount=x.amount,
                     previously_sponsored=x.previously_sponsored,
@@ -193,7 +193,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.collabclubs = details.collabclubs
 
     # Check POC Details Exist or not
-    if not await getMember(
+    if not await get_member(
         details.clubid, details.poc, cookies=info.context.cookies
     ):
         raise Exception("Member Details for POC does not exist")
@@ -208,23 +208,23 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         event_instance.status.state = Event_State_Status.incomplete
 
     # get current time
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
     event_instance.status.last_updated_time = time_str
     event_instance.status.last_updated_by = user["uid"]
     event_instance.status.creation_time = time_str
 
     # generates and sets the event's code
-    event_instance.code = await getEventCode(
+    event_instance.code = await get_event_code(
         details.clubid, details.datetimeperiod[0]
     )
 
     if club_details["category"] == "body":
-        event_instance.club_category = ClubBodyCategoryType.body
+        event_instance.club_category = Club_Body_Category_Type.body
     elif club_details["category"] == "admin":
-        event_instance.club_category = ClubBodyCategoryType.admin
+        event_instance.club_category = Club_Body_Category_Type.admin
     else:
-        event_instance.club_category = ClubBodyCategoryType.club
+        event_instance.club_category = Club_Body_Category_Type.club
 
     created_id = (
         await eventsdb.insert_one(jsonable_encoder(event_instance))
@@ -294,7 +294,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         "status.room": event_ref["status"]["room"],
         # if user["role"] == "cc"
         # else False,
-        "status.last_updated_time": datetime.now(timezone).strftime(
+        "status.last_updated_time": datetime.now(TIMEZONE).strftime(
             "%d-%m-%Y %I:%M %p"
         ),
         "status.last_updated_by": user["uid"],
@@ -337,7 +337,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.poc is not None and event_ref.get("poc", None) != details.poc:
         updates["poc"] = details.poc
         # Check POC Details Exist or not
-        if not await getMember(
+        if not await get_member(
             details.clubid, details.poc, cookies=info.context.cookies
         ):
             raise Exception("Member Details for POC does not exist")
@@ -370,7 +370,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         # updates["status.budget"] = False or user["role"] == "cc"
         updates["budget"] = list(
             map(
-                lambda x: BudgetType(
+                lambda x: Budget_Type(
                     amount=x.amount,
                     description=x.description,
                     advance=x.advance,
@@ -381,7 +381,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     if details.sponsor is not None and updatable:
         updates["sponsor"] = list(
             map(
-                lambda x: SponsorType(
+                lambda x: Sponsor_Type(
                     name=x.name,
                     amount=x.amount,
                     previously_sponsored=x.previously_sponsored,
@@ -462,7 +462,7 @@ async def progressEvent(
     event_instance = Event.model_validate(event_ref)
 
     mail_uid = user["uid"]
-    clubDetails = await getClubDetails(
+    clubDetails = await get_club_details(
         event_instance.clubid, info.context.cookies
     )
     if len(clubDetails.keys()) == 0:
@@ -472,11 +472,11 @@ async def progressEvent(
         clubname = clubDetails["name"]
 
     # get current time
-    current_time = datetime.now(timezone)
+    current_time = datetime.now(TIMEZONE)
     time_str = current_time.strftime("%d-%m-%Y %I:%M %p")
 
-    is_admin = event_instance.club_category == ClubBodyCategoryType.admin
-    is_body = event_instance.club_category == ClubBodyCategoryType.body
+    is_admin = event_instance.club_category == Club_Body_Category_Type.admin
+    is_body = event_instance.club_category == Club_Body_Category_Type.body
 
     if event_instance.status.state == Event_State_Status.incomplete:
         if user["role"] != "club" or user["uid"] != event_instance.clubid:
@@ -618,7 +618,7 @@ async def progressEvent(
     updation["deleted_time"] = event_instance.status.deleted_time
     updation["deleted_by"] = event_instance.status.deleted_by
 
-    poc = await getUser(event_instance.poc, info.context.cookies)
+    poc = await get_user(event_instance.poc, info.context.cookies)
     if not poc:
         raise Exception("POC does not exist.")
 
@@ -634,7 +634,7 @@ async def progressEvent(
     ## trigger mail notification
     # Data Preparation for the mailing
     mail_event_title = updated_event_instance.name
-    mail_eventlink = getEventLink(updated_event_instance.code)
+    mail_eventlink = get_event_link(updated_event_instance.code)
     mail_description = updated_event_instance.description
     if mail_description == "":
         mail_description = "N/A"
@@ -758,7 +758,7 @@ async def progressEvent(
     mail_to = []
     cc_to = []
     if updated_event_instance.status.state == Event_State_Status.pending_cc:
-        mail_to = await getRoleEmails("cc")
+        mail_to = await get_role_emails("cc")
 
         # Mail to club also for the successful submission of the event
         mail_to_club = [
@@ -786,7 +786,7 @@ async def progressEvent(
             poc_phone=poc_phone,
         )
 
-        await triggerMail(
+        await trigger_mail(
             mail_uid,
             mail_subject_club,
             mail_body_club,
@@ -798,8 +798,8 @@ async def progressEvent(
         updated_event_instance.status.state
         == Event_State_Status.pending_budget
     ):
-        cc_to = await getRoleEmails("cc") + await getRoleEmails("slo")
-        slc_emails = await getRoleEmails("slc")
+        cc_to = await get_role_emails("cc") + await get_role_emails("slo")
+        slc_emails = await get_role_emails("slc")
 
         if slc_members_for_email is not None:
             mail_to = []
@@ -826,8 +826,8 @@ async def progressEvent(
     elif (
         updated_event_instance.status.state == Event_State_Status.pending_room
     ):
-        cc_to = await getRoleEmails("cc") + ([mail_club] if is_body else [])
-        mail_to = await getRoleEmails("slo")
+        cc_to = await get_role_emails("cc") + ([mail_club] if is_body else [])
+        mail_to = await get_role_emails("slo")
         mail_body = PROGRESS_EVENT_BODY_FOR_SLO.safe_substitute(
             event_id=updated_event_instance.code,
             club=clubname,
@@ -864,7 +864,7 @@ async def progressEvent(
         )
 
     if len(mail_to):
-        await triggerMail(
+        await trigger_mail(
             mail_uid,
             mail_subject,
             mail_body,
@@ -913,11 +913,11 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
     updation["budget"] = False
     updation["room"] = False
     updation["deleted_by"] = user["uid"]
-    updation["deleted_time"] = datetime.now(timezone).strftime(
+    updation["deleted_time"] = datetime.now(TIMEZONE).strftime(
         "%d-%m-%Y %I:%M %p"
     )
 
-    clubDetails = await getClubDetails(
+    clubDetails = await get_club_details(
         event_instance.clubid, info.context.cookies
     )
     if len(clubDetails.keys()) == 0:
@@ -948,14 +948,14 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
             mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
                 club=clubname,
                 event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
+                eventlink=get_event_link(event_instance.code),
                 deleted_by="Clubs Council",
             )
         elif user["role"] == "slo":
             mail_to = [
                 mail_club,
             ]
-            cc_to = await getRoleEmails("cc")
+            cc_to = await get_role_emails("cc")
             mail_subject = DELETE_EVENT_SUBJECT.safe_substitute(
                 event_id=event_instance.code,
                 event=event_instance.name,
@@ -963,11 +963,11 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
             mail_body = DELETE_EVENT_BODY_FOR_CLUB.safe_substitute(
                 club=clubname,
                 event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
+                eventlink=get_event_link(event_instance.code),
                 deleted_by="Student Life Office",
             )
 
-            await triggerMail(
+            await trigger_mail(
                 user["uid"],
                 mail_subject,
                 mail_body,
@@ -976,7 +976,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
                 cookies=info.context.cookies,
             )
         elif user["role"] == "club":
-            mail_to = await getRoleEmails("cc")
+            mail_to = await get_role_emails("cc")
             mail_subject = DELETE_EVENT_SUBJECT.safe_substitute(
                 event_id=event_instance.code,
                 event=event_instance.name,
@@ -984,10 +984,10 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
             mail_body = DELETE_EVENT_BODY_FOR_CC.safe_substitute(
                 club=clubname,
                 event=event_instance.name,
-                eventlink=getEventLink(event_instance.code),
+                eventlink=get_event_link(event_instance.code),
             )
 
-            await triggerMail(
+            await trigger_mail(
                 user["uid"],
                 mail_subject,
                 mail_body,
@@ -1036,7 +1036,7 @@ async def rejectEvent(
 
     event_instance = Event.model_validate(event_ref)
 
-    clubDetails = await getClubDetails(
+    clubDetails = await get_club_details(
         event_instance.clubid, info.context.cookies
     )
     if len(clubDetails.keys()) == 0:
@@ -1069,13 +1069,13 @@ async def rejectEvent(
     mail_body = REJECT_EVENT_BODY_FOR_CLUB.safe_substitute(
         club=clubname,
         event=event_instance.name,
-        eventlink=getEventLink(event_instance.code),
+        eventlink=get_event_link(event_instance.code),
         reason=reason,
         deleted_by="Clubs Council",
     )
 
     # Mail to the club regarding the rejected event
-    await triggerMail(
+    await trigger_mail(
         user["uid"],
         mail_subject,
         mail_body,

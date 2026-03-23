@@ -12,22 +12,22 @@ from pydantic import (
 from mtypes import (
     Audience,
     Bills_Status,
-    BudgetType,
-    ClubBodyCategoryType,
+    Budget_Type,
+    Club_Body_Category_Type,
     Event_Location,
     Event_Mode,
     Event_Status,
-    HttpUrlString,
-    PrizesType,
+    Http_Url_String,
+    Prizes_Type,
     PyObjectId,
-    SponsorType,
+    Sponsor_Type,
     event_popu_type,
     long_str_type,
     medium_str_type,
     short_str_type,
-    timezone,
     very_short_str_type,
 )
+from utils import TIMEZONE
 
 
 class EventReport(BaseModel):
@@ -40,11 +40,12 @@ class EventReport(BaseModel):
         attendance (mtypes.event_popu_type): The number of attendees.
         external_attendance (Optional[mtypes.event_popu_type]): The number of
                     external attendees if allowed.
-        prizes (List[mtypes.PrizesType]): The list prizes awarded in the event.
+        prizes (List[mtypes.Prizes_Type]): The list prizes awarded in the 
+                                        event.
         prizes_breakdown (mtypes.long_str_type): A breakdown of the prizes
                                        awarded.
         winners (mtypes.long_str_type): The winners of the event.
-        photos_link (mtypes.HttpUrlString): The link to the event's photos.
+        photos_link (mtypes.Http_Url_String): The link to the event's photos.
         feedback_cc (mtypes.medium_str_type): Feedback on the event by CC.
         feedback_college (mtypes.medium_str_type): Feedback on the event by
                                          the college.
@@ -56,15 +57,15 @@ class EventReport(BaseModel):
     summary: medium_str_type
     attendance: event_popu_type
     external_attendance: Optional[event_popu_type] = None
-    prizes: List[PrizesType] = []
+    prizes: List[Prizes_Type] = []
     prizes_breakdown: long_str_type
     winners: long_str_type
-    photos_link: HttpUrlString
+    photos_link: Http_Url_String
     feedback_cc: medium_str_type
     feedback_college: medium_str_type
     submitted_by: str
     submitted_time: datetime = Field(
-        default_factory=lambda: datetime.now(timezone), frozen=True
+        default_factory=lambda: datetime.now(TIMEZONE), frozen=True
     )
 
 
@@ -77,8 +78,8 @@ class Event(BaseModel):
         code (str): The code of the event. Defaults to None.
         clubid (str): The Club ID of the club hosting the event.
         collabclubs (List[str]): The Club IDs of the collaborating clubs.
-        club_category (mtypes.ClubBodyCategoryType): Category of the club for
-                       which the event is. Defaults to a club.
+        club_category (mtypes.Club_Body_Category_Type): Category of the club
+                       for which the event is. Defaults to a club.
         name (mtypes.very_short_str_type): The name of the event.
         description (mtypes.medium_str_type): A description of the event.
                                        Defaults to `No description available.`.
@@ -86,7 +87,7 @@ class Event(BaseModel):
                                                     of the event.
         poster (str): The URL of the event's poster. Defaults to None.
         audience (List[mtypes.Audience]): The list audience for the event.
-        link (mtypes.HttpUrlString): The link to the event's page.
+        link (mtypes.Http_Url_String): The link to the event's page.
                             Defaults to None.
         mode (mtypes.Event_Mode): The mode of the event. Defaults to hybrid.
         location (List[mtypes.Event_Location]): The list of locations for
@@ -110,7 +111,7 @@ class Event(BaseModel):
             the event.
         poc (str): The point of contact for the event. Defaults to None.
         status (mtypes.Event_Status): The approval and approver details.
-        budget (List[mtypes.BudgetType]): The list of budgets for the event.
+        budget (List[mtypes.Budget_Type]): The list of budgets for the event.
         bills_status (mtypes.Bills_Status): The status of the budget.
         event_report_submitted (bool): Whether the event report after
                                        completion has been submitted.
@@ -121,7 +122,7 @@ class Event(BaseModel):
     code: str | None = None
     clubid: str
     collabclubs: List[str] = []
-    club_category: ClubBodyCategoryType = ClubBodyCategoryType.club
+    club_category: Club_Body_Category_Type = Club_Body_Category_Type.club
 
     name: very_short_str_type
 
@@ -129,7 +130,7 @@ class Event(BaseModel):
     datetimeperiod: Tuple[datetime, datetime]
     poster: str | None = None
     audience: List[Audience] = []
-    link: HttpUrlString | None = None
+    link: Http_Url_String | None = None
 
     mode: Event_Mode = Event_Mode.hybrid
     location: List[Event_Location] = []
@@ -143,8 +144,8 @@ class Event(BaseModel):
     poc: str | None = None
 
     status: Event_Status = Event_Status()
-    budget: List[BudgetType] = []
-    sponsor: List[SponsorType] = []
+    budget: List[Budget_Type] = []
+    sponsor: List[Sponsor_Type] = []
     bills_status: Bills_Status = Bills_Status()
     event_report_submitted: bool = False
 
@@ -180,7 +181,7 @@ class Holiday(BaseModel):
     date: date
     description: medium_str_type | None = None
     created_time: datetime = Field(
-        default_factory=lambda: datetime.now(timezone), frozen=True
+        default_factory=lambda: datetime.now(TIMEZONE), frozen=True
     )
 
     model_config = ConfigDict(

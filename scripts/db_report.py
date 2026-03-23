@@ -11,6 +11,8 @@ MONGO_DATABASE = "dev"
 client = MongoClient(MONGO_URI)
 db = client[MONGO_DATABASE]
 
+#  TODO: change the timezone from utc to ist
+
 try:
     startYear = int(input("Enter the start year: "))
     endYear = int(input("Enter the end year: "))
@@ -94,7 +96,7 @@ for club in clubs:
                         slo_approver_time
                         and slo_approver_time != "Not Approved"
                     ):
-                        if slo_approver_time == 'Self Approved':
+                        if slo_approver_time == "Self Approved":
                             slo_approver = event["status"].get("slo_approver")
                             approver_times.append(
                                 datetime.strptime(
@@ -118,7 +120,11 @@ for club in clubs:
                             ).replace(tzinfo=timezone.utc)
                         )
 
-                    if approver_times and "submission_time" in event["status"] and event["status"]["submission_time"]:
+                    if (
+                        approver_times
+                        and "submission_time" in event["status"]
+                        and event["status"]["submission_time"]
+                    ):
                         approval_time = max(approver_times)
                         approval_time = approval_time.replace(
                             tzinfo=timezone.utc
@@ -342,7 +348,7 @@ for event in sorted_events:
                 ).replace(tzinfo=timezone.utc)
             )
         if slo_approver_time and slo_approver_time != "Not Approved":
-            if slo_approver_time == 'Self Approved':
+            if slo_approver_time == "Self Approved":
                 slo_approver = event["status"].get("slo_approver")
                 approver_times.append(
                     datetime.strptime(
