@@ -2,7 +2,6 @@ import csv
 import io
 from datetime import datetime
 from typing import Any, List
-from zoneinfo import ZoneInfo
 
 import strawberry
 
@@ -25,7 +24,7 @@ from otypes import (
     RoomListType,
     timelot_type,
 )
-from utils import events_with_sorting, get_clubs, trim_public_events
+from utils import events_with_sorting, get_clubs, trim_public_events, TIMEZONE
 
 
 @strawberry.field
@@ -286,7 +285,7 @@ async def events(
         ]
 
     if excludeCompleted:
-        now = (datetime.now(ZoneInfo("UTC"))).strftime(
+        now = (datetime.now(TIMEZONE)).strftime(
             "%Y-%m-%dT%H:%M:%S+00:00"
         )
         searchspace["datetimeperiod.1"] = {"$gte": now}
