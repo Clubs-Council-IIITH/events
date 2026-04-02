@@ -406,6 +406,14 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         else None,
     }
 
+    # Model validation to check if the updates are valid as per the Event model
+    try:
+        Event.model_validate(
+            {**event_ref, **updates}
+        )
+    except Exception as e:
+        raise Exception(f"Invalid update details: {e}")
+
     updation = {"$set": jsonable_encoder(updates)}
 
     upd_ref = await eventsdb.update_one(query, updation)
