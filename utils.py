@@ -534,10 +534,15 @@ async def get_pending_reports_count(clubid: str) -> int:
     report_check_gt = datetime(2026, 1, 6, tzinfo=TIMEZONE).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
+    
+    no_report_club = ["felicity"]
+    if clubid in no_report_club:
+        return 0
 
     pending_reports_count = await eventsdb.count_documents(
         {
             "clubid": clubid,
+            "audience": {"$nin": ["internal"]},   
             "status.state": {"$in": ["approved"]},
             "datetimeperiod.1": {
                 "$lt": report_check_lt,
