@@ -22,6 +22,9 @@ FISCAL_START_MONTH = 4
 # fiscalyear config
 fiscalyear.START_MONTH = FISCAL_START_MONTH
 
+# list of clubs which are not required to submit event reports
+no_report_club = ["felicity"]
+
 
 async def get_member(cid, uid, cookies=None) -> dict | None:
     """
@@ -535,7 +538,6 @@ async def get_pending_reports_count(clubid: str) -> int:
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
     
-    no_report_club = ["felicity"]
     if clubid in no_report_club:
         return 0
 
