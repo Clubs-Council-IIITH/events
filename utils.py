@@ -15,6 +15,7 @@ inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 # configuration for pending reports (env-configurable)
 REPORT_DUE_DAYS = int(os.getenv("EVENT_REPORT_DUE_DAYS", "7"))
 NO_REPORT_CLUBS = os.getenv("NO_REPORT_CLUBS", "felicity").split(",")
+NO_REPORT_CLUBS = [club.strip() for club in NO_REPORT_CLUBS if club.strip()]
 
 # takes the time from IST timezone
 TIMEZONE = ZoneInfo("Asia/Kolkata")
@@ -26,7 +27,6 @@ FISCAL_START_MONTH = 4
 # fiscalyear config
 fiscalyear.START_MONTH = FISCAL_START_MONTH
 
-NO_REPORT_CLUBS = [club.strip() for club in NO_REPORT_CLUBS if club.strip()]
 
 
 async def get_member(cid, uid, cookies=None) -> dict | None:
