@@ -12,6 +12,10 @@ from db import eventsdb
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
+# configuration for pending reports (env-configurable)
+REPORT_DUE_DAYS = int(os.getenv("EVENT_REPORT_DUE_DAYS", "7"))
+NO_REPORT_CLUBS = os.getenv("NO_REPORT_CLUBS", "felicity").split(",")
+
 # takes the time from IST timezone
 TIMEZONE = ZoneInfo("Asia/Kolkata")
 """IST timezone"""
@@ -22,8 +26,7 @@ FISCAL_START_MONTH = 4
 # fiscalyear config
 fiscalyear.START_MONTH = FISCAL_START_MONTH
 
-# list of clubs which are not required to submit event reports
-no_report_club = ["felicity"]
+NO_REPORT_CLUBS = [club.strip() for club in NO_REPORT_CLUBS if club.strip()]
 
 
 async def get_member(cid, uid, cookies=None) -> dict | None:
@@ -531,14 +534,16 @@ async def get_pending_reports_count(clubid: str) -> int:
     Returns:
         (int): count of pending event reports
     """
-    report_check_lt = (datetime.now(TIMEZONE) - timedelta(days=7)).strftime(
+    report_check_lt = (
+        datetime.now(TIMEZONE) - timedelta(days=REPORT_DUE_DAYS)
+    ).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
     report_check_gt = datetime(2026, 1, 6, tzinfo=TIMEZONE).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
     
-    if clubid in no_report_club:
+    if clubid in NO_REPORT_CLUBS:
         return 0
 
     pending_reports_count = await eventsdb.count_documents(
