@@ -527,6 +527,9 @@ def trim_public_events(event: dict) -> dict:
 async def get_pending_reports_count(clubid: str) -> int:
     """
     Method to get the count of pending event reports for a club.
+    Any event conducted by a club not in NO_REPORT_CLUBS, which is not internal
+    and is approved and has ended more than REPORT_DUE_DAYS ago but does not
+    have its event report submitted is considered to have a pending event report.
 
     Args:
         clubid (str): club id
