@@ -12,6 +12,11 @@ from db import eventsdb
 
 inter_communication_secret = os.getenv("INTER_COMMUNICATION_SECRET")
 
+# configuration for pending reports (env-configurable)
+REPORT_DUE_DAYS = int(os.getenv("EVENT_REPORT_DUE_DAYS", "7"))
+NO_REPORT_CLUBS = os.getenv("NO_REPORT_CLUBS", "felicity").split(",")
+NO_REPORT_CLUBS = [club.strip() for club in NO_REPORT_CLUBS if club.strip()]
+
 # takes the time from IST timezone
 TIMEZONE = ZoneInfo("Asia/Kolkata")
 """IST timezone"""
@@ -21,6 +26,7 @@ FISCAL_START_MONTH = 4
 
 # fiscalyear config
 fiscalyear.START_MONTH = FISCAL_START_MONTH
+
 
 
 async def get_member(cid, uid, cookies=None) -> dict | None:
@@ -521,6 +527,9 @@ def trim_public_events(event: dict) -> dict:
 async def get_pending_reports_count(clubid: str) -> int:
     """
     Method to get the count of pending event reports for a club.
+    Any event conducted by a club not in NO_REPORT_CLUBS, which is not internal
+    and is approved and has ended more than REPORT_DUE_DAYS ago but does not
+    have its event report submitted is considered to have a pending event report.
 
     Args:
         clubid (str): club id
@@ -528,16 +537,23 @@ async def get_pending_reports_count(clubid: str) -> int:
     Returns:
         (int): count of pending event reports
     """
-    report_check_lt = (datetime.now(TIMEZONE) - timedelta(days=7)).strftime(
+    report_check_lt = (
+        datetime.now(TIMEZONE) - timedelta(days=REPORT_DUE_DAYS)
+    ).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
     report_check_gt = datetime(2026, 1, 6, tzinfo=TIMEZONE).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
+    
+    if clubid in NO_REPORT_CLUBS:
+        return 0
 
     pending_reports_count = await eventsdb.count_documents(
         {
             "clubid": clubid,
+            "audience": {"$nin": ["internal"]},
+            "collabclubs": {"$nin": NO_REPORT_CLUBS},
             "status.state": {"$in": ["approved"]},
             "datetimeperiod.1": {
                 "$lt": report_check_lt,
