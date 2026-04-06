@@ -549,7 +549,8 @@ async def get_pending_reports_count(clubid: str) -> int:
     pending_reports_count = await eventsdb.count_documents(
         {
             "clubid": clubid,
-            "audience": {"$nin": ["internal"]},   
+            "audience": {"$nin": ["internal"]},
+            "collabclubs": {"$nin": NO_REPORT_CLUBS},
             "status.state": {"$in": ["approved"]},
             "datetimeperiod.1": {
                 "$lt": report_check_lt,
