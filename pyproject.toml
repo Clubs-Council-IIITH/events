@@ -11,7 +11,7 @@ dependencies = [
     "httpx==0.28.1",
     "prettytable==3.17.0",
     "pymongo==4.16.0",
-    "strawberry-graphql[cli]==0.312.2",
+    "strawberry-graphql[cli]==0.313.0",
 ]
 
 [tool.ruff]
