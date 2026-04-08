@@ -106,7 +106,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         raise Exception("You do not have permission to access this resource.")
 
     # Check if the start time is before the end time
-    if details.datetimeperiod[0] >= details.datetimeperiod[1]:
+    if details.datetimeperiod[0] > details.datetimeperiod[1]:
         raise Exception("Start time cannot be after end time.")
 
     # Check if the club exists
@@ -273,7 +273,8 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         raise Exception("Not Authenticated to access this API")
 
     if details.datetimeperiod is not None:
-        if details.datetimeperiod[0] >= details.datetimeperiod[1]:
+        # allow start == end (zero-length) but disallow start after end
+        if details.datetimeperiod[0] > details.datetimeperiod[1]:
             raise Exception(
                 "Start datetime cannot be same/after end datetime."
             )

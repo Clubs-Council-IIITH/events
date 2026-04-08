@@ -151,8 +151,8 @@ class Event(BaseModel):
 
     @field_validator("datetimeperiod")
     def check_end_year(cls, value, info: ValidationInfo):
-        if value[0] >= value[1]:
-            raise ValueError("Start date cannot be same/after end date")
+        if value[0] > value[1]:
+            raise ValueError("Start date cannot be after end date")
         return value
 
     model_config = ConfigDict(
