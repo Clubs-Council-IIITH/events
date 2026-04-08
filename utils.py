@@ -28,7 +28,6 @@ FISCAL_START_MONTH = 4
 fiscalyear.START_MONTH = FISCAL_START_MONTH
 
 
-
 async def get_member(cid, uid, cookies=None) -> dict | None:
     """
     This function makes a query to the Members service resolved by the
@@ -529,7 +528,8 @@ async def get_pending_reports_count(clubid: str) -> int:
     Method to get the count of pending event reports for a club.
     Any event conducted by a club not in NO_REPORT_CLUBS, which is not internal
     and is approved and has ended more than REPORT_DUE_DAYS ago but does not
-    have its event report submitted is considered to have a pending event report.
+    have its event report submitted is considered to have a pending event
+    report.
 
     Args:
         clubid (str): club id
@@ -539,13 +539,11 @@ async def get_pending_reports_count(clubid: str) -> int:
     """
     report_check_lt = (
         datetime.now(TIMEZONE) - timedelta(days=REPORT_DUE_DAYS)
-    ).strftime(
-        "%Y-%m-%dT%H:%M:%S+00:00"
-    )
+    ).strftime("%Y-%m-%dT%H:%M:%S+00:00")
     report_check_gt = datetime(2026, 1, 6, tzinfo=TIMEZONE).strftime(
         "%Y-%m-%dT%H:%M:%S+00:00"
     )
-    
+
     if clubid in NO_REPORT_CLUBS:
         return 0
 
