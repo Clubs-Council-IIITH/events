@@ -668,7 +668,7 @@ async def availableRooms(
     if user is None or user["role"] not in ["club", "cc", "slo"]:
         raise Exception("You do not have permission to access this resource.")
 
-    assert timeslot[0] <= timeslot[1], "Invalid timeslot"
+    assert timeslot[0] < timeslot[1], "Invalid timeslot"
     timeslot_str = [
         timeslot[0].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
         timeslot[1].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
