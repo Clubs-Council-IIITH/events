@@ -408,9 +408,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
 
     # Model validation to check if the updates are valid as per the Event model
     try:
-        Event.model_validate(
-            {**event_ref, **updates}
-        )
+        Event.model_validate({**event_ref, **updates})
     except Exception as e:
         raise Exception(f"Invalid update details: {e}")
 
