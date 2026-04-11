@@ -491,7 +491,10 @@ async def progressEvent(
             raise noaccess_error
 
         # Check if the completed events report is submitted
-        if await get_pending_reports_count(event_instance.clubid):
+        pending_reports = await get_pending_reports_count(
+            event_instance.clubid
+        )
+        if pending_reports and "internal" not in event_instance.audience:
             raise Exception(
                 "Club must submit the report for your completed events "
                 "before creating a new one."
