@@ -69,14 +69,8 @@ class EventReport(BaseModel):
     submitted_time: datetime = Field(
         default_factory=lambda: datetime.now(TIMEZONE), frozen=True
     )
-    expected_budget: float | None = None
-    actual_budget: float | None = None
-
-    @field_validator("expected_budget", "actual_budget")
-    def check_non_negative_budget(cls, value):
-        if value is not None and value < 0:
-            raise ValueError("Budget must be non-negative")
-        return value
+expected_budget: float | None = Field(default=None, ge=0)
+actual_budget: float | None = Field(default=None, ge=0)
 
 
 class Event(BaseModel):
