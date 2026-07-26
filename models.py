@@ -51,6 +51,8 @@ class EventReport(BaseModel):
                                          the college.
         submitted_by (str): The user who submitted the report.
         submitted_time (datetime): The time the report was submitted.
+        expected_budget (Optional[float]): The estimated/proposed budget.
+        actual_budget (Optional[float]): The actual budget spent.
     """
 
     eventid: str
@@ -67,6 +69,14 @@ class EventReport(BaseModel):
     submitted_time: datetime = Field(
         default_factory=lambda: datetime.now(TIMEZONE), frozen=True
     )
+    expected_budget: float | None = None
+    actual_budget: float | None = None
+
+    @field_validator("expected_budget", "actual_budget")
+    def check_non_negative_budget(cls, value):
+        if value is not None and value < 0:
+            raise ValueError("Budget must be non-negative")
+        return value
 
 
 class Event(BaseModel):
