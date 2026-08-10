@@ -60,6 +60,14 @@ PyObjectIdType = strawberry.scalar(
 """A scalar Type for serializing PyObjectId, used for id field"""
 
 
+@strawberry.input
+class InputBudgetAllocationBreakdown:
+    """Input for a single allocation breakdown entry in an event report."""
+
+    description: short_str_type
+    allocated_amount: float
+
+
 @strawberry.experimental.pydantic.type(model=EventReport, all_fields=True)
 class EventReportType:
     """
@@ -338,13 +346,58 @@ class InputDataReportDetails:
     status: str
 
 
-@strawberry.experimental.pydantic.input(model=EventReport, all_fields=True)
+@strawberry.input
 class InputEventReport:
     """
     Input for taking all the fields of the EventReport model.
     """
 
-    pass
+    eventid: str
+    summary: medium_str_type
+    attendance: event_popu_type
+    external_attendance: event_popu_type | None = None
+    allocated_budget: float | None = None
+    allocated_budget_breakdown: List[InputBudgetAllocationBreakdown] = strawberry.field(
+        default_factory=list
+    )
+    prizes: List[str] = strawberry.field(default_factory=list)
+    prizes_breakdown: str
+    winners: str
+    photos_link: str
+    feedback_cc: medium_str_type
+    feedback_college: medium_str_type
+    submitted_by: str
+    submitted_time: datetime | None = None
+
+    def to_pydantic(self):
+        """Convert the input object into the backing pydantic model."""
+
+        report_dict = {
+            "eventid": self.eventid,
+            "summary": self.summary,
+            "attendance": self.attendance,
+            "external_attendance": self.external_attendance,
+            "allocated_budget": self.allocated_budget,
+            "allocated_budget_breakdown": [
+                {
+                    "description": entry.description,
+                    "allocated_amount": entry.allocated_amount,
+                }
+                for entry in self.allocated_budget_breakdown
+            ],
+            "prizes": self.prizes,
+            "prizes_breakdown": self.prizes_breakdown,
+            "winners": self.winners,
+            "photos_link": self.photos_link,
+            "feedback_cc": self.feedback_cc,
+            "feedback_college": self.feedback_college,
+            "submitted_by": self.submitted_by,
+        }
+
+        if self.submitted_time is not None:
+            report_dict["submitted_time"] = self.submitted_time
+
+        return EventReport(**report_dict)
 
 
 @strawberry.input
