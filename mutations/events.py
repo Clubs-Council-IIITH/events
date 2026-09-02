@@ -77,7 +77,7 @@ noaccess_error = Exception(
 @strawberry.mutation
 async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     """
-    Method to create an event by a club,CC.
+    Method to create an event by a club,CC and SLO.
 
     Args:
         details (otypes.InputEventDetails): The details of the event to be
@@ -100,6 +100,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         or not details.clubid
         or not (
             (user["role"] == "club" and user["uid"] == details.clubid)
+            or (user["role"] == "slo")  # allow SLO to create events too
             or (user["role"] == "cc")  # allow CC to create events too
         )
     ):
