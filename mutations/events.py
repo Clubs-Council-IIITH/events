@@ -200,7 +200,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
         raise Exception("Member Details for POC does not exist")
 
     # if creator is CC, set state to approved
-    if user["role"] == "cc":
+    if user["role"] == "cc" or user["role"] == "slo":
         event_instance.status.state = Event_State_Status.pending_cc
         # event_instance.status.state = Event_State_Status.approved
         # event_instance.status.budget = True
@@ -222,7 +222,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
 
     if club_details["category"] == "body":
         event_instance.club_category = Club_Body_Category_Type.body
-    elif club_details["category"] == "admin":
+    elif club_details["category"] == "admin" or club_details["category"] == "supervisory":
         event_instance.club_category = Club_Body_Category_Type.admin
     else:
         event_instance.club_category = Club_Body_Category_Type.club
