@@ -13,6 +13,7 @@ from mtypes import (
     Audience,
     Bills_Status,
     Budget_Type,
+    Budget_Allocation_Breakdown,
     Club_Body_Category_Type,
     Event_Location,
     Event_Mode,
@@ -40,6 +41,9 @@ class EventReport(BaseModel):
         attendance (mtypes.event_popu_type): The number of attendees.
         external_attendance (Optional[mtypes.event_popu_type]): The number of
                     external attendees if allowed.
+        allocated_budget (float | None): The allocated budget for the event.
+        allocated_budget_breakdown (List[mtypes.Budget_Allocation_Breakdown]):
+                The allocation breakdown for the event report.
         prizes (List[mtypes.Prizes_Type]): The list prizes awarded in the
                                         event.
         prizes_breakdown (mtypes.long_str_type): A breakdown of the prizes
@@ -57,6 +61,8 @@ class EventReport(BaseModel):
     summary: medium_str_type
     attendance: event_popu_type
     external_attendance: Optional[event_popu_type] = None
+    allocated_budget: float | None = None
+    allocated_budget_breakdown: List[Budget_Allocation_Breakdown] = []
     prizes: List[Prizes_Type] = []
     prizes_breakdown: long_str_type
     winners: long_str_type

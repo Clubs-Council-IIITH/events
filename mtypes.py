@@ -449,6 +449,25 @@ class Budget_Type:
             raise ValueError("Amount used must be positive")
         return value
 
+@strawberry.type
+class Budget_Allocation_Breakdown:
+    """
+    Class for a description-wise allocation entry in an event report.
+
+    Attributes:
+        description (short_str_type): Description of the allocation.
+        allocated_amount (float): Amount allocated by the CC.
+    """
+
+    description: short_str_type
+    allocated_amount: float
+
+    def __init__(self, description: short_str_type, allocated_amount: float):
+        if allocated_amount < 0:
+            raise ValueError("Amount used must be non-negative")
+
+        self.description = description
+        self.allocated_amount = allocated_amount
 
 @strawberry.type
 class Sponsor_Type:
