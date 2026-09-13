@@ -150,14 +150,14 @@ async def editEventReport(
 
     submitted_time = datetime.strptime(
         event_report["submitted_time"], "%Y-%m-%dT%H:%M:%S.%fZ"
-    )
+    ).replace(tzinfo=TIMEZONE)
 
     if user_role in ["club", "cc"]:
         edit_window = timedelta(days=2)
     elif user_role == "slo":
         edit_window = timedelta(days=14)
 
-    if submitted_time + edit_window < datetime.now():
+    if submitted_time + edit_window < datetime.now(TIMEZONE):
         raise ValueError("Event report can't be updated")
 
     report_dict = jsonable_encoder(details.to_pydantic())

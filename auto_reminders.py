@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from db import eventsdb
@@ -96,7 +97,7 @@ async def check_for_bill_status():
                 cookies=bot_cookie,
             )
 
-        except Exception as e:
+        except (httpx.HTTPError, KeyError, ValueError) as e:
             print(
                 f"Error sending reminder for event {event_instance.code}: {e}"
             )
@@ -167,7 +168,7 @@ async def check_for_ended_events():
                 cookies=bot_cookie,
             )
 
-        except Exception as e:
+        except (httpx.HTTPError, KeyError, ValueError) as e:
             print(
                 f"Error sending reminder for event {event_instance.code}: {e}"
             )

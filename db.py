@@ -26,6 +26,7 @@ Attributes:
 from os import getenv
 
 from pymongo import AsyncMongoClient
+from pymongo.errors import PyMongoError
 
 # get mongodb URI and database name from environment variable
 MONGO_URI = "mongodb://{}:{}@mongo:{}/".format(
@@ -81,5 +82,5 @@ async def create_index() -> None:
             await event_reportsdb.create_index(
                 [("event_id", 1)], unique=True, name="unique_event_id"
             )
-    except Exception:
-        pass
+    except PyMongoError as e:
+        print(f"Warning: could not ensure events index: {e}")

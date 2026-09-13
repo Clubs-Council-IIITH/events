@@ -1,4 +1,5 @@
 from enum import StrEnum, auto
+from typing import Annotated, Any
 
 import strawberry
 from bson import ObjectId
@@ -11,7 +12,6 @@ from pydantic import (
     field_validator,
 )
 from pydantic_core import core_schema
-from typing_extensions import Annotated, Any
 
 event_popu_type = Annotated[int, Field(ge=0)]
 """event population type, non-negative integer"""
@@ -449,6 +449,7 @@ class Budget_Type:
             raise ValueError("Amount used must be positive")
         return value
 
+
 @strawberry.type
 class Budget_Allocation_Breakdown:
     """
@@ -468,6 +469,7 @@ class Budget_Allocation_Breakdown:
 
         self.description = description
         self.allocated_amount = allocated_amount
+
 
 @strawberry.type
 class Sponsor_Type:

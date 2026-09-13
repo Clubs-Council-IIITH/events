@@ -1,4 +1,5 @@
 import strawberry
+from graphql import GraphQLError
 
 from db import eventsdb
 from mailing import trigger_mail
@@ -29,17 +30,19 @@ async def remindSLO(info: Info, eventid: str) -> bool:
     user = info.context.user
 
     if user is None or user.get("role") != "cc":
-        raise Exception("You do not have permission to access this resource.")
+        raise GraphQLError(
+            "You do not have permission to access this resource."
+        )
 
     event_ref = await eventsdb.find_one({"_id": eventid})
     if not event_ref:
-        raise Exception("Event not found.")
+        raise GraphQLError("Event not found.")
 
     event_instance = Event.model_validate(event_ref)
     slo_emails = await get_role_emails("slo")
 
     if not slo_emails:
-        raise Exception("No SLO emails found to send a reminder.")
+        raise GraphQLError("No SLO emails found to send a reminder.")
 
     # format email using the new concise template
     mail_uid = user["uid"]

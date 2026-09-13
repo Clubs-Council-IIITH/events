@@ -1,9 +1,10 @@
 import csv
 import io
 from datetime import datetime
-from typing import Any, List
+from typing import Any
 
 import strawberry
+from graphql import GraphQLError
 
 from db import eventsdb
 
@@ -51,7 +52,7 @@ async def event(eventid: str, info: Info) -> EventType:
     event = await eventsdb.find_one({"_id": eventid})
 
     allclubs = await get_clubs(info.context.cookies)
-    list_allclubs = list()
+    list_allclubs = []
     for club in allclubs:
         list_allclubs.append(club["cid"])
 
@@ -81,7 +82,7 @@ async def event(eventid: str, info: Info) -> EventType:
         )
         or event["clubid"] not in list_allclubs
     ):
-        raise Exception(
+        raise GraphQLError(
             "Can not access event. Either it does not exist or user does not have perms."  # noqa: E501
         )
 
@@ -121,7 +122,7 @@ async def eventid(code: str, info: Info) -> str:
     event = await eventsdb.find_one({"code": code})
 
     if event is None:
-        raise Exception("Event with given code does not exist.")
+        raise GraphQLError("Event with given code does not exist.")
 
     return event["_id"]
 
@@ -137,10 +138,10 @@ async def events(
     skip: int = 0,
     timings: timelot_type | None = None,
     pastEventsLimit: int | None = None,
-    location: List[Event_Location] | None = None,
+    location: list[Event_Location] | None = None,
     excludeCompleted: bool = False,
     hideDeleted: bool = False,
-) -> List[EventType]:
+) -> list[EventType]:
     """
     Returns a list of events as a search result that match the given criteria.
 
@@ -221,17 +222,17 @@ async def events(
     )
 
     if not limit and paginationOn:
-        raise Exception("Pagination limit is required.")
+        raise GraphQLError("Pagination limit is required.")
     if limit is not None and limit > 25:
-        raise Exception("Limit can not be greater than 25.")
+        raise GraphQLError("Limit can not be greater than 25.")
     if restrictAccess and (
         not paginationOn and pastEventsLimit is None and limit is None
     ):
         pastEventsLimit = 4
     if pastEventsLimit is not None and pastEventsLimit <= 0:
-        raise Exception("pastEventsLimit must be greater than 0.")
+        raise GraphQLError("pastEventsLimit must be greater than 0.")
     if pastEventsLimit is not None and pastEventsLimit > 6:
-        raise Exception("pastEventsLimit can not be greater than 6.")
+        raise GraphQLError("pastEventsLimit can not be greater than 6.")
 
     searchspace: dict[str, Any] = {}
     if clubid is not None:
@@ -241,7 +242,7 @@ async def events(
         ]
     else:
         allclubs = await get_clubs(info.context.cookies)
-        list_allclubs = list()
+        list_allclubs = []
         for club in allclubs:
             list_allclubs.append(club["cid"])
         searchspace["clubid"] = {"$in": list_allclubs}
@@ -274,7 +275,7 @@ async def events(
     if location is not None:
         searchspace["location"] = {"$in": location}
 
-    timings_str: List[str] | None = None
+    timings_str: list[str] | None = None
     if timings is not None:
         timings_str = [
             timings[0].strftime("%Y-%m-%dT%H:%M:%S+00:00"),
@@ -312,7 +313,7 @@ async def calendarEvents(
     info: Info,
     clubid: str | None = None,
     pastEventsLimit: int | None = None,
-) -> List[EventType]:
+) -> list[EventType]:
     """
     Fetches events for the calendar view based on user permissions and filters.
 
@@ -377,7 +378,7 @@ async def calendarEvents(
         ]
     else:
         allclubs = await get_clubs(info.context.cookies)
-        list_allclubs = list()
+        list_allclubs = []
         for club in allclubs:
             list_allclubs.append(club["cid"])
         searchspace["clubid"] = {"$in": list_allclubs}
@@ -420,7 +421,7 @@ async def clashingEvents(
     info: Info,
     id: str,
     filterByLocation: bool = True,
-) -> List[EventType]:
+) -> list[EventType]:
     """
     Returns a list of clashing events for the given event id.
 
@@ -439,7 +440,9 @@ async def clashingEvents(
 
     user = info.context.user
     if user is None or user["role"] not in ["cc", "slo"]:
-        raise Exception("You do not have permission to access this resource.")
+        raise GraphQLError(
+            "You do not have permission to access this resource."
+        )
 
     searchspace = {
         "status.state": {
@@ -451,7 +454,7 @@ async def clashingEvents(
 
     event = await eventsdb.find_one({"_id": id})
     if event is None:
-        raise Exception("Event with given id does not exist.")
+        raise GraphQLError("Event with given id does not exist.")
 
     if filterByLocation:
         event["location"] = [
@@ -473,7 +476,7 @@ async def clashingEvents(
 
 
 @strawberry.field
-async def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
+async def incompleteEvents(clubid: str, info: Info) -> list[EventType]:
     """
     Return all incomplete events of a club for the club
 
@@ -492,7 +495,9 @@ async def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
     user = info.context.user
 
     if not user or user["role"] != "club" or user["uid"] != clubid:
-        raise Exception("You do not have permission to access this resource.")
+        raise GraphQLError(
+            "You do not have permission to access this resource."
+        )
 
     events = (
         await eventsdb.find(
@@ -534,7 +539,7 @@ async def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
 #         ]
 #     else:
 #         allclubs = get_clubs(info.context.cookies)
-#         list_allclubs = list()
+#         list_allclubs = []
 #         for club in allclubs:
 #             list_allclubs.append(club["cid"])
 #         searchspace["clubid"] = {"$in": list_allclubs}
@@ -559,7 +564,7 @@ async def incompleteEvents(clubid: str, info: Info) -> List[EventType]:
 
 
 @strawberry.field
-async def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
+async def pendingEvents(clubid: str | None, info: Info) -> list[EventType]:
     """
     Returns all the pending events of a give club id
 
@@ -606,7 +611,9 @@ async def pendingEvents(clubid: str | None, info: Info) -> List[EventType]:
             }
 
     if user is None or len(requested_states) == 0:
-        raise Exception("You do not have permission to access this resource.")
+        raise GraphQLError(
+            "You do not have permission to access this resource."
+        )
 
     searchspace["status.state"] = {
         "$in": list(requested_states),
@@ -666,7 +673,9 @@ async def availableRooms(
     user = info.context.user
 
     if user is None or user["role"] not in ["club", "cc", "slo"]:
-        raise Exception("You do not have permission to access this resource.")
+        raise GraphQLError(
+            "You do not have permission to access this resource."
+        )
 
     assert timeslot[0] < timeslot[1], "Invalid timeslot"
     timeslot_str = [
@@ -738,12 +747,14 @@ async def downloadEventsData(
     """
     user = info.context.user
     if user is None:
-        raise Exception("You do not have permission to access this resource.")
+        raise GraphQLError(
+            "You do not have permission to access this resource."
+        )
 
     if details.status not in ["pending", "approved", "all"]:
-        raise Exception("Invalid status")
+        raise GraphQLError("Invalid status")
 
-    all_events = list()
+    all_events = []
     allclubs = await get_clubs(info.context.cookies)
     searchspace: dict[str, Any] = {}
 
@@ -835,7 +846,7 @@ async def downloadEventsData(
     if details.status != "approved":
         fieldnames.append(header_mapping["status"])
 
-    club_names = dict()
+    club_names = {}
     for club in allclubs:
         club_names[club["cid"]] = club["name"]
 

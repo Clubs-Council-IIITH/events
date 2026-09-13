@@ -1,3 +1,7 @@
+import httpx
+from graphql import GraphQLError
+from pydantic import ValidationError
+
 # pyright: reportAttributeAccessIssue=false
 
 """
@@ -104,16 +108,18 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
             or (user["role"] == "cc")  # allow CC to create events too
         )
     ):
-        raise Exception("You do not have permission to access this resource.")
+        raise GraphQLError(
+            "You do not have permission to access this resource."
+        )
 
     # Check if the start time is before the end time
     if details.datetimeperiod[0] >= details.datetimeperiod[1]:
-        raise Exception("Start time cannot be after end time.")
+        raise GraphQLError("Start time cannot be after end time.")
 
     # Check if the club exists
     club_details = await get_club_details(details.clubid, info.context.cookies)
     if len(club_details.keys()) == 0:
-        raise Exception("Club does not exist.")
+        raise GraphQLError("Club does not exist.")
 
     event_instance = Event(
         name=details.name.strip(),
@@ -161,33 +167,29 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
             details.population
             and details.population < details.external_population
         ):
-            raise Exception(
+            raise GraphQLError(
                 "Number of external participants should be less than total."
             )
         event_instance.external_population = details.external_population
     if details.budget is not None:
-        event_instance.budget = list(
-            map(
-                lambda x: Budget_Type(
-                    amount=x.amount,
-                    description=x.description,
-                    advance=x.advance,
-                ),
-                details.budget,
+        event_instance.budget = [
+            Budget_Type(
+                amount=x.amount,
+                description=x.description,
+                advance=x.advance,
             )
-        )
+            for x in details.budget
+        ]
     if details.sponsor is not None:
-        event_instance.sponsor = list(
-            map(
-                lambda x: Sponsor_Type(
-                    name=x.name,
-                    amount=x.amount,
-                    previously_sponsored=x.previously_sponsored,
-                    comment=x.comment if x.comment else "None",
-                ),
-                details.sponsor,
+        event_instance.sponsor = [
+            Sponsor_Type(
+                name=x.name,
+                amount=x.amount,
+                previously_sponsored=x.previously_sponsored,
+                comment=x.comment if x.comment else "None",
             )
-        )
+            for x in details.sponsor
+        ]
     if details.collabclubs and details.collabclubs != []:
         if details.clubid in details.collabclubs:
             details.collabclubs.remove(details.clubid)
@@ -197,7 +199,7 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     if not await get_member(
         details.clubid, details.poc, cookies=info.context.cookies
     ):
-        raise Exception("Member Details for POC does not exist")
+        raise GraphQLError("Member Details for POC does not exist")
 
     # if creator is CC, set state to approved
     if user["role"] == "cc" or user["role"] == "slo":
@@ -222,7 +224,10 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
 
     if club_details["category"] == "body":
         event_instance.club_category = Club_Body_Category_Type.body
-    elif club_details["category"] == "admin" or club_details["category"] == "supervisory":
+    elif (
+        club_details["category"] == "admin"
+        or club_details["category"] == "supervisory"
+    ):
         event_instance.club_category = Club_Body_Category_Type.admin
     else:
         event_instance.club_category = Club_Body_Category_Type.club
@@ -266,22 +271,22 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     allowed_roles = ["cc", "slo"]
 
     if user is None:
-        raise Exception("Not Authenticated!")
+        raise GraphQLError("Not Authenticated!")
 
     if (details.clubid != user["uid"] or user["role"] != "club") and user[
         "role"
     ] not in allowed_roles:
-        raise Exception("Not Authenticated to access this API")
+        raise GraphQLError("Not Authenticated to access this API")
 
-    if details.datetimeperiod is not None:
-        if details.datetimeperiod[0] >= details.datetimeperiod[1]:
-            raise Exception(
-                "Start datetime cannot be same/after end datetime."
-            )
+    if (
+        details.datetimeperiod is not None
+        and details.datetimeperiod[0] >= details.datetimeperiod[1]
+    ):
+        raise GraphQLError("Start datetime cannot be same/after end datetime.")
 
     event_ref = await eventsdb.find_one({"_id": details.eventid})
     if not event_ref:
-        raise Exception("Event does not exist.")
+        raise GraphQLError("Event does not exist.")
 
     # if the update is done by CC, set state to approved
     # else set status to incomplete
@@ -341,7 +346,7 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
         if not await get_member(
             details.clubid, details.poc, cookies=info.context.cookies
         ):
-            raise Exception("Member Details for POC does not exist")
+            raise GraphQLError("Member Details for POC does not exist")
     if details.description is not None:
         updates["description"] = details.description.strip()
     if details.audience is not None:
@@ -362,35 +367,31 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
             details.population
             and details.population < details.external_population
         ):
-            raise Exception(
+            raise GraphQLError(
                 "Number of external participants should be less than total."
             )
         updates["external_population"] = details.external_population
 
     if details.budget is not None and updatable:
         # updates["status.budget"] = False or user["role"] == "cc"
-        updates["budget"] = list(
-            map(
-                lambda x: Budget_Type(
-                    amount=x.amount,
-                    description=x.description,
-                    advance=x.advance,
-                ),
-                details.budget,
+        updates["budget"] = [
+            Budget_Type(
+                amount=x.amount,
+                description=x.description,
+                advance=x.advance,
             )
-        )
+            for x in details.budget
+        ]
     if details.sponsor is not None and updatable:
-        updates["sponsor"] = list(
-            map(
-                lambda x: Sponsor_Type(
-                    name=x.name,
-                    amount=x.amount,
-                    previously_sponsored=x.previously_sponsored,
-                    comment=x.comment if x.comment else "None",
-                ),
-                details.sponsor,
+        updates["sponsor"] = [
+            Sponsor_Type(
+                name=x.name,
+                amount=x.amount,
+                previously_sponsored=x.previously_sponsored,
+                comment=x.comment if x.comment else "None",
             )
-        )
+            for x in details.sponsor
+        ]
 
     old_poster_file = event_ref.get("poster", None)
     if details.poster is not None:
@@ -410,19 +411,21 @@ async def editEvent(details: InputEditEventDetails, info: Info) -> EventType:
     # Model validation to check if the updates are valid as per the Event model
     try:
         Event.model_validate({**event_ref, **updates})
-    except Exception as e:
-        raise Exception(f"Invalid update details: {e}")
+    except ValidationError as e:
+        raise GraphQLError(f"Invalid update details: {e}")
 
     updation = {"$set": jsonable_encoder(updates)}
 
     upd_ref = await eventsdb.update_one(query, updation)
     if upd_ref.matched_count == 0:
-        raise Exception("You do not have permission to access this resource.")
+        raise GraphQLError(
+            "You do not have permission to access this resource."
+        )
 
     if old_poster_file:
         try:
             await delete_file(old_poster_file)
-        except Exception as e:
+        except (httpx.HTTPError, RuntimeError, OSError) as e:
             print(f"Error deleting poster file {old_poster_file}\nError: {e}")
     event_ref = await eventsdb.find_one({"_id": details.eventid})
     return EventType.from_pydantic(Event.model_validate(event_ref))
@@ -473,7 +476,7 @@ async def progressEvent(
         event_instance.clubid, info.context.cookies
     )
     if len(clubDetails.keys()) == 0:
-        raise Exception("Club does not exist.")
+        raise GraphQLError("Club does not exist.")
     else:
         mail_club = clubDetails["email"]
         clubname = clubDetails["name"]
@@ -494,7 +497,7 @@ async def progressEvent(
             event_instance.clubid
         )
         if pending_reports and "internal" not in event_instance.audience:
-            raise Exception(
+            raise GraphQLError(
                 "Club must submit the report for your completed events "
                 "before creating a new one."
             )
@@ -545,7 +548,9 @@ async def progressEvent(
         if cc_approver is not None:
             updation["cc_approver"] = cc_approver
         else:
-            raise Exception("CC Approver is required to progress the event.")
+            raise GraphQLError(
+                "CC Approver is required to progress the event."
+            )
 
         if not updation["budget"]:
             updation["state"] = Event_State_Status.pending_budget.value
@@ -630,7 +635,7 @@ async def progressEvent(
 
     poc = await get_user(event_instance.poc, info.context.cookies)
     if not poc:
-        raise Exception("POC does not exist.")
+        raise GraphQLError("POC does not exist.")
 
     upd_ref = await eventsdb.update_one(
         {"_id": eventid}, {"$set": {"status": updation}}
@@ -904,7 +909,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
     user = info.context.user
 
     if user is None or user["role"] not in ["club", "cc", "slo"]:
-        raise Exception("Not Authenticated!")
+        raise GraphQLError("Not Authenticated!")
 
     query = {
         "_id": eventid,
@@ -931,7 +936,7 @@ async def deleteEvent(eventid: str, info: Info) -> EventType:
         event_instance.clubid, info.context.cookies
     )
     if len(clubDetails.keys()) == 0:
-        raise Exception("Club does not exist.")
+        raise GraphQLError("Club does not exist.")
     else:
         mail_club = clubDetails["email"]
         clubname = clubDetails["name"]
@@ -1034,7 +1039,7 @@ async def rejectEvent(
     user = info.context.user
 
     if user is None or user["role"] != "cc":
-        raise Exception("Not Authenticated!")
+        raise GraphQLError("Not Authenticated!")
 
     query = {
         "_id": eventid,
@@ -1050,13 +1055,13 @@ async def rejectEvent(
         event_instance.clubid, info.context.cookies
     )
     if len(clubDetails.keys()) == 0:
-        raise Exception("Club does not exist.")
+        raise GraphQLError("Club does not exist.")
     else:
         mail_club = clubDetails["email"]
         clubname = clubDetails["name"]
 
     if event_instance.status.state != Event_State_Status.pending_cc:
-        raise Exception("Cannot reset event that has progressed beyond CC.")
+        raise GraphQLError("Cannot reset event that has progressed beyond CC.")
 
     status = event_instance.model_dump()["status"]
     status["state"] = Event_State_Status.incomplete.value
@@ -1123,10 +1128,10 @@ async def updateEventsCid(
     user = info.context.user
 
     if user is None or user["role"] not in ["cc"]:
-        raise Exception("Not Authenticated!")
+        raise GraphQLError("Not Authenticated!")
 
     if inter_communication_secret != inter_communication_secret_global:
-        raise Exception("Authentication Error! Invalid secret!")
+        raise GraphQLError("Authentication Error! Invalid secret!")
 
     updation = {
         "$set": {

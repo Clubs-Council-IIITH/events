@@ -1,6 +1,8 @@
 from datetime import datetime
 
+import httpx
 import strawberry
+from graphql import GraphQLError
 
 from db import eventsdb
 from mailing import trigger_mail
@@ -215,7 +217,7 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
     if bill.get("filename"):
         try:
             await delete_file(bill["filename"])
-        except Exception as e:
+        except (httpx.HTTPError, RuntimeError, OSError) as e:
             print(f"Error deleting file: {e}")
 
     event = await eventsdb.find_one({"_id": details.eventid})
@@ -235,7 +237,7 @@ async def addBill(details: InputBillsUpload, info: Info) -> bool:
     slo_emails = await get_role_emails("slo")
 
     if not slo_emails:
-        raise Exception("No SLO emails found to send a reminder.")
+        raise GraphQLError("No SLO emails found to send a reminder.")
 
     mail_uid = user["uid"]
     mail_subject = BILL_SUBMISSION_SUBJECT.safe_substitute(

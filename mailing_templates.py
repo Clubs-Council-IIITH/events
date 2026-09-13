@@ -346,7 +346,7 @@ Best regards,
 Clubs Council  
 
 (Note: This is an automated reminder from the Clubs Council system.)
-"""  # noqa: E501
+"""
 )
 
 

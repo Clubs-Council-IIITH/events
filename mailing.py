@@ -1,6 +1,6 @@
 import os
-from typing import List
 
+import httpx
 from httpx import AsyncClient
 
 from utils import convert_to_html
@@ -14,9 +14,13 @@ async def trigger_mail(
     subject: str,
     body: str,
     cookies: dict | None = None,
-    toRecipients: List[str] = [],
-    ccRecipients: List[str] = [],
+    toRecipients: list[str] | None = None,
+    ccRecipients: list[str] | None = None,
 ) -> None:
+    if toRecipients is None:
+        toRecipients = []
+    if ccRecipients is None:
+        ccRecipients = []
     """
     Method triggers a mutation request, resolved by the sendMail resolver from
     mailing.py from interfaces microservice, it triggers a email.
@@ -57,9 +61,9 @@ async def trigger_mail(
                     json={"query": query, "variables": variables},
                 )
         else:
-            raise Exception(
+            raise RuntimeError(
                 "Couldn't find cookie, cannot send email without cookies!"
             )
 
-    except Exception:
-        return None
+    except httpx.HTTPError, RuntimeError, KeyError:
+        return

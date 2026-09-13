@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from typing import List, Optional, Tuple
 
 from pydantic import (
     BaseModel,
@@ -12,8 +11,8 @@ from pydantic import (
 from mtypes import (
     Audience,
     Bills_Status,
-    Budget_Type,
     Budget_Allocation_Breakdown,
+    Budget_Type,
     Club_Body_Category_Type,
     Event_Location,
     Event_Mode,
@@ -60,10 +59,10 @@ class EventReport(BaseModel):
     eventid: str
     summary: medium_str_type
     attendance: event_popu_type
-    external_attendance: Optional[event_popu_type] = None
+    external_attendance: event_popu_type | None = None
     allocated_budget: float | None = None
-    allocated_budget_breakdown: List[Budget_Allocation_Breakdown] = []
-    prizes: List[Prizes_Type] = []
+    allocated_budget_breakdown: list[Budget_Allocation_Breakdown] = []
+    prizes: list[Prizes_Type] = []
     prizes_breakdown: long_str_type
     winners: long_str_type
     photos_link: Http_Url_String
@@ -127,31 +126,31 @@ class Event(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     code: str | None = None
     clubid: str
-    collabclubs: List[str] = []
+    collabclubs: list[str] = []
     club_category: Club_Body_Category_Type = Club_Body_Category_Type.club
 
     name: very_short_str_type
 
     description: medium_str_type | None = "No description available."
-    datetimeperiod: Tuple[datetime, datetime]
+    datetimeperiod: tuple[datetime, datetime]
     poster: str | None = None
-    audience: List[Audience] = []
+    audience: list[Audience] = []
     link: Http_Url_String | None = None
 
     mode: Event_Mode = Event_Mode.hybrid
-    location: List[Event_Location] = []
+    location: list[Event_Location] = []
     otherLocation: very_short_str_type | None = None
-    locationAlternate: List[Event_Location] = []
+    locationAlternate: list[Event_Location] = []
     otherLocationAlternate: very_short_str_type | None = None
     equipment: short_str_type | None = None
     additional: short_str_type | None = None
     population: event_popu_type | None = None
-    external_population: Optional[event_popu_type] = None
+    external_population: event_popu_type | None = None
     poc: str | None = None
 
     status: Event_Status = Event_Status()
-    budget: List[Budget_Type] = []
-    sponsor: List[Sponsor_Type] = []
+    budget: list[Budget_Type] = []
+    sponsor: list[Sponsor_Type] = []
     bills_status: Bills_Status = Bills_Status()
     event_report_submitted: bool = False
 

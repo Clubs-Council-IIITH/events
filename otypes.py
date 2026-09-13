@@ -1,7 +1,6 @@
 import json
 from datetime import date, datetime
 from functools import cached_property
-from typing import Dict, List, Optional, Tuple, TypeAlias
 
 import strawberry
 from graphql import GraphQLError
@@ -35,14 +34,14 @@ class Context(BaseContext):
     """
 
     @cached_property
-    def user(self) -> Dict | None:
+    def user(self) -> dict | None:
         if not self.request:
             return None
         user = json.loads(self.request.headers.get("user", "{}"))
         return user
 
     @cached_property
-    def cookies(self) -> Dict | None:
+    def cookies(self) -> dict | None:
         if not self.request:
             return None
 
@@ -50,7 +49,7 @@ class Context(BaseContext):
         return cookies
 
 
-Info: TypeAlias = _Info[Context, RootValueType]
+type Info = _Info[Context, RootValueType]
 """custom info Type for user metadata"""
 
 
@@ -74,16 +73,12 @@ class EventReportType:
     Type for returning the event's report.
     """
 
-    pass
-
 
 @strawberry.experimental.pydantic.type(model=Event, all_fields=True)
 class EventType:
     """
     Type for returning all the details regarding an event.
     """
-
-    pass
 
 
 @strawberry.type
@@ -109,7 +104,7 @@ class RoomListType:
         locations (List[otypes.RoomInfo]): List of locations with availability.
     """
 
-    locations: List[RoomInfo]
+    locations: list[RoomInfo]
 
 
 @strawberry.type
@@ -158,16 +153,12 @@ class BudgetInput(Budget_Type):
     Input for taking all fields of the Budget_Type class.
     """
 
-    pass
-
 
 @strawberry.input
 class SponsorInput(Sponsor_Type):
     """
     Input for taking all fields of the Sponsor_Type class.
     """
-
-    pass
 
 
 class InputEventDetailsBaseModel(BaseModel):
@@ -210,26 +201,26 @@ class InputEventDetailsBaseModel(BaseModel):
     """  # noqa: E501
 
     name: very_short_str_type
-    location: List[Event_Location] | None = None
+    location: list[Event_Location] | None = None
     otherLocation: very_short_str_type | None = None  # very_short_str_type
-    locationAlternate: List[Event_Location] | None = None
+    locationAlternate: list[Event_Location] | None = None
     otherLocationAlternate: very_short_str_type | None = (
         None  # very_short_str_type
     )
     description: medium_str_type | None = None
     clubid: str
-    collabclubs: List[str] | None = None
+    collabclubs: list[str] | None = None
     mode: Event_Mode | None = Event_Mode.hybrid
     poster: str | None = None
-    datetimeperiod: List[datetime]
-    audience: List[Audience] | None = None
+    datetimeperiod: list[datetime]
+    audience: list[Audience] | None = None
     link: str | None = None
     equipment: short_str_type | None = None
     additional: short_str_type | None = None
     population: event_popu_type | None = None
-    external_population: Optional[event_popu_type] = None
-    budget: List[BudgetInput] | None = None
-    sponsor: List[SponsorInput] | None = None
+    external_population: event_popu_type | None = None
+    budget: list[BudgetInput] | None = None
+    sponsor: list[SponsorInput] | None = None
     poc: str
 
 
@@ -240,8 +231,6 @@ class InputEventDetails:
     """
     Input for taking all fields of the InputEventDetailsBaseModel class.
     """
-
-    pass
 
 
 class InputEditEventDetailsBaseModel(BaseModel):
@@ -294,24 +283,24 @@ class InputEditEventDetailsBaseModel(BaseModel):
 
     name: very_short_str_type | None = None
     eventid: str
-    collabclubs: List[str] | None = None
-    location: List[Event_Location] | None = None
+    collabclubs: list[str] | None = None
+    location: list[Event_Location] | None = None
     otherLocation: very_short_str_type | None = None
-    locationAlternate: List[Event_Location] | None = None
+    locationAlternate: list[Event_Location] | None = None
     otherLocationAlternate: very_short_str_type | None = None
     description: medium_str_type | None = None
     clubid: str | None
     mode: Event_Mode | None = Event_Mode.hybrid
     poster: str | None = None
-    datetimeperiod: List[datetime] | None = None
-    audience: List[Audience] | None = None
+    datetimeperiod: list[datetime] | None = None
+    audience: list[Audience] | None = None
     link: str | None = None
     equipment: short_str_type | None = None
     additional: short_str_type | None = None
     population: event_popu_type | None = None
-    external_population: Optional[event_popu_type] = None
-    budget: List[BudgetInput] | None = None
-    sponsor: List[SponsorInput] | None = None
+    external_population: event_popu_type | None = None
+    budget: list[BudgetInput] | None = None
+    sponsor: list[SponsorInput] | None = None
     poc: str | None = None
 
 
@@ -322,8 +311,6 @@ class InputEditEventDetails:
     """
     Input for taking all fields of the InputEditEventDetailsBaseModel class.
     """
-
-    pass
 
 
 @strawberry.input
@@ -341,8 +328,8 @@ class InputDataReportDetails:
     """
 
     clubid: str | None
-    dateperiod: List[date] | None = None
-    fields: List[str]
+    dateperiod: list[date] | None = None
+    fields: list[str]
     status: str
 
 
@@ -357,10 +344,10 @@ class InputEventReport:
     attendance: event_popu_type
     external_attendance: event_popu_type | None = None
     allocated_budget: float | None = None
-    allocated_budget_breakdown: List[InputBudgetAllocationBreakdown] = strawberry.field(
-        default_factory=list
+    allocated_budget_breakdown: list[InputBudgetAllocationBreakdown] = (
+        strawberry.field(default_factory=list)
     )
-    prizes: List[str] = strawberry.field(default_factory=list)
+    prizes: list[str] = strawberry.field(default_factory=list)
     prizes_breakdown: str
     winners: str
     photos_link: str
@@ -443,7 +430,7 @@ class InputBillsUpload:
 
     eventid: str
     filename: str  # very_short_str_type
-    budget: List[BudgetInput]
+    budget: list[BudgetInput]
 
     def __post_init__(self):
         try:
@@ -456,7 +443,7 @@ class InputBillsUpload:
 
 
 # custom data type for start and end of event
-timelot_type = Tuple[datetime, datetime]
+timelot_type = tuple[datetime, datetime]
 """A custom data type for start and end of event"""
 
 # Holidays Types
@@ -502,5 +489,3 @@ class HolidayType:
     """
     Type for returning all the details regarding a holiday.
     """
-
-    pass

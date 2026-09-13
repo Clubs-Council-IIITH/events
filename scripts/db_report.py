@@ -1,5 +1,9 @@
 import csv
-from datetime import datetime, timezone
+import sys
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+IST = ZoneInfo("Asia/Kolkata")
 from os import makedirs
 
 import matplotlib.pyplot as plt
@@ -11,7 +15,6 @@ MONGO_DATABASE = "dev"
 client = MongoClient(MONGO_URI)
 db = client[MONGO_DATABASE]
 
-#  TODO: change the timezone from utc to ist
 
 try:
     startYear = int(input("Enter the start year: "))
@@ -21,13 +24,13 @@ try:
     )
 except:  # noqa: E722
     print("Invalid input! Please enter valid integers for the years.")
-    exit(1)
+    sys.exit(1)
 if startYear > endYear:
     print("Start year cannot be greater than end year.")
-    exit(1)
+    sys.exit(1)
 if deadclub_threshold < 0:
     print("Dead club threshold cannot be negative.")
-    exit(1)
+    sys.exit(1)
 
 include_bodies = (
     input("Do you want to include bodies in the report? (yes/no): ")
@@ -40,8 +43,8 @@ if include_bodies:
     club_categories.append("body")
 
 
-start_date = datetime(startYear, 4, 1, tzinfo=timezone.utc)
-end_date = datetime(endYear, 3, 31, 23, 59, 59, tzinfo=timezone.utc)
+start_date = datetime(startYear, 4, 1, tzinfo=IST)
+end_date = datetime(endYear, 3, 31, 23, 59, 59, tzinfo=IST)
 
 clubs = list(
     db.clubs.find(
@@ -69,12 +72,8 @@ for club in clubs:
 
     for event in events:
         if event["status"]["state"] == "approved":
-            event_start = datetime.fromisoformat(
-                event["datetimeperiod"][0].replace("Z", "+00:00")
-            )
-            event_end = datetime.fromisoformat(
-                event["datetimeperiod"][1].replace("Z", "+00:00")
-            )
+            event_start = datetime.fromisoformat(event["datetimeperiod"][0])
+            event_end = datetime.fromisoformat(event["datetimeperiod"][1])
 
             if start_date <= event_start <= end_date:
                 try:
@@ -90,7 +89,7 @@ for club in clubs:
                         approver_times.append(
                             datetime.strptime(
                                 cc_approver_time, "%d-%m-%Y %I:%M %p"
-                            ).replace(tzinfo=timezone.utc)
+                            ).replace(tzinfo=IST)
                         )
                     if (
                         slo_approver_time
@@ -101,13 +100,13 @@ for club in clubs:
                             approver_times.append(
                                 datetime.strptime(
                                     slo_approver, "%d-%m-%Y %I:%M %p"
-                                ).replace(tzinfo=timezone.utc)
+                                ).replace(tzinfo=IST)
                             )
                         else:
                             approver_times.append(
                                 datetime.strptime(
                                     slo_approver_time, "%d-%m-%Y %I:%M %p"
-                                ).replace(tzinfo=timezone.utc)
+                                ).replace(tzinfo=IST)
                             )
 
                     if (
@@ -117,7 +116,7 @@ for club in clubs:
                         approver_times.append(
                             datetime.strptime(
                                 slc_approver_time, "%d-%m-%Y %I:%M %p"
-                            ).replace(tzinfo=timezone.utc)
+                            ).replace(tzinfo=IST)
                         )
 
                     if (
@@ -126,19 +125,13 @@ for club in clubs:
                         and event["status"]["submission_time"]
                     ):
                         approval_time = max(approver_times)
-                        approval_time = approval_time.replace(
-                            tzinfo=timezone.utc
-                        )
+                        approval_time = approval_time.replace(tzinfo=IST)
                         created_time = datetime.strptime(
                             event["status"]["submission_time"],
                             "%d-%m-%Y %I:%M %p",
-                        )
-                        created_time = created_time.replace(
-                            tzinfo=timezone.utc
-                        )
-                        approval_time = approval_time.replace(
-                            tzinfo=timezone.utc
-                        )
+                        ).replace(tzinfo=IST)
+                        created_time = created_time.replace(tzinfo=IST)
+                        approval_time = approval_time.replace(tzinfo=IST)
                         time_difference = approval_time - created_time
                         approvals += 1
                         approval_time_sum += time_difference.total_seconds()
@@ -326,7 +319,7 @@ sorted_events = sorted(
     filtered_events,
     key=lambda event: datetime.strptime(
         event["status"]["submission_time"], "%d-%m-%Y %I:%M %p"
-    ),
+    ).replace(tzinfo=IST),
 )
 
 approval_times = []
@@ -335,8 +328,8 @@ for event in sorted_events:
     try:
         created_time = datetime.strptime(
             event["status"]["submission_time"], "%d-%m-%Y %I:%M %p"
-        )
-        created_time = created_time.replace(tzinfo=timezone.utc)
+        ).replace(tzinfo=IST)
+        created_time = created_time.replace(tzinfo=IST)
         cc_approver_time = event["status"].get("cc_approver_time")
         slo_approver_time = event["status"].get("slo_approver_time")
         slc_approver_time = event["status"].get("slc_approver_time")
@@ -345,7 +338,7 @@ for event in sorted_events:
             approver_times.append(
                 datetime.strptime(
                     cc_approver_time, "%d-%m-%Y %I:%M %p"
-                ).replace(tzinfo=timezone.utc)
+                ).replace(tzinfo=IST)
             )
         if slo_approver_time and slo_approver_time != "Not Approved":
             if slo_approver_time == "Self Approved":
@@ -353,23 +346,23 @@ for event in sorted_events:
                 approver_times.append(
                     datetime.strptime(
                         slo_approver, "%d-%m-%Y %I:%M %p"
-                    ).replace(tzinfo=timezone.utc)
+                    ).replace(tzinfo=IST)
                 )
             else:
                 approver_times.append(
                     datetime.strptime(
                         slo_approver_time, "%d-%m-%Y %I:%M %p"
-                    ).replace(tzinfo=timezone.utc)
+                    ).replace(tzinfo=IST)
                 )
         if slc_approver_time and slc_approver_time != "Not Approved":
             approver_times.append(
                 datetime.strptime(
                     slc_approver_time, "%d-%m-%Y %I:%M %p"
-                ).replace(tzinfo=timezone.utc)
+                ).replace(tzinfo=IST)
             )
         if approver_times:
             approval_time = max(approver_times)
-            approval_time = approval_time.replace(tzinfo=timezone.utc)
+            approval_time = approval_time.replace(tzinfo=IST)
             time_difference = approval_time - created_time
             approval_times.append(
                 time_difference.total_seconds() / (3600 * 24)
@@ -380,7 +373,7 @@ for event in sorted_events:
 if exception_count > 0:
     print(
         "Exception occurred while processing approval times. "
-        "Number of exceptions: {}".format(exception_count)
+        f"Number of exceptions: {exception_count}"
     )
 
 if len(approval_times) > 0:

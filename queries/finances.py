@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 import strawberry
 
@@ -75,7 +74,7 @@ async def eventBills(eventid: str, info: Info) -> Bills_Status:
 
 
 @strawberry.field
-async def allEventsBills(info: Info) -> List[BillsStatusType]:
+async def allEventsBills(info: Info) -> list[BillsStatusType]:
     """
     Get the bills status of all events
 

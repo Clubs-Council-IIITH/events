@@ -1,11 +1,12 @@
 import html
+import json
 import os
 import re
 from datetime import datetime, timedelta
-from typing import List
 from zoneinfo import ZoneInfo
 
 import fiscalyear
+import httpx
 from httpx import AsyncClient
 
 from db import eventsdb
@@ -61,7 +62,7 @@ async def get_member(cid, uid, cookies=None) -> dict | None:
             )
         return response.json()["data"]["member"]
 
-    except Exception:
+    except httpx.HTTPError, json.JSONDecodeError, KeyError:
         return None
 
 
@@ -102,11 +103,11 @@ async def get_user(uid, cookies=None) -> tuple[dict, dict] | None:
         return response.json()["data"]["userProfile"], response.json()["data"][
             "userMeta"
         ]
-    except Exception:
+    except httpx.HTTPError, json.JSONDecodeError, KeyError:
         return None
 
 
-async def get_clubs(cookies=None) -> List[dict]:
+async def get_clubs(cookies=None) -> list[dict]:
     """
     Function to call a query to the Clubs service resolved by the allClubs
     method, fetches info about all clubs.
@@ -134,7 +135,7 @@ async def get_clubs(cookies=None) -> List[dict]:
                 "http://gateway/graphql", json={"query": query}
             )
         return response.json()["data"]["allClubs"]
-    except Exception:
+    except httpx.HTTPError, json.JSONDecodeError, KeyError:
         return []
 
 
@@ -190,7 +191,7 @@ async def get_club_details(
                 json={"query": query, "variables": variable},
             )
         return response.json()["data"]["club"]
-    except Exception:
+    except httpx.HTTPError, json.JSONDecodeError, KeyError:
         return {}
 
 
@@ -235,8 +236,7 @@ async def get_event_code(clubid, starttime) -> str:
     for i in club_events:
         code = i["code"]
         code = int(code[-3:])
-        if code > max_code:
-            max_code = code
+        max_code = max(max_code, code)
 
     event_count = max_code + 1
     code_year = str(year.fiscal_year - 1)[-2:] + str(year.fiscal_year)[-2:]
@@ -272,7 +272,7 @@ def get_event_finances_link(id) -> str:
     return f"{host}/manage/finances/{id}"
 
 
-async def get_role_emails(role: str) -> List[str]:
+async def get_role_emails(role: str) -> list[str]:
     """
     Brings all the emails of members belonging to a role
 
@@ -319,7 +319,7 @@ async def get_role_emails(role: str) -> List[str]:
                 )
                 emails.append(resp.json()["data"]["userProfile"]["email"])
         return emails
-    except Exception:
+    except httpx.HTTPError, json.JSONDecodeError, KeyError:
         return []
 
 
@@ -343,9 +343,9 @@ async def events_with_sorting(
     pagination=False,
     skip=0,
     limit: int | None = None,
-    timings: List[str] | None = None,
+    timings: list[str] | None = None,
     pastEventsLimit: int | None = None,
-) -> List[dict]:
+) -> list[dict]:
     """
     Provides a list of events based on the searchspace provided.
 
@@ -510,8 +510,7 @@ def trim_public_events(event: dict) -> dict:
         "bills_status",
     ]
     for key in delete_keys:
-        if key in event:
-            del event[key]
+        event.pop(key, None)
 
     status = event["status"]
     del event["status"]
@@ -610,7 +609,7 @@ async def delete_file(filename) -> str:
         )
 
     if response.status_code != 200:
-        raise Exception(response.text)
+        raise RuntimeError(response.text)
 
     return response.text
 

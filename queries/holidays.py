@@ -1,5 +1,4 @@
 from datetime import date
-from typing import List
 
 import strawberry
 
@@ -11,7 +10,7 @@ from otypes import HolidayType
 @strawberry.field
 async def holidays(
     start_date: date | None = None, end_date: date | None = None
-) -> List[HolidayType]:
+) -> list[HolidayType]:
     """
     Get a list of holidays from a start date(if provided) to an end date
     (if provided).
