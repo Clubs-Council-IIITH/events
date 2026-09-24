@@ -255,6 +255,7 @@ class Event_Full_Location:
     va3_117 = "Vindhya A3 117"
     vsh1 = "Vindhya SH1"
     vsh2 = "Vindhya SH2"
+    vsh3 = "Vindhya SH3"
     amphi = "Amphitheatre"
     warehouse = "Bakul Warehouse"
     felig = "Felicity Ground"
@@ -296,6 +297,7 @@ class Event_Location(StrEnum):
     va3_117 = auto()
     vsh1 = auto()
     vsh2 = auto()
+    vsh3 = auto()
     # Other
     amphi = auto()
     warehouse = auto()
