@@ -6,7 +6,7 @@ from typing import Any
 import strawberry
 from graphql import GraphQLError
 
-from db import eventsdb
+from db import event_reportsdb, eventsdb
 
 # import all models and types
 from models import Event
@@ -833,6 +833,7 @@ async def downloadEventsData(
         "equipment": "Equipment",
         "additional": "Additional Requests",
         "event_report_submitted": "Event Report Submitted",
+        "event_report_photos_link": "Report's Photos Link",
     }
 
     # Prepare CSV content
@@ -849,6 +850,23 @@ async def downloadEventsData(
     club_names = {}
     for club in allclubs:
         club_names[club["cid"]] = club["name"]
+
+    photos_links: dict[str, str | None] = {}
+    if "event_report_photos_link" in details.fields:
+        reported_event_ids = [
+            event["_id"]
+            for event in all_events
+            if event.get("event_report_submitted")
+        ]
+        if reported_event_ids:
+            reports = await event_reportsdb.find(
+                {"event_id": {"$in": reported_event_ids}},
+                {"event_id": 1, "photos_link": 1},
+            ).to_list(length=None)
+            photos_links = {
+                report["event_id"]: report.get("photos_link")
+                for report in reports
+            }
 
     csv_writer = csv.DictWriter(csv_output, fieldnames=fieldnames)
     csv_writer.writeheader()
@@ -901,6 +919,8 @@ async def downloadEventsData(
 
                 if value:
                     value = getattr(Event_Full_State_Status, value)
+            elif field == "event_report_photos_link":
+                value = photos_links.get(event["_id"])
             elif field == "event_report_submitted":
                 if value is None:
                     value = "No Event Report Required"
