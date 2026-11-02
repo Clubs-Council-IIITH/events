@@ -104,6 +104,56 @@ Note: This automated email has been generated from the Clubs Council website. Fo
 """  # noqa: E501
 )
 
+# email template for SLO(Student Life Office) when it submits an event for a
+# supervisory body. The event goes directly to pending_room, CC(Clubs Council)
+# is only informed.
+SLO_SUBMITTED_EVENT_SUBJECT = Template(
+    """
+[Events] $club submitted an event: $event ($event_id)
+"""
+)
+
+SLO_SUBMITTED_EVENT_BODY = Template(
+    """
+Dear Sir/Ma'am,
+
+$club has submitted the event "$event". It currently is now pending room approval from the Student Life Office, and has passed an automated CC approval.
+
+     1. Event ID: $event_id
+
+     2. Purpose: $event
+
+     3. Event Description: $description
+
+     4. Expected Number of Students: $student_count
+
+     5. Start Date: $start_time
+     6. End Date  : $end_time
+
+     7. Room requested   : $location
+     8. Alternate Room   : $locationAlternate
+     9. Room Availability: $room_status
+
+    10. Budget    : $budget
+    11. Sponsored Amount   : $sponsor
+
+    12. Equipment Support      : $equipment
+    13. Additional Information : $additional
+
+    14. Point of Contact -
+        Name   : $poc_name
+        RollNo : $poc_roll
+        Email  : $poc_email
+        Phone  : $poc_phone
+
+To review and approve the event, visit the link below:
+$eventlink
+
+
+Note: This automated email has been generated from the Clubs Council website. For more details, visit clubs.iiit.ac.in.
+"""  # noqa: E501
+)
+
 # email template informing the deletion of the event from the club's side
 # and informing the CC(Clubs Council).
 DELETE_EVENT_SUBJECT = Template(
