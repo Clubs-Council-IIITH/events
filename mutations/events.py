@@ -44,6 +44,8 @@ from mailing_templates import (
     PROGRESS_EVENT_SUBJECT,
     REJECT_EVENT_BODY_FOR_CLUB,
     REJECT_EVENT_SUBJECT,
+    SLO_SUBMITTED_EVENT_BODY,
+    SLO_SUBMITTED_EVENT_SUBJECT,
     SUBMIT_EVENT_BODY_FOR_CLUB,
 )
 
@@ -63,6 +65,7 @@ from otypes import EventType, Info, InputEditEventDetails, InputEventDetails
 from utils import (
     TIMEZONE,
     delete_file,
+    events_with_sorting,
     get_club_details,
     get_event_code,
     get_event_link,
@@ -232,12 +235,210 @@ async def createEvent(details: InputEventDetails, info: Info) -> EventType:
     else:
         event_instance.club_category = Club_Body_Category_Type.club
 
+    # SLO's events for a supervisory body need no CC (and SLC) approval,
+    # they go directly to SLO for the room approval
+    submit_to_slo = (
+        user["role"] == "slo"
+        and event_instance.club_category == Club_Body_Category_Type.admin
+    )
+    if submit_to_slo:
+        event_instance.status.state = Event_State_Status.pending_room
+        event_instance.status.budget = True
+        event_instance.status.submission_time = time_str
+        event_instance.status.cc_approver_time = time_str
+
     created_id = (
         await eventsdb.insert_one(jsonable_encoder(event_instance))
     ).inserted_id
-    created_event = Event.model_validate(
-        await eventsdb.find_one({"_id": created_id})
-    )
+    created_doc = await eventsdb.find_one({"_id": created_id})
+    created_event = Event.model_validate(created_doc)
+
+    if submit_to_slo:
+        # Mail SLO (cc: CC) about the event that went directly to pending_room
+        # Data preparation for the mailing, same as in progressEvent
+        mail_description = created_event.description
+        if mail_description == "":
+            mail_description = "N/A"
+
+        student_count = created_event.population
+        external_count = created_event.external_population
+        if student_count and external_count and external_count > 0:
+            student_count = (
+                str(student_count + external_count)
+                + f" (External Participants: {external_count})"
+            )
+
+        if created_event.mode == Event_Mode.online:
+            mail_location = "online"
+            mail_locationAlternate = "N/A"
+        else:
+            mail_location = ", ".join(
+                [
+                    getattr(Event_Full_Location, loc, "Unknown location")
+                    if loc != "other"
+                    else (created_event.otherLocation or "other")
+                    for loc in created_event.location
+                ]
+            )
+            mail_locationAlternate = ", ".join(
+                [
+                    getattr(Event_Full_Location, loc, "Unknown location")
+                    if loc != "other"
+                    else (created_event.otherLocationAlternate or "other")
+                    for loc in created_event.locationAlternate
+                ]
+            )
+
+        equipment, additional, budget, sponsor = "N/A", "N/A", "N/A", "N/A"
+        if created_event.equipment:
+            equipment = created_event.equipment
+        if created_event.additional:
+            additional = created_event.additional
+        if created_event.budget:
+            budget_table = PrettyTable()
+            budget_table.field_names = ["Description", "Amount", "Advance"]
+            for item in created_event.budget:
+                budget_table.add_row(
+                    [
+                        item.description,
+                        item.amount,
+                        "Yes" if item.advance else "No",
+                    ],
+                    divider=True,
+                )
+            total_budget = sum(item.amount for item in created_event.budget)
+            budget_table.add_row(
+                ["Total budget", total_budget, ""], divider=True
+            )
+            budget_table.max_width["Description"] = 20
+            budget_table.max_width["Amount"] = 8
+            budget_table.max_width["Advance"] = 7
+            budget_table.align["Amount"] = "r"
+
+            budget = "\n" + budget_table.get_string()
+
+        if created_event.sponsor:
+            sponsor_table = PrettyTable()
+            sponsor_table.field_names = ["Name", "Amount", "Comment"]
+            for item in created_event.sponsor:
+                sponsor_table.add_row(
+                    [item.name, item.amount, item.comment],
+                    divider=True,
+                )
+            total_sponsor = sum(item.amount for item in created_event.sponsor)
+            sponsor_table.add_row(
+                ["Total sponsor", total_sponsor, ""], divider=True
+            )
+            sponsor_table.max_width["Name"] = 10
+            sponsor_table.max_width["Amount"] = 8
+            sponsor_table.max_width["Comment"] = 20
+            sponsor_table.align["Amount"] = "r"
+
+            sponsor = "\n" + sponsor_table.get_string()
+
+        ist_offset = timedelta(hours=5, minutes=30)
+        time_format = "%A, %d-%m-%Y %H:%M"
+        event_start_time = (
+            created_event.datetimeperiod[0] + ist_offset
+        ).strftime(time_format)
+        event_end_time = (
+            created_event.datetimeperiod[1] + ist_offset
+        ).strftime(time_format)
+
+        poc = await get_user(created_event.poc, info.context.cookies)
+        poc_name, poc_roll, poc_email, poc_phone = ("Unknown",) * 4
+        if poc:
+            poc_details, poc_meta = poc
+            poc_name = poc_details["firstName"] + " " + poc_details["lastName"]
+            poc_email = poc_details["email"]
+            poc_roll = poc_details["rollno"] or "Unknown"
+            poc_phone = poc_meta["phone"] or "Unknown"
+
+        # Room availability, same search as the clashingEvents query
+        requested_rooms = [
+            loc for loc in created_event.location if loc != "other"
+        ]
+        room_status = "Cannot be checked automatically."
+        if created_event.mode != Event_Mode.online and requested_rooms:
+            clashing_events = await events_with_sorting(
+                {
+                    "status.state": {
+                        "$in": [Event_State_Status.approved.value]
+                    },
+                    "location": {"$in": requested_rooms},
+                },
+                date_filter=False,
+                timings=created_doc["datetimeperiod"],
+            )
+            if not clashing_events:
+                room_status = (
+                    "Free: no approved event uses the requested room(s) "
+                    "during this time."
+                )
+            else:
+                clash_lines = []
+                for clash in clashing_events:
+                    clash_event = Event.model_validate(clash)
+                    clash_club = (
+                        await get_club_details(
+                            clash_event.clubid, info.context.cookies
+                        )
+                    ).get("name", clash_event.clubid)
+                    clash_rooms = ", ".join(
+                        getattr(Event_Full_Location, loc, "Unknown location")
+                        for loc in clash_event.location
+                        if loc in requested_rooms
+                    )
+                    clash_start = (
+                        clash_event.datetimeperiod[0] + ist_offset
+                    ).strftime(time_format)
+                    clash_end = (
+                        clash_event.datetimeperiod[1] + ist_offset
+                    ).strftime(time_format)
+                    clash_lines.append(
+                        f"Clash: {clash_rooms} is booked by "
+                        f"{clash_event.name} ({clash_club}), "
+                        f"{clash_start} to {clash_end}"
+                    )
+                room_status = "\n".join(clash_lines)
+
+        mail_subject = SLO_SUBMITTED_EVENT_SUBJECT.safe_substitute(
+            club=club_details["name"],
+            event=created_event.name,
+            event_id=created_event.code,
+        )
+        mail_body = SLO_SUBMITTED_EVENT_BODY.safe_substitute(
+            club=club_details["name"],
+            event=created_event.name,
+            event_id=created_event.code,
+            description=mail_description,
+            student_count=student_count,
+            start_time=event_start_time,
+            end_time=event_end_time,
+            location=mail_location,
+            locationAlternate=mail_locationAlternate,
+            room_status=room_status,
+            budget=budget,
+            sponsor=sponsor,
+            equipment=equipment,
+            additional=additional,
+            poc_name=poc_name,
+            poc_roll=poc_roll,
+            poc_email=poc_email,
+            poc_phone=poc_phone,
+            eventlink=get_event_link(created_event.code),
+        )
+
+        mail_to = await get_role_emails("slo")
+        if len(mail_to):
+            await trigger_mail(
+                user["uid"],
+                mail_subject,
+                mail_body,
+                toRecipients=mail_to,
+                ccRecipients=await get_role_emails("cc"),
+                cookies=info.context.cookies,
+            )
 
     return EventType.from_pydantic(created_event)
 
